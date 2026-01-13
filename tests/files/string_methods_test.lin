@@ -1,0 +1,10 @@
+fun main() {
+    val str = "Hello, Dotlin!"
+    println("Original: " + str)
+    println("Upper: " + str.toUpperCase())
+    println("Lower: " + str.toLowerCase())
+    println("Starts with Hello: " + str.startsWith("Hello").toString())
+    println("Starts with World: " + str.startsWith("World").toString())
+    println("Ends with !: " + str.endsWith("!").toString())
+    println("Ends with Dotlin: " + str.endsWith("Dotlin").toString())
+}

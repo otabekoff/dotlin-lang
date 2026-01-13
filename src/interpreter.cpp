@@ -67,7 +67,7 @@ namespace dotlin
     }
 
     // For now, return a dummy value
-    return std::string("Program executed successfully");
+    return Value(std::string("Program executed successfully"));
   }
 
   Value interpret(const Program &program)
@@ -101,8 +101,8 @@ namespace dotlin
   void Interpreter::visit(BinaryExpr &node)
   {
     // Evaluate binary expressions
-    auto leftValue = evaluate(*node.left);
-    auto rightValue = evaluate(*node.right);
+    auto leftValue = node.left ? evaluate(*node.left) : Value(std::string("null"));
+    auto rightValue = node.right ? evaluate(*node.right) : Value(std::string("null"));
 
     // Perform the operation based on node.op
     switch (node.op)
@@ -130,7 +130,7 @@ namespace dotlin
   void Interpreter::visit(UnaryExpr &node)
   {
     // Evaluate unary expressions
-    auto operandValue = evaluate(*node.operand);
+    auto operandValue = node.operand ? evaluate(*node.operand) : Value(std::string("null"));
 
     // Perform the operation based on node.op
     switch (node.op)
@@ -159,7 +159,7 @@ namespace dotlin
       std::string funcName = identifier->name;
       if (funcName == "println")
       {
-        if (!node.arguments.empty())
+        if (!node.arguments.empty() && node.arguments[0])
         {
           auto argValue = evaluate(*node.arguments[0]);
           std::cout << valueToString(argValue);
@@ -169,7 +169,7 @@ namespace dotlin
       }
       else if (funcName == "print")
       {
-        if (!node.arguments.empty())
+        if (!node.arguments.empty() && node.arguments[0])
         {
           auto argValue = evaluate(*node.arguments[0]);
           std::cout << valueToString(argValue);
@@ -188,7 +188,10 @@ namespace dotlin
     // For other function calls, evaluate arguments but don't do anything
     for (const auto &arg : node.arguments)
     {
-      evaluate(*arg);
+      if (arg)
+      {
+        evaluate(*arg);
+      }
     }
   }
 
@@ -205,7 +208,7 @@ namespace dotlin
     if (node.initializer)
     {
       // Evaluate the initializer expression
-      value = evaluate(**node.initializer);
+      value = node.initializer ? evaluate(**node.initializer) : Value(0);
     }
     else
     {
@@ -262,7 +265,8 @@ namespace dotlin
 
     for (const auto &stmt : node.statements)
     {
-      execute(*stmt);
+      if (stmt)
+        execute(*stmt);
     }
 
     environment = previousEnv;
@@ -278,18 +282,19 @@ namespace dotlin
   void Interpreter::visit(IfStmt &node)
   {
     // Handle if statements
-    auto conditionValue = evaluate(*node.condition);
+    auto conditionValue = node.condition ? evaluate(*node.condition) : Value(false);
 
     // In a real implementation, would execute appropriate branch based on
     // condition
     if (std::holds_alternative<bool>(conditionValue) &&
         std::get<bool>(conditionValue))
     {
-      execute(*node.thenBranch);
+      if (node.thenBranch)
+        execute(*node.thenBranch);
     }
-    else if (node.elseBranch)
+    else if (node.elseBranch.has_value() && node.elseBranch.value())
     {
-      execute(**node.elseBranch);
+      execute(*node.elseBranch.value());
     }
   }
 
@@ -297,12 +302,23 @@ namespace dotlin
   {
     // Evaluate the expression but ignore the result (like in most languages)
     // Expression statements are typically used for side effects
-    evaluate(*node.expression);
+    if (node.expression)
+      evaluate(*node.expression);
   }
 
   Value Interpreter::evaluate(Expression &expr)
   {
     std::cout << "DEBUG: Starting expression evaluation" << std::endl;
+    // Check for potential null expression (this shouldn't happen in normal cases, but as a safeguard)
+    // Increment evaluation depth and check for recursion limit
+    evaluationDepth++;
+    if (evaluationDepth > MAX_EVALUATION_DEPTH)
+    {
+      std::cout << "ERROR: Maximum evaluation depth exceeded, possible infinite recursion" << std::endl;
+      evaluationDepth--; // Decrement before returning
+      return std::string("recursion_limit_exceeded");
+    }
+
     // Use the visitor pattern to dispatch to the appropriate visit method
     struct EvalVisitor : public AstVisitor
     {
@@ -315,7 +331,27 @@ namespace dotlin
       {
         // Return the literal value directly
         std::cout << "DEBUG: In LiteralExpr evaluator" << std::endl;
-        result = node.value;
+        // Convert the old variant type to the new Value type
+        if (std::holds_alternative<int>(node.value))
+        {
+          result = Value(std::get<int>(node.value));
+        }
+        else if (std::holds_alternative<double>(node.value))
+        {
+          result = Value(std::get<double>(node.value));
+        }
+        else if (std::holds_alternative<bool>(node.value))
+        {
+          result = Value(std::get<bool>(node.value));
+        }
+        else if (std::holds_alternative<std::string>(node.value))
+        {
+          result = Value(std::get<std::string>(node.value));
+        }
+        else
+        {
+          result = std::string("undefined");
+        }
       }
 
       void visit(IdentifierExpr &node) override
@@ -324,26 +360,24 @@ namespace dotlin
         if (node.name == "args")
         {
           // Create an array-like representation of command-line arguments
-          // For now, return a placeholder string representing args array
           std::vector<Value> argsVector;
           for (const auto &arg : interpreter->commandLineArgs)
           {
             argsVector.push_back(arg);
           }
-          // For now, return a placeholder since we don't have array type yet
-          result = std::string("args_array");
+          result = Value(ArrayValue(std::move(argsVector)));
         }
         // Look up the value in the environment
         else
         {
           try
           {
-            result = interpreter->environment->get(node.name);
+            result = interpreter->environment->get(node.name); // This should already return Value type
           }
           catch (const std::exception &)
           {
             // Return a default value if variable not found
-            result = std::string("undefined");
+            result = Value(std::string("undefined"));
           }
         }
       }
@@ -351,8 +385,8 @@ namespace dotlin
       void visit(BinaryExpr &node) override
       {
         // Evaluate operands and perform operation
-        auto leftVal = interpreter->evaluate(*node.left);
-        auto rightVal = interpreter->evaluate(*node.right);
+        auto leftVal = node.left ? interpreter->evaluate(*node.left) : Value(std::string("null"));
+        auto rightVal = node.right ? interpreter->evaluate(*node.right) : Value(std::string("null"));
 
         // Handle different type combinations for operations
         switch (node.op)
@@ -395,12 +429,12 @@ namespace dotlin
             {
               rightStr = std::get<std::string>(rightVal);
             }
-            result = leftStr + rightStr;
+            result = Value(leftStr + rightStr);
           }
           else if (std::holds_alternative<int>(leftVal) &&
                    std::holds_alternative<int>(rightVal))
           {
-            result = std::get<int>(leftVal) + std::get<int>(rightVal);
+            result = Value(std::get<int>(leftVal) + std::get<int>(rightVal));
           }
           else if (std::holds_alternative<double>(leftVal) ||
                    std::holds_alternative<double>(rightVal))
@@ -411,7 +445,7 @@ namespace dotlin
             double right = std::holds_alternative<int>(rightVal)
                                ? static_cast<double>(std::get<int>(rightVal))
                                : std::get<double>(rightVal);
-            result = left + right;
+            result = Value(left + right);
           }
           else
           {
@@ -422,7 +456,7 @@ namespace dotlin
           if (std::holds_alternative<int>(leftVal) &&
               std::holds_alternative<int>(rightVal))
           {
-            result = std::get<int>(leftVal) - std::get<int>(rightVal);
+            result = Value(std::get<int>(leftVal) - std::get<int>(rightVal));
           }
           else if (std::holds_alternative<double>(leftVal) ||
                    std::holds_alternative<double>(rightVal))
@@ -433,7 +467,7 @@ namespace dotlin
             double right = std::holds_alternative<int>(rightVal)
                                ? static_cast<double>(std::get<int>(rightVal))
                                : std::get<double>(rightVal);
-            result = left - right;
+            result = Value(left - right);
           }
           else
           {
@@ -444,7 +478,7 @@ namespace dotlin
           if (std::holds_alternative<int>(leftVal) &&
               std::holds_alternative<int>(rightVal))
           {
-            result = std::get<int>(leftVal) * std::get<int>(rightVal);
+            result = Value(std::get<int>(leftVal) * std::get<int>(rightVal));
           }
           else if (std::holds_alternative<double>(leftVal) ||
                    std::holds_alternative<double>(rightVal))
@@ -455,7 +489,7 @@ namespace dotlin
             double right = std::holds_alternative<int>(rightVal)
                                ? static_cast<double>(std::get<int>(rightVal))
                                : std::get<double>(rightVal);
-            result = left * right;
+            result = Value(left * right);
           }
           else
           {
@@ -466,9 +500,9 @@ namespace dotlin
           if (std::holds_alternative<int>(leftVal) &&
               std::holds_alternative<int>(rightVal))
           {
-            result = std::get<int>(rightVal) != 0
-                         ? std::get<int>(leftVal) / std::get<int>(rightVal)
-                         : 0;
+            result = Value(std::get<int>(rightVal) != 0
+                               ? std::get<int>(leftVal) / std::get<int>(rightVal)
+                               : 0);
           }
           else if (std::holds_alternative<double>(leftVal) ||
                    std::holds_alternative<double>(rightVal))
@@ -479,7 +513,7 @@ namespace dotlin
             double right = std::holds_alternative<int>(rightVal)
                                ? static_cast<double>(std::get<int>(rightVal))
                                : std::get<double>(rightVal);
-            result = right != 0 ? left / right : 0.0;
+            result = Value(right != 0 ? left / right : 0.0);
           }
           else
           {
@@ -490,9 +524,9 @@ namespace dotlin
           if (std::holds_alternative<int>(leftVal) &&
               std::holds_alternative<int>(rightVal))
           {
-            result = std::get<int>(rightVal) != 0
-                         ? std::get<int>(leftVal) % std::get<int>(rightVal)
-                         : 0;
+            result = Value(std::get<int>(rightVal) != 0
+                               ? std::get<int>(leftVal) % std::get<int>(rightVal)
+                               : 0);
           }
           else
           {
@@ -504,7 +538,7 @@ namespace dotlin
           if (std::holds_alternative<int>(leftVal) &&
               std::holds_alternative<int>(rightVal))
           {
-            result = std::get<int>(leftVal) == std::get<int>(rightVal);
+            result = Value(std::get<int>(leftVal) == std::get<int>(rightVal));
           }
           else if (std::holds_alternative<double>(leftVal) ||
                    std::holds_alternative<double>(rightVal))
@@ -515,13 +549,13 @@ namespace dotlin
             double right = std::holds_alternative<int>(rightVal)
                                ? static_cast<double>(std::get<int>(rightVal))
                                : std::get<double>(rightVal);
-            result = left == right;
+            result = Value(left == right);
           }
           else if (std::holds_alternative<std::string>(leftVal) &&
                    std::holds_alternative<std::string>(rightVal))
           {
-            result =
-                std::get<std::string>(leftVal) == std::get<std::string>(rightVal);
+            result = Value(
+                std::get<std::string>(leftVal) == std::get<std::string>(rightVal));
           }
           else if (std::holds_alternative<bool>(leftVal) &&
                    std::holds_alternative<bool>(rightVal))
@@ -684,7 +718,7 @@ namespace dotlin
 
       void visit(UnaryExpr &node) override
       {
-        auto operandVal = interpreter->evaluate(*node.operand);
+        auto operandVal = node.operand ? interpreter->evaluate(*node.operand) : Value(std::string("null"));
 
         switch (node.op)
         {
@@ -758,7 +792,14 @@ namespace dotlin
         std::vector<Value> args;
         for (auto &arg : node.arguments)
         {
-          args.push_back(interpreter->evaluate(*arg));
+          if (arg)
+          {
+            args.push_back(interpreter->evaluate(*arg));
+          }
+          else
+          {
+            args.push_back(Value(std::string("undefined")));
+          }
         }
 
         std::cout << "DEBUG: Number of args: " << args.size() << std::endl;
@@ -766,82 +807,505 @@ namespace dotlin
         // Check if it's a method call on an object (callee is MemberAccessExpr)
         if (auto *memberAccess = dynamic_cast<MemberAccessExpr *>(node.callee.get()))
         {
-          // Determine if this is a direct method call (str.substring()) or a method on result (args.size().toString())
-          if (auto *ident = dynamic_cast<IdentifierExpr *>(memberAccess->object.get()))
+          // Check if the member access has a valid object
+          if (!memberAccess->object)
           {
-            // This is a direct method call like str.substring() or str.indexOf()
-            std::string objName = ident->name;
+            std::cout << "ERROR: Member access expression has null object" << std::endl;
+            result = std::string("null_object_error");
+            return;
+          }
+
+          // Check if it's the special case of args.size() or args.contentToString()
+          std::string objName = "";
+          bool isArgsObject = false;
+          auto *ident = dynamic_cast<IdentifierExpr *>(memberAccess->object.get());
+          if (ident)
+          {
+            objName = ident->name;
+            isArgsObject = (objName == "args");
+          }
+
+          if (isArgsObject)
+          {
             std::string methodName = memberAccess->property;
 
-            // Get the object value first
-            Value objValue = interpreter->evaluate(*ident);
-
-            if (methodName == "substring" && args.size() == 1 && std::holds_alternative<int>(args[0]))
+            if (objName == "args" && methodName == "size" && args.empty())
             {
-              // Handle substring(start) method call
-              if (std::holds_alternative<std::string>(objValue))
-              {
-                std::string str = std::get<std::string>(objValue);
-                int start = std::get<int>(args[0]);
-                if (start >= 0 && start <= static_cast<int>(str.length()))
-                {
-                  result = str.substr(start);
-                }
-                else
-                {
-                  result = std::string(""); // Return empty string for invalid index
-                }
-              }
+              // Handle args.size() method call
+              result = static_cast<int>(interpreter->commandLineArgs.size());
               return;
             }
-            else if (methodName == "substring" && args.size() == 2 &&
-                     std::holds_alternative<int>(args[0]) && std::holds_alternative<int>(args[1]))
+            else if (objName == "args" && methodName == "contentToString" && args.empty())
             {
-              // Handle substring(start, end) method call
-              if (std::holds_alternative<std::string>(objValue))
+              // Handle args.contentToString() method call
+              std::string content = "[";
+              for (size_t i = 0; i < interpreter->commandLineArgs.size(); ++i)
               {
-                std::string str = std::get<std::string>(objValue);
-                int start = std::get<int>(args[0]);
-                int end = std::get<int>(args[1]);
-                if (start >= 0 && end <= static_cast<int>(str.length()) && start <= end)
+                content += interpreter->commandLineArgs[i];
+                if (i < interpreter->commandLineArgs.size() - 1)
                 {
-                  result = str.substr(start, end - start);
-                }
-                else
-                {
-                  result = std::string(""); // Return empty string for invalid range
+                  content += ", ";
                 }
               }
+              content += "]";
+              result = content;
               return;
             }
-            else if (methodName == "indexOf" && args.size() == 1 && std::holds_alternative<std::string>(args[0]))
+            else
             {
-              // Handle indexOf(substring) method call
-              if (std::holds_alternative<std::string>(objValue))
-              {
-                std::string str = std::get<std::string>(objValue);
-                std::string substr = std::get<std::string>(args[0]);
-                size_t pos = str.find(substr);
-                result = static_cast<int>(pos != std::string::npos ? pos : -1);
-              }
+              // Unrecognized method on args, return default
+              result = std::string("");
               return;
             }
           }
           else
           {
-            // This is a method call on the result of a member access, like args.size().toString()
-            // Evaluate the member access expression to get the value
-            Value objValue = interpreter->evaluate(*memberAccess);
-
-            // For now, we mainly handle toString() on any value
-            if (args.empty()) // Assume this is toString() with no arguments
+            // Check if the object of the member access is a call expression or member access (chained method call)
+            // This handles cases like: expr.method().otherMethod() or expr.method1().method2()
+            if ((dynamic_cast<CallExpr *>(memberAccess->object.get()) ||
+                 dynamic_cast<MemberAccessExpr *>(memberAccess->object.get())))
             {
-              result = interpreter->valueToString(objValue);
-              return;
+              // This is a chained method call like: expr.method().otherMethod()
+              // First evaluate the object (which could be a call or another member access) to get the base value
+              Value baseValue = memberAccess->object ? interpreter->evaluate(*memberAccess->object) : Value(std::string("null"));
+
+              // Now handle method calls on the result
+              std::string methodName = memberAccess->property;
+
+              if (methodName == "toString" && args.empty())
+              {
+                result = interpreter->valueToString(baseValue);
+                return;
+              }
+              else if (methodName == "substring" && args.size() == 1 && std::holds_alternative<int>(args[0]))
+              {
+                // Handle substring(start) method call
+                if (std::holds_alternative<std::string>(baseValue))
+                {
+                  std::string str = std::get<std::string>(baseValue);
+                  int start = std::get<int>(args[0]);
+                  if (start >= 0 && static_cast<size_t>(start) <= str.length())
+                  {
+                    result = str.substr(static_cast<size_t>(start));
+                  }
+                  else
+                  {
+                    result = std::string(""); // Return empty string for invalid index
+                  }
+                }
+                else
+                {
+                  result = std::string(""); // Return empty string for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "substring" && args.size() == 2 &&
+                       std::holds_alternative<int>(args[0]) && std::holds_alternative<int>(args[1]))
+              {
+                // Handle substring(start, end) method call
+                if (std::holds_alternative<std::string>(baseValue))
+                {
+                  std::string str = std::get<std::string>(baseValue);
+                  int start = std::get<int>(args[0]);
+                  int end = std::get<int>(args[1]);
+                  if (start >= 0 && static_cast<size_t>(end) <= str.length() && start <= end)
+                  {
+                    result = str.substr(static_cast<size_t>(start), static_cast<size_t>(end - start));
+                  }
+                  else
+                  {
+                    result = std::string(""); // Return empty string for invalid range
+                  }
+                }
+                else
+                {
+                  result = std::string(""); // Return empty string for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "indexOf" && args.size() == 1 && std::holds_alternative<std::string>(args[0]))
+              {
+                // Handle indexOf(substring) method call
+                if (std::holds_alternative<std::string>(baseValue))
+                {
+                  std::string str = std::get<std::string>(baseValue);
+                  std::string substr = std::get<std::string>(args[0]);
+                  size_t pos = str.find(substr);
+                  result = static_cast<int>(pos != std::string::npos ? static_cast<int>(pos) : -1);
+                }
+                else
+                {
+                  result = -1; // Return -1 for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "startsWith" && args.size() == 1 && std::holds_alternative<std::string>(args[0]))
+              {
+                // Handle startsWith(prefix) method call
+                if (std::holds_alternative<std::string>(baseValue))
+                {
+                  std::string str = std::get<std::string>(baseValue);
+                  std::string prefix = std::get<std::string>(args[0]);
+                  result = static_cast<bool>(str.substr(0, prefix.length()) == prefix);
+                }
+                else
+                {
+                  result = false; // Return false for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "endsWith" && args.size() == 1 && std::holds_alternative<std::string>(args[0]))
+              {
+                // Handle endsWith(suffix) method call
+                if (std::holds_alternative<std::string>(baseValue))
+                {
+                  std::string str = std::get<std::string>(baseValue);
+                  std::string suffix = std::get<std::string>(args[0]);
+                  if (suffix.length() <= str.length())
+                  {
+                    result = static_cast<bool>(str.substr(str.length() - suffix.length()) == suffix);
+                  }
+                  else
+                  {
+                    result = false;
+                  }
+                }
+                else
+                {
+                  result = false; // Return false for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "toUpperCase" && args.empty())
+              {
+                // Handle toUpperCase() method call
+                if (std::holds_alternative<std::string>(baseValue))
+                {
+                  std::string str = std::get<std::string>(baseValue);
+                  std::string upperStr = str;
+                  for (char &c : upperStr)
+                  {
+                    c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+                  }
+                  result = upperStr;
+                }
+                else
+                {
+                  result = std::string(""); // Return empty string for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "toLowerCase" && args.empty())
+              {
+                // Handle toLowerCase() method call
+                if (std::holds_alternative<std::string>(baseValue))
+                {
+                  std::string str = std::get<std::string>(baseValue);
+                  std::string lowerStr = str;
+                  for (char &c : lowerStr)
+                  {
+                    c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+                  }
+                  result = lowerStr;
+                }
+                else
+                {
+                  result = std::string(""); // Return empty string for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "trim" && args.empty())
+              {
+                // Handle trim() method call
+                if (std::holds_alternative<std::string>(baseValue))
+                {
+                  std::string str = std::get<std::string>(baseValue);
+                  // Left trim
+                  size_t start = str.find_first_not_of(" \t\n\r\f\v");
+                  if (start == std::string::npos)
+                  {
+                    result = std::string(""); // String is all whitespace
+                  }
+                  else
+                  {
+                    // Right trim
+                    size_t end = str.find_last_not_of(" \t\n\r\f\v");
+                    result = str.substr(start, end - start + 1);
+                  }
+                }
+                else
+                {
+                  result = std::string(""); // Return empty string for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "split" && args.size() == 1 && std::holds_alternative<std::string>(args[0]))
+              {
+                // Handle split(delimiter) method call
+                if (std::holds_alternative<std::string>(baseValue))
+                {
+                  std::string str = std::get<std::string>(baseValue);
+                  std::string delimiter = std::get<std::string>(args[0]);
+
+                  std::vector<std::string> parts;
+                  size_t start = 0;
+                  size_t end = str.find(delimiter);
+
+                  while (end != std::string::npos)
+                  {
+                    parts.push_back(str.substr(start, end - start));
+                    start = end + delimiter.length();
+                    end = str.find(delimiter, start);
+                  }
+
+                  parts.push_back(str.substr(start));
+
+                  // For now, return a string representation of the parts
+                  std::string resultStr = "[";
+                  for (size_t i = 0; i < parts.size(); ++i)
+                  {
+                    resultStr += parts[i];
+                    if (i < parts.size() - 1)
+                    {
+                      resultStr += ", ";
+                    }
+                  }
+                  resultStr += "]";
+                  result = resultStr;
+                }
+                else
+                {
+                  result = std::string(""); // Return empty string for non-string objects
+                }
+                return;
+              }
+              else
+              {
+                // Unrecognized method on chained call, return default
+                result = std::string("");
+                return;
+              }
+            }
+            else
+            {
+              // Handle general method calls on expressions (variables, literals, etc.) - direct calls
+              std::string methodName = memberAccess->property;
+
+              // Get the object value by evaluating the object expression
+              // Safety check for null object
+              if (!memberAccess->object)
+              {
+                std::cout << "ERROR: Direct method call has null object" << std::endl;
+                result = std::string("null_object_error");
+                return;
+              }
+              Value objValue = interpreter->evaluate(*memberAccess->object);
+
+              if (methodName == "substring" && args.size() == 1 && std::holds_alternative<int>(args[0]))
+              {
+                // Handle substring(start) method call
+                if (std::holds_alternative<std::string>(objValue))
+                {
+                  std::string str = std::get<std::string>(objValue);
+                  int start = std::get<int>(args[0]);
+                  if (start >= 0 && static_cast<size_t>(start) <= str.length())
+                  {
+                    result = str.substr(static_cast<size_t>(start));
+                  }
+                  else
+                  {
+                    result = std::string(""); // Return empty string for invalid index
+                  }
+                }
+                return;
+              }
+              else if (methodName == "substring" && args.size() == 2 &&
+                       std::holds_alternative<int>(args[0]) && std::holds_alternative<int>(args[1]))
+              {
+                // Handle substring(start, end) method call
+                if (std::holds_alternative<std::string>(objValue))
+                {
+                  std::string str = std::get<std::string>(objValue);
+                  int start = std::get<int>(args[0]);
+                  int end = std::get<int>(args[1]);
+                  if (start >= 0 && static_cast<size_t>(end) <= str.length() && start <= end)
+                  {
+                    result = str.substr(static_cast<size_t>(start), static_cast<size_t>(end - start));
+                  }
+                  else
+                  {
+                    result = std::string(""); // Return empty string for invalid range
+                  }
+                }
+                return;
+              }
+              else if (methodName == "indexOf" && args.size() == 1 && std::holds_alternative<std::string>(args[0]))
+              {
+                // Handle indexOf(substring) method call
+                if (std::holds_alternative<std::string>(objValue))
+                {
+                  std::string str = std::get<std::string>(objValue);
+                  std::string substr = std::get<std::string>(args[0]);
+                  size_t pos = str.find(substr);
+                  result = static_cast<int>(pos != std::string::npos ? static_cast<int>(pos) : -1);
+                }
+                else
+                {
+                  result = -1; // Return -1 for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "startsWith" && args.size() == 1 && std::holds_alternative<std::string>(args[0]))
+              {
+                // Handle startsWith(prefix) method call
+                if (std::holds_alternative<std::string>(objValue))
+                {
+                  std::string str = std::get<std::string>(objValue);
+                  std::string prefix = std::get<std::string>(args[0]);
+                  result = static_cast<bool>(str.substr(0, prefix.length()) == prefix);
+                }
+                else
+                {
+                  result = false; // Return false for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "endsWith" && args.size() == 1 && std::holds_alternative<std::string>(args[0]))
+              {
+                // Handle endsWith(suffix) method call
+                if (std::holds_alternative<std::string>(objValue))
+                {
+                  std::string str = std::get<std::string>(objValue);
+                  std::string suffix = std::get<std::string>(args[0]);
+                  if (suffix.length() <= str.length())
+                  {
+                    result = static_cast<bool>(str.substr(str.length() - suffix.length()) == suffix);
+                  }
+                  else
+                  {
+                    result = false;
+                  }
+                }
+                return;
+              }
+              else if (methodName == "toUpperCase" && args.empty())
+              {
+                // Handle toUpperCase() method call
+                if (std::holds_alternative<std::string>(objValue))
+                {
+                  std::string str = std::get<std::string>(objValue);
+                  std::string upperStr = str;
+                  for (char &c : upperStr)
+                  {
+                    c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+                  }
+                  result = upperStr;
+                }
+                else
+                {
+                  result = std::string(""); // Return empty string for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "toLowerCase" && args.empty())
+              {
+                // Handle toLowerCase() method call
+                if (std::holds_alternative<std::string>(objValue))
+                {
+                  std::string str = std::get<std::string>(objValue);
+                  std::string lowerStr = str;
+                  for (char &c : lowerStr)
+                  {
+                    c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+                  }
+                  result = lowerStr;
+                }
+                else
+                {
+                  result = std::string(""); // Return empty string for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "trim" && args.empty())
+              {
+                // Handle trim() method call
+                if (std::holds_alternative<std::string>(objValue))
+                {
+                  std::string str = std::get<std::string>(objValue);
+                  // Left trim
+                  size_t start = str.find_first_not_of(" \t\n\r\f\v");
+                  if (start == std::string::npos)
+                  {
+                    result = std::string(""); // String is all whitespace
+                  }
+                  else
+                  {
+                    // Right trim
+                    size_t end = str.find_last_not_of(" \t\n\r\f\v");
+                    result = str.substr(start, end - start + 1);
+                  }
+                }
+                else
+                {
+                  result = std::string(""); // Return empty string for non-string objects
+                }
+                return;
+              }
+              else if (methodName == "split" && args.size() == 1 && std::holds_alternative<std::string>(args[0]))
+              {
+                // Handle split(delimiter) method call
+                if (std::holds_alternative<std::string>(objValue))
+                {
+                  std::string str = std::get<std::string>(objValue);
+                  std::string delimiter = std::get<std::string>(args[0]);
+
+                  std::vector<std::string> parts;
+                  size_t start = 0;
+                  size_t end = str.find(delimiter);
+
+                  while (end != std::string::npos)
+                  {
+                    parts.push_back(str.substr(start, end - start));
+                    start = end + delimiter.length();
+                    end = str.find(delimiter, start);
+                  }
+
+                  parts.push_back(str.substr(start));
+
+                  // For now, return a string representation of the parts
+                  std::string resultStr = "[";
+                  for (size_t i = 0; i < parts.size(); ++i)
+                  {
+                    resultStr += parts[i];
+                    if (i < parts.size() - 1)
+                    {
+                      resultStr += ", ";
+                    }
+                  }
+                  resultStr += "]";
+                  result = resultStr;
+                }
+                else
+                {
+                  result = std::string(""); // Return empty string for non-string objects
+                }
+                return;
+              }
+              else
+              {
+                // Unrecognized method on direct call, return default
+                result = std::string("");
+                return;
+              }
             }
           }
-          // Add other method implementations here as needed
         }
+        // If we reach here and the callee is not a MemberAccessExpr, it means we need to handle
+        // chained method calls differently. Actually, the structure is correct:
+        // When we have expr.method().otherMethod(), the outer call is otherMethod() on the result
+        // of expr.method(), so the callee of the outer call is the MemberAccessExpr for .otherMethod()
+        // The original structure was correct but had a syntax error. We should check for non-MemberAccess
+        // call expressions after the main MemberAccess handling.
 
         // Check if it's a built-in function like println
         if (auto *ident = dynamic_cast<IdentifierExpr *>(node.callee.get()))
@@ -877,6 +1341,83 @@ namespace dotlin
             std::getline(std::cin, input);
             result = input;
           }
+          else if (ident->name == "printf" || ident->name == "format")
+          {
+            // Handle printf-style formatting
+            if (!args.empty())
+            {
+              // First argument is the format string
+              std::string formatStr = interpreter->valueToString(args[0]);
+
+              // For now, implement basic string replacement
+              std::string resultStr = formatStr;
+
+              // Replace placeholders like %s, %d, %f with actual values
+              size_t argIndex = 1;
+              for (size_t i = 0; i < resultStr.length() && argIndex < args.size(); ++i)
+              {
+                if (resultStr[i] == '%' && i + 1 < resultStr.length())
+                {
+                  char nextChar = resultStr[i + 1];
+                  if (nextChar == 's' || nextChar == 'd' || nextChar == 'f' || nextChar == 'i')
+                  {
+                    std::string replacement = interpreter->valueToString(args[argIndex]);
+                    resultStr.replace(i, 2, replacement);
+                    ++argIndex;
+                    i += replacement.length() - 1; // Adjust position after replacement
+                  }
+                }
+              }
+
+              result = resultStr;
+            }
+            else
+            {
+              result = std::string("");
+            }
+          }
+          else if (ident->name == "toInt")
+          {
+            // Convert string to integer
+            if (!args.empty())
+            {
+              std::string str = interpreter->valueToString(args[0]);
+              try
+              {
+                int val = std::stoi(str);
+                result = val;
+              }
+              catch (...)
+              {
+                result = 0; // Return 0 on conversion error
+              }
+            }
+            else
+            {
+              result = 0;
+            }
+          }
+          else if (ident->name == "toDouble")
+          {
+            // Convert string to double
+            if (!args.empty())
+            {
+              std::string str = interpreter->valueToString(args[0]);
+              try
+              {
+                double val = std::stod(str);
+                result = val;
+              }
+              catch (...)
+              {
+                result = 0.0; // Return 0.0 on conversion error
+              }
+            }
+            else
+            {
+              result = 0.0;
+            }
+          }
           else
           {
             // For now, return a placeholder for other function calls
@@ -894,15 +1435,37 @@ namespace dotlin
       void visit(MemberAccessExpr &node) override
       {
         // Handle member access
-        auto objValue = interpreter->evaluate(*node.object);
+        if (!node.object)
+        {
+          std::cout << "ERROR: Member access expression has null object" << std::endl;
+          result = std::string("null_object_error");
+          return;
+        }
+        auto objValue = node.object ? interpreter->evaluate(*node.object) : Value(std::string("null"));
 
-        // Check if the object is an identifier "args" and the property is "size"
+        // Check if the object is an identifier "args" and the property is "size" or "contentToString"
         if (auto *identifier = dynamic_cast<IdentifierExpr *>(node.object.get()))
         {
           if (identifier->name == "args" && node.property == "size")
           {
             // Return the size of command-line arguments
             result = static_cast<int>(interpreter->commandLineArgs.size());
+            return;
+          }
+          else if (identifier->name == "args" && node.property == "contentToString")
+          {
+            // Return a string representation of all command-line arguments
+            std::string content = "[";
+            for (size_t i = 0; i < interpreter->commandLineArgs.size(); ++i)
+            {
+              content += interpreter->commandLineArgs[i];
+              if (i < interpreter->commandLineArgs.size() - 1)
+              {
+                content += ", ";
+              }
+            }
+            content += "]";
+            result = content;
             return;
           }
         }
@@ -930,6 +1493,42 @@ namespace dotlin
           // For now, return a placeholder - indexOf with arguments is handled in CallExpr
           result = std::string("");
         }
+        else if (node.property == "startsWith" && std::holds_alternative<std::string>(objValue))
+        {
+          // Handle .startsWith property access without arguments
+          // For now, return a placeholder - startsWith with arguments is handled in CallExpr
+          result = std::string("");
+        }
+        else if (node.property == "endsWith" && std::holds_alternative<std::string>(objValue))
+        {
+          // Handle .endsWith property access without arguments
+          // For now, return a placeholder - endsWith with arguments is handled in CallExpr
+          result = std::string("");
+        }
+        else if (node.property == "toUpperCase" && std::holds_alternative<std::string>(objValue))
+        {
+          // Handle .toUpperCase property access without arguments
+          // For now, return a placeholder - toUpperCase with arguments is handled in CallExpr
+          result = std::string("");
+        }
+        else if (node.property == "toLowerCase" && std::holds_alternative<std::string>(objValue))
+        {
+          // Handle .toLowerCase property access without arguments
+          // For now, return a placeholder - toLowerCase with arguments is handled in CallExpr
+          result = std::string("");
+        }
+        else if (node.property == "trim" && std::holds_alternative<std::string>(objValue))
+        {
+          // Handle .trim property access without arguments
+          // For now, return a placeholder - trim with arguments is handled in CallExpr
+          result = std::string("");
+        }
+        else if (node.property == "split" && std::holds_alternative<std::string>(objValue))
+        {
+          // Handle .split property access without arguments
+          // For now, return a placeholder - split with arguments is handled in CallExpr
+          result = std::string("");
+        }
         else
         {
           // For now, return a placeholder for other member accesses
@@ -939,11 +1538,17 @@ namespace dotlin
 
       void visit(ArrayAccessExpr &node) override
       {
-        // Handle array access like args[0]
-        auto arrayValue = interpreter->evaluate(*node.array);
-        auto indexValue = interpreter->evaluate(*node.index);
+        // Handle array access like args[0] or myArray[1]
+        if (!node.array || !node.index)
+        {
+          std::cout << "ERROR: Array access expression has null array or index" << std::endl;
+          result = std::string("null_access_error");
+          return;
+        }
+        auto arrayValue = node.array ? interpreter->evaluate(*node.array) : Value(std::string("null"));
+        auto indexValue = node.index ? interpreter->evaluate(*node.index) : Value(std::string("null"));
 
-        // Check if we're accessing the args array
+        // Check if we're accessing the args array (legacy handling)
         if (std::holds_alternative<std::string>(arrayValue) &&
             std::get<std::string>(arrayValue) == "args_array" &&
             std::holds_alternative<int>(indexValue))
@@ -951,7 +1556,23 @@ namespace dotlin
           int index = std::get<int>(indexValue);
           if (index >= 0 && static_cast<size_t>(index) < interpreter->commandLineArgs.size())
           {
-            result = interpreter->commandLineArgs[index];
+            result = interpreter->commandLineArgs[static_cast<size_t>(index)];
+          }
+          else
+          {
+            result = std::string("index_out_of_bounds");
+          }
+        }
+        // Handle access to actual ArrayValue
+        else if (std::holds_alternative<ArrayValue>(arrayValue) &&
+                 std::holds_alternative<int>(indexValue))
+        {
+          const ArrayValue &arr = std::get<ArrayValue>(arrayValue);
+          int index = std::get<int>(indexValue);
+
+          if (index >= 0 && static_cast<size_t>(index) < arr.elements.size())
+          {
+            result = arr.elements[static_cast<size_t>(index)];
           }
           else
           {
@@ -962,6 +1583,25 @@ namespace dotlin
         {
           result = std::string("unsupported_array_access");
         }
+      }
+
+      void visit(ArrayLiteralExpr &node) override
+      {
+        // Evaluate each element in the array literal
+        std::vector<Value> elements;
+        for (auto &element : node.elements)
+        {
+          if (element)
+          {
+            elements.push_back(interpreter->evaluate(*element));
+          }
+          else
+          {
+            elements.push_back(Value(std::string("undefined")));
+          }
+        }
+        // Create an ArrayValue with the evaluated elements
+        result = ArrayValue(std::move(elements));
       }
 
       // Statement visitor methods (required by interface but shouldn't be called for expressions)
@@ -1005,11 +1645,23 @@ namespace dotlin
     catch (const std::exception &e)
     {
       std::cout << "Exception in expression evaluation: " << e.what() << std::endl;
+      // Return a default value in case of error
+      evaluationDepth--; // Decrement before returning
+      return std::string("evaluation_error");
     }
+    catch (...)
+    {
+      std::cout << "Unknown exception in expression evaluation" << std::endl;
+      evaluationDepth--; // Decrement before returning
+      return std::string("evaluation_error");
+    }
+    // Decrement evaluation depth before returning
+    evaluationDepth--;
     return visitor.result;
   }
 
-  void Interpreter::execute(Statement &stmt)
+  void
+  Interpreter::execute(Statement &stmt)
   {
     // Use the visitor pattern to dispatch to the appropriate visit method
     struct ExecVisitor : public AstVisitor
@@ -1024,8 +1676,8 @@ namespace dotlin
       void visit(UnaryExpr &node) override { (void)node; }
       void visit(CallExpr &node) override
       {
-        // Evaluate the member access expression
-        interpreter->evaluate(node);
+        // Handle function calls for side effects (like println)
+        interpreter->visit(node);
       }
       void visit(MemberAccessExpr &node) override
       {
@@ -1035,6 +1687,11 @@ namespace dotlin
       void visit(ArrayAccessExpr &node) override
       {
         // Evaluate the array access expression
+        interpreter->evaluate(node);
+      }
+      void visit(ArrayLiteralExpr &node) override
+      {
+        // Evaluate the array literal expression
         interpreter->evaluate(node);
       }
       void visit(ExpressionStmt &node) override { interpreter->visit(node); }
@@ -1066,6 +1723,21 @@ namespace dotlin
     else if (std::holds_alternative<std::string>(value))
     {
       return std::get<std::string>(value);
+    }
+    else if (std::holds_alternative<ArrayValue>(value))
+    {
+      std::string result = "[";
+      std::vector<Value> arr = std::get<ArrayValue>(value).elements;
+      for (size_t i = 0; i < arr.size(); ++i)
+      {
+        result += valueToString(arr[i]);
+        if (i < arr.size() - 1)
+        {
+          result += ", ";
+        }
+      }
+      result += "]";
+      return result;
     }
     else
     {

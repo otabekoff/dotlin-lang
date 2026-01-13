@@ -1,0 +1,7 @@
+fun main() {
+    val str = "Hello, Dotlin!"
+    val result1 = str.substring(0, 5)
+    println("Substring result: [" + result1 + "]")
+    val result2 = str.substring(0, 5).toString()
+    println("Chained result: [" + result2 + "]")
+}

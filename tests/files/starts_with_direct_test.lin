@@ -1,0 +1,4 @@
+fun main() {
+    val str = "Hello World"
+    println("Starts with Hello: " + str.startsWith("Hello").toString())
+}

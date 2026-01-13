@@ -1,0 +1,5 @@
+fun main() {
+    val str = "Hello, Dotlin!"
+    val result = str.startsWith("Hello").toString()
+    println("Type of result: " + result)
+}

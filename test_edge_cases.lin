@@ -1,0 +1,25 @@
+fun main() {
+    // Test direct method calls
+    val text = "Hello World"
+    println(text.toUpperCase())
+    println(text.toLowerCase())
+    println(text.indexOf("World"))
+    println(text.startsWith("Hello"))
+    println(text.endsWith("World"))
+    println(text.substring(0, 5))
+    
+    // Test chained method calls
+    println("hello world".toUpperCase().indexOf("WORLD"))
+    println(text.toUpperCase().startsWith("HELLO"))
+    println("  hello  ".trim().toUpperCase())
+    
+    // Test complex expressions
+    val result = "some text".indexOf("text").toString()
+    println(result)
+    
+    // Test with variables
+    val greeting = "Hello, "
+    val name = "World"
+    val message = greeting + name
+    println(message.toUpperCase())
+}

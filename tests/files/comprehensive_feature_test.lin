@@ -1,0 +1,38 @@
+fun main(args: Array<String>) {
+    println("=== Dotlin Comprehensive Feature Test ===")
+    
+    // Test command-line arguments
+    println("Args: " + args.contentToString())
+    println("Args count: " + args.size().toString())
+    
+    // Test string methods
+    val str = "  Hello, Dotlin!  "
+    println("Original: [" + str + "]")
+    println("Upper: [" + str.toUpperCase() + "]")
+    println("Lower: [" + str.toLowerCase() + "]")
+    println("Trimmed: [" + str.trim() + "]")
+    println("Starts with Hello: " + str.trim().startsWith("Hello").toString())
+    println("Ends with !: " + str.trim().endsWith("!").toString())
+    println("Index of \",\": " + str.indexOf(",").toString())
+    println("Substring (0,5): [" + str.trim().substring(0, 5) + "]")
+    
+    // Test string splitting
+    val sentence = "apple,banana,cherry"
+    println("Split result: " + sentence.split(","))
+    
+    // Test formatting functions
+    println("Format test: " + format("Hello %s from %s", "Dotlin", "C++"))
+    println("Number: " + format("Value is %d", 42))
+    println("Float: " + format("Pi is %f", 3.14))
+    
+    // Test type conversion
+    val numStr = "123"
+    val floatStr = "45.67"
+    println("String to int: " + toInt(numStr).toString())
+    println("String to double: " + toDouble(floatStr).toString())
+    
+    // Test method chaining
+    println("Method chaining: " + args.contentToString().toUpperCase())
+    
+    println("=== Test Complete ===")
+}

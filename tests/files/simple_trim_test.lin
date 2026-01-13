@@ -1,0 +1,5 @@
+fun main() {
+    val str = "  Hello  "
+    val trimmed = str.trim()
+    println("Result: " + trimmed)
+}

@@ -1,0 +1,7 @@
+fun main() {
+    val str = "Hello, Dotlin!"
+    val result1 = str.indexOf(",")
+    println("IndexOf result: " + result1.toString())
+    val result2 = str.indexOf(",").toString()
+    println("Chained IndexOf result: " + result2)
+}

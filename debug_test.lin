@@ -1,0 +1,1 @@
+fun main(args: Array<String>) { val text = "hello world"; val result = text.toUpperCase().indexOf("WORLD"); println(result.toString()); }

@@ -1,0 +1,8 @@
+fun main() {
+    val str = "  Hello, Dotlin!  "
+    println("Original: [" + str + "]")
+    println("Trimmed: [" + str.trim() + "]")
+    
+    val sentence = "apple,banana,cherry"
+    println("Split result: " + sentence.split(","))
+}

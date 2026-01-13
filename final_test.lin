@@ -1,0 +1,5 @@
+fun main(args: Array<String>) {
+    val text = "hello world";
+    println("Direct startsWith: " + text.startsWith("hello").toString());
+    println("Chained result: " + text.toUpperCase().indexOf("WORLD").toString());
+}

@@ -1,0 +1,5 @@
+fun main() {
+    val str = "Hello World"
+    val result = str.substring(0, 5)
+    println("Substring: " + result)
+}

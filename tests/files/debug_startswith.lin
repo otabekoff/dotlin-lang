@@ -1,0 +1,7 @@
+fun main() {
+    val str = "Hello World"
+    val result = str.startsWith("Hello")
+    println("Type of result: " + result.toString())
+    val result2 = "Hello, Dotlin!".startsWith("Hello")
+    println("Direct call result: " + result2.toString())
+}

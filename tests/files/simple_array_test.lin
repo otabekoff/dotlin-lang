@@ -1,0 +1,11 @@
+fun main(args: Array<String>) {
+    println("=== Simple Array Test ===")
+    
+    // Test simple array construction
+    val numbers = [1, 2, 3]
+    println("Numbers: " + numbers[0])
+    
+    // Test string array
+    val words = ["hello", "world"]
+    println("Word: " + words[0])
+}

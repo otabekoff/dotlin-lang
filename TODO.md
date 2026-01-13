@@ -5,39 +5,39 @@ Find all of the commnents in c++ files (cpp, h, and all the others), write them 
 
 ## Todo List for Dotlin Language Implementation
 
-- [ ] is not completed.
-- [-] is partially completed
-- [x] is completed.
+- [ ] is for not completed.
+- [-] is for partially completed
+- [x] is for completed.
 
 1. Method Chaining and Property Access
     - [x] Implement .toString() method for basic types (int, double, bool)
     - [x] Fix method chaining to properly chain return values
-    - [ ] Implement additional string methods (.substring(), .indexOf(), etc.)
+    - [x] Implement additional string methods (.substring(), .indexOf(), etc.)
 2. Command-Line Argument Support
     - [x] Connect command-line arguments from main.cpp to interpreter execution context
-    - [ ] Make command-line arguments available to fun main(args: Array<String>) function
-    - [ ] Implement Array type and Array operations
-    - [ ] Add args.contentToString() functionality
+    - [x] Make command-line arguments available to fun main(args: Array<String>) function
+    - [-] Implement Array type and Array operations
+    - [x] Add args.contentToString() functionality
 3. Advanced Formatting Functions
-    - [ ] Implement printf-style formatting functions
-    - [ ] Implement number formatting functions
-    - [ ] Implement string formatting utilities
+    - [x] Implement printf-style formatting functions
+    - [x] Implement number formatting functions
+    - [x] Implement string formatting utilities
 4. Array Operations Support
-    - [ ] Implement Array data type
-    - [ ] Add array indexing operations ([])
-    - [ ] Implement array methods (.size, .get(), .set(), etc.)
+    - [-] Implement Array data type
+    - [x] Add array indexing operations ([]) 
+    - [x] Implement array methods (.size, .get(), .set(), etc.)
     - [ ] Add array construction syntax
 5. Complex Expression Handling
-    - [ ] Add proper null pointer checks in AST traversal
+    - [x] Add proper null pointer checks in AST traversal
     - [x] Fix unique_ptr dereference issues in complex expressions
-    - [ ] Improve error handling for malformed expressions
-    - [ ] Add bounds checking for property access
+    - [x] Improve error handling for malformed expressions
+    - [x] Add bounds checking for property access
 6. Additional String Methods
-    - [ ] Implement .substring(start, end)
-    - [ ] Implement .indexOf(char/string)
-    - [ ] Implement .startsWith(), .endsWith()
-    - [ ] Implement .toUpperCase(), .toLowerCase()
-    - [ ] Implement .trim(), .split()
+    - [x] Implement .substring(start, end)
+    - [x] Implement .indexOf(char/string)
+    - [x] Implement .startsWith(), .endsWith()
+    - [x] Implement .toUpperCase(), .toLowerCase()
+    - [x] Implement .trim(), .split()
 7. Enhanced Type System
     - [ ] Implement proper type checking
     - [ ] Add explicit type annotations support

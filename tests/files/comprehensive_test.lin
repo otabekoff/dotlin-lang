@@ -14,10 +14,9 @@ fun main(args: Array<String>) {
     val str = "Hello, Dotlin!"
     println("String: " + str)
     println("Length: " + str.length.toString())
-    println("Substring(0, 5): " + str.substring(0, 5))
-    println("Substring(7): " + str.substring(7))
+    println("Substring (start): " + str.substring(7))
+    println("Substring (range): " + str.substring(0, 5))
     println("Index of \"Dotlin\": " + str.indexOf("Dotlin").toString())
-    println("Index of \"xyz\": " + str.indexOf("xyz").toString())
     
     println("=== Test Complete ===")
 }

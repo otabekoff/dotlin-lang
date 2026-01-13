@@ -1,0 +1,5 @@
+fun main() {
+    val str = "Hello, Dotlin!"
+    println("String: " + str)
+    println("Length: " + str.length.toString())
+}

@@ -1,0 +1,9 @@
+fun main(args: Array<String>) {
+    println("=== Simple Direct Method Test ===")
+    
+    val text = "hello"
+    println("Text: " + text)
+    
+    val result = text.startsWith("he")
+    println("Starts with 'he': " + result)
+}

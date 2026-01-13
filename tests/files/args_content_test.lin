@@ -1,0 +1,5 @@
+fun main(args: Array<String>) {
+    println("=== Args ContentToString Test ===")
+    println("Args content: " + args.contentToString())
+    println("Args count: " + args.size().toString())
+}

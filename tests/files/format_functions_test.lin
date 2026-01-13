@@ -1,0 +1,7 @@
+fun main() {
+    println("Testing format functions:")
+    println(format("Hello %s!", "Dotlin"))
+    println(format("Number: %d", 42))
+    println("Converting string to number: " + toInt("123").toString())
+    println("Converting string to double: " + toDouble("3.14").toString())
+}

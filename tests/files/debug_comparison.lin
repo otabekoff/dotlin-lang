@@ -1,0 +1,6 @@
+fun main() {
+    val str = "Hello, Dotlin!"
+    println("Test startsWith: " + str.startsWith("Hello").toString())
+    val result = str.startsWith("Hello")
+    println("Assigned result: " + result.toString())
+}

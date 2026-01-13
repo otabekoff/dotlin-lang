@@ -20,6 +20,7 @@ namespace dotlin
   struct CallExpr;
   struct MemberAccessExpr;
   struct ArrayAccessExpr;
+  struct ArrayLiteralExpr;
   struct ExpressionStmt;
   struct VariableDeclStmt;
   struct FunctionDeclStmt;
@@ -165,6 +166,7 @@ namespace dotlin
     virtual void visit(FunctionDeclStmt &node) = 0;
     virtual void visit(BlockStmt &node) = 0;
     virtual void visit(ReturnStmt &node) = 0;
+    virtual void visit(ArrayLiteralExpr &node) = 0;
     virtual void visit(IfStmt &node) = 0;
   };
 
@@ -242,6 +244,14 @@ namespace dotlin
     void accept(AstVisitor &visitor) override { visitor.visit(*this); }
   };
 
+  struct ArrayLiteralExpr : Expression
+  {
+    std::vector<Expression::Ptr> elements;
+    ArrayLiteralExpr(std::vector<Expression::Ptr> elems, size_t l, size_t c)
+        : Expression(l, c), elements(std::move(elems)) {}
+
+    void accept(AstVisitor &visitor) override { visitor.visit(*this); }
+  };
 
   // Concrete statement types
   struct ExpressionStmt : Statement

@@ -1,0 +1,28 @@
+fun main(args: Array<String>) {
+    println("=== Array Construction Test ===")
+    
+    // Test simple array construction
+    val numbers = [1, 2, 3, 4, 5]
+    println("Numbers array: " + numbers.toString())
+    
+    // Test mixed-type array construction (as much as the type system allows)
+    val strings = ["hello", "world", "dotlin"]
+    println("Strings array: " + strings.toString())
+    
+    // Test array construction with expressions
+    val computed = [1 + 2, 3 * 4, 10 - 5]
+    println("Computed array: " + computed.toString())
+    
+    // Test empty array
+    val empty = []
+    println("Empty array: " + empty.toString())
+    
+    // Test array indexing
+    println("First number: " + numbers[0])
+    println("Second number: " + numbers[1])
+    println("Last number: " + numbers[4])
+    
+    // Test string array indexing
+    println("First string: " + strings[0])
+    println("Second string: " + strings[1])
+}

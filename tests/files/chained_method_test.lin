@@ -1,0 +1,10 @@
+fun main(args: Array<String>) {
+    println("=== Chained Method Test ===")
+    
+    val text = "hello world"
+    println("Original text: " + text)
+    
+    // Test chained method call that was causing crash
+    val result = text.toUpperCase().indexOf("WORLD")
+    println("Chained result: " + result.toString())
+}

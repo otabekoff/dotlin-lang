@@ -1,0 +1,9 @@
+fun main(args: Array<String>) {
+    println("=== Simple Test ===")
+    println("Args count: " + args.size().toString())
+    if (args.size() > 0) {
+        val str = args[0]
+        println("First arg: " + str)
+        println("Length: " + str.length.toString())
+    }
+}

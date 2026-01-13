@@ -311,6 +311,37 @@ namespace dotlin
       }
       return expr;
     }
+    case TokenType::LBRACKET:
+    {
+      pos++; // consume '['
+      std::vector<Expression::Ptr> elements;
+
+      // Parse array elements separated by commas
+      if (pos < tokens.size() && tokens[pos].type != TokenType::RBRACKET)
+      {
+        elements.push_back(parseExpression(tokens, pos));
+
+        while (pos < tokens.size() && tokens[pos].type == TokenType::COMMA)
+        {
+          pos++; // consume comma
+          if (pos < tokens.size() && tokens[pos].type != TokenType::RBRACKET)
+          {
+            elements.push_back(parseExpression(tokens, pos));
+          }
+        }
+      }
+
+      // Expect closing bracket
+      if (pos < tokens.size() && tokens[pos].type == TokenType::RBRACKET)
+      {
+        pos++; // consume ']'
+      }
+
+      // Use the last token we consumed for position info, or default to 1,1
+      size_t line = (pos > 0) ? tokens[pos - 1].line : 1;
+      size_t col = (pos > 0) ? tokens[pos - 1].column : 1;
+      return std::make_unique<ArrayLiteralExpr>(std::move(elements), line, col);
+    }
     default:
       pos++;
       return nullptr;

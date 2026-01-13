@@ -1,0 +1,5 @@
+fun main() {
+    // Test the problematic chained expression
+    val result = "some text".indexOf("text").toString()
+    println(result)
+}

@@ -1,0 +1,21 @@
+fun main(args: Array<String>) {
+    println("=== Direct Method Call Test ===")
+    
+    // Test direct method calls on string variables
+    val text = "hello world"
+    println("Original text: " + text)
+    
+    // Test direct calls
+    val starts = text.startsWith("hello")
+    println("Starts with 'hello': " + starts.toString())
+    
+    val indexOfResult = text.indexOf("world")
+    println("Index of 'world': " + indexOfResult.toString())
+    
+    val upperText = text.toUpperCase()
+    println("Uppercase: " + upperText)
+    
+    // Test chained calls (should work)
+    val chainedResult = text.toUpperCase().indexOf("WORLD")
+    println("Chained result: " + chainedResult.toString())
+}

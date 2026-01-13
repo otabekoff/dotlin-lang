@@ -1,0 +1,5 @@
+fun main() {
+    val str = "Hello World"
+    val result = str.toUpperCase()
+    println("ToUpperCase: " + result)
+}
