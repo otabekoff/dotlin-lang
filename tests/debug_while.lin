@@ -1,0 +1,12 @@
+fun main(args: Array<String>) {
+    var i = 0
+    println("Before loop: " + i.toString())
+    
+    while (i < 3) {
+        println("In loop, i = " + i.toString())
+        i = i + 1
+        println("After increment, i = " + i.toString())
+    }
+    
+    println("After loop: " + i.toString())
+}

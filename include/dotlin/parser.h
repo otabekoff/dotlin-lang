@@ -27,6 +27,9 @@ namespace dotlin
   struct BlockStmt;
   struct ReturnStmt;
   struct IfStmt;
+  struct WhileStmt;
+  struct ForStmt;
+  struct WhenStmt;
 
   // Base class for all AST nodes
   struct AstNode
@@ -149,6 +152,64 @@ namespace dotlin
     size_t column;
   };
 
+  struct WhileStatement
+  {
+    std::unique_ptr<Expression> condition;
+    std::unique_ptr<Statement> body;
+    size_t line;
+    size_t column;
+  };
+
+  struct ForStatement
+  {
+    std::string variable;
+    std::unique_ptr<Expression> iterable;
+    std::unique_ptr<Statement> body;
+    size_t line;
+    size_t column;
+  };
+
+  struct WhenStatement
+  {
+    std::unique_ptr<Expression> subject;
+    std::vector<std::pair<std::unique_ptr<Expression>, std::unique_ptr<Statement>>> branches;
+    std::optional<std::unique_ptr<Statement>> elseBranch;
+    size_t line;
+    size_t column;
+  };
+
+  // Parser helper functions
+  std::unique_ptr<Statement> parseStatement(const std::vector<Token> &tokens,
+                                            size_t &pos);
+  std::unique_ptr<Statement>
+  parseVariableDeclaration(const std::vector<Token> &tokens, size_t &pos);
+  std::unique_ptr<Statement>
+  parseFunctionDeclaration(const std::vector<Token> &tokens, size_t &pos);
+  std::unique_ptr<Statement> parseIfStatement(const std::vector<Token> &tokens,
+                                              size_t &pos);
+  std::unique_ptr<Statement>
+  parseReturnStatement(const std::vector<Token> &tokens, size_t &pos);
+  std::unique_ptr<Statement> parseBlockStatement(const std::vector<Token> &tokens,
+                                                 size_t &pos);
+  std::unique_ptr<Statement> parseWhileStatement(const std::vector<Token> &tokens,
+                                                 size_t &pos);
+  std::unique_ptr<Statement> parseForStatement(const std::vector<Token> &tokens,
+                                               size_t &pos);
+  std::unique_ptr<Statement>
+  parseExpressionStatement(const std::vector<Token> &tokens, size_t &pos);
+  std::unique_ptr<Expression> parseExpression(const std::vector<Token> &tokens,
+                                              size_t &pos);
+  std::unique_ptr<Expression>
+  parseComparisonExpression(const std::vector<Token> &tokens, size_t &pos);
+  std::unique_ptr<Expression>
+  parseAdditiveExpression(const std::vector<Token> &tokens, size_t &pos);
+  std::unique_ptr<Expression>
+  parseMultiplicativeExpression(const std::vector<Token> &tokens, size_t &pos);
+  std::unique_ptr<Expression>
+  parsePostfixExpression(const std::vector<Token> &tokens, size_t &pos);
+  std::unique_ptr<Expression>
+  parsePrimaryExpression(const std::vector<Token> &tokens, size_t &pos);
+
   // Visitor pattern for AST traversal
   class AstVisitor
   {
@@ -168,6 +229,9 @@ namespace dotlin
     virtual void visit(ReturnStmt &node) = 0;
     virtual void visit(ArrayLiteralExpr &node) = 0;
     virtual void visit(IfStmt &node) = 0;
+    virtual void visit(WhileStmt &node) = 0;
+    virtual void visit(ForStmt &node) = 0;
+    virtual void visit(WhenStmt &node) = 0;
   };
 
   // Concrete expression types
@@ -322,6 +386,44 @@ namespace dotlin
     void accept(AstVisitor &visitor) override { visitor.visit(*this); }
   };
 
+  struct WhileStmt : Statement
+  {
+    Expression::Ptr condition;
+    Statement::Ptr body;
+    WhileStmt(Expression::Ptr cond, Statement::Ptr body_stmt, size_t l, size_t c)
+        : Statement(l, c), condition(std::move(cond)), body(std::move(body_stmt))
+    {
+    }
+
+    void accept(AstVisitor &visitor) override { visitor.visit(*this); }
+  };
+
+  struct ForStmt : Statement
+  {
+    std::string variable;
+    Expression::Ptr iterable;
+    Statement::Ptr body;
+    ForStmt(std::string var, Expression::Ptr iter, Statement::Ptr body_stmt, size_t l, size_t c)
+        : Statement(l, c), variable(std::move(var)), iterable(std::move(iter)), body(std::move(body_stmt))
+    {
+    }
+
+    void accept(AstVisitor &visitor) override { visitor.visit(*this); }
+  };
+
+  struct WhenStmt : Statement
+  {
+    Expression::Ptr subject;
+    std::vector<std::pair<Expression::Ptr, Statement::Ptr>> branches;
+    std::optional<Statement::Ptr> elseBranch;
+    WhenStmt(Expression::Ptr subj, std::vector<std::pair<Expression::Ptr, Statement::Ptr>> brs, std::optional<Statement::Ptr> else_br, size_t l, size_t c)
+        : Statement(l, c), subject(std::move(subj)), branches(std::move(brs)), elseBranch(std::move(else_br))
+    {
+    }
+
+    void accept(AstVisitor &visitor) override { visitor.visit(*this); }
+  };
+
   Program parse(const std::vector<Token> &tokens);
 
   // Parser helper functions
@@ -337,10 +439,18 @@ namespace dotlin
   parseReturnStatement(const std::vector<Token> &tokens, size_t &pos);
   std::unique_ptr<Statement> parseBlockStatement(const std::vector<Token> &tokens,
                                                  size_t &pos);
+  std::unique_ptr<Statement> parseWhileStatement(const std::vector<Token> &tokens,
+                                                 size_t &pos);
+  std::unique_ptr<Statement> parseForStatement(const std::vector<Token> &tokens,
+                                               size_t &pos);
+  std::unique_ptr<Statement> parseWhenStatement(const std::vector<Token> &tokens,
+                                                size_t &pos);
   std::unique_ptr<Statement>
   parseExpressionStatement(const std::vector<Token> &tokens, size_t &pos);
   std::unique_ptr<Expression> parseExpression(const std::vector<Token> &tokens,
                                               size_t &pos);
+  std::unique_ptr<Expression>
+  parseAssignmentExpression(const std::vector<Token> &tokens, size_t &pos);
   std::unique_ptr<Expression>
   parseComparisonExpression(const std::vector<Token> &tokens, size_t &pos);
   std::unique_ptr<Expression>

@@ -1,0 +1,8 @@
+// Simple test for variable assignment
+fun main(args: Array<String>) {
+    var i = 0
+    println("Initial value: " + i.toString())
+    i = i + 1
+    println("After increment: " + i.toString())
+    println("Test completed!")
+}

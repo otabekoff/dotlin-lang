@@ -1,0 +1,12 @@
+// Test for loops in Dotlin
+fun main(args: Array<String>) {
+    println("Testing for loops...")
+    
+    // Test for loop with array
+    val numbers = arrayOf(1, 2, 3, 4, 5)
+    for (num in numbers) {
+        println("Number: " + num.toString())
+    }
+    
+    println("For loop test completed!")
+}

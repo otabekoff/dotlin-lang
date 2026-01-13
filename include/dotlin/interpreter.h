@@ -40,13 +40,63 @@ namespace dotlin
     return std::vector<Value>();
   }
 
+  // Equality operator for Value type
+  inline bool operator==(const Value &lhs, const Value &rhs)
+  {
+    // Compare types first
+    if (lhs.index() != rhs.index())
+    {
+      return false;
+    }
+
+    // Compare values based on type
+    if (std::holds_alternative<int>(lhs))
+    {
+      return std::get<int>(lhs) == std::get<int>(rhs);
+    }
+    else if (std::holds_alternative<double>(lhs))
+    {
+      return std::get<double>(lhs) == std::get<double>(rhs);
+    }
+    else if (std::holds_alternative<bool>(lhs))
+    {
+      return std::get<bool>(lhs) == std::get<bool>(rhs);
+    }
+    else if (std::holds_alternative<std::string>(lhs))
+    {
+      return std::get<std::string>(lhs) == std::get<std::string>(rhs);
+    }
+    else if (std::holds_alternative<ArrayValue>(lhs))
+    {
+      // Compare array elements
+      const auto &lhsArr = std::get<ArrayValue>(lhs).elements;
+      const auto &rhsArr = std::get<ArrayValue>(rhs).elements;
+      if (lhsArr.size() != rhsArr.size())
+      {
+        return false;
+      }
+      for (size_t i = 0; i < lhsArr.size(); ++i)
+      {
+        if (!(lhsArr[i] == rhsArr[i]))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Default case for unknown types
+    return false;
+  }
+
   // Environment for variable bindings
   struct Environment
   {
     std::unordered_map<std::string, Value> values;
-    Environment *enclosing = nullptr;
+    std::shared_ptr<Environment> enclosing = nullptr;
+    bool is_block_scope = false; // Flag to identify block vs function scope
 
-    Environment(Environment *parent = nullptr) : enclosing(parent) {}
+    Environment(std::shared_ptr<Environment> parent = nullptr, bool block_scope = false) : enclosing(parent), is_block_scope(block_scope) {}
 
     void define(const std::string &name, Value value);
     Value get(const std::string &name);
@@ -75,10 +125,14 @@ namespace dotlin
     void visit(BlockStmt &node);
     void visit(ReturnStmt &node);
     void visit(IfStmt &node);
+    void visit(WhileStmt &node);
+    void visit(ForStmt &node);
+    void visit(WhenStmt &node);
 
   private:
-    Environment globals;
-    Environment *environment;
+    std::shared_ptr<Environment> globals;
+    std::shared_ptr<Environment> environment;
+    std::shared_ptr<Environment> functionEnvironment; // Keep track of the function-level environment
     bool hasMainFunction;
     Statement::Ptr mainFunctionStmt;                // Store reference to main function if found
     std::vector<std::string> commandLineArgs;       // Store command-line arguments
@@ -88,7 +142,7 @@ namespace dotlin
     Value evaluate(Expression &expr);
     void execute(Statement &stmt);
     Value executeBlock(const std::vector<Statement::Ptr> &statements,
-                       Environment *env);
+                       std::shared_ptr<Environment> env);
     std::string valueToString(const Value &value);
   };
 

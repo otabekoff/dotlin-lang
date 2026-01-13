@@ -1,0 +1,41 @@
+// Test file for control flow constructs in Dotlin
+
+fun main(args: Array<String>) {
+    println("Testing while loops...")
+    
+    // Test while loop
+    var i = 0
+    while (i < 5) {
+        println("While loop iteration: " + i.toString())
+        i = i + 1
+    }
+    
+    println("Testing for loops...")
+    
+    // Test for loop with array
+    val numbers = arrayOf(1, 2, 3, 4, 5)
+    for (num in numbers) {
+        println("For loop with number: " + num.toString())
+    }
+    
+    println("Testing when expressions...")
+    
+    // Test when expression
+    var x = 2
+    when (x) {
+        1 -> println("x is one")
+        2 -> println("x is two") 
+        3 -> println("x is three")
+        else -> println("x is something else")
+    }
+    
+    // Test when with string
+    var day = "Monday"
+    when (day) {
+        "Monday" -> println("Start of the week!")
+        "Friday" -> println("End of the week!")
+        else -> println("Some other day")
+    }
+    
+    println("All control flow tests completed!")
+}

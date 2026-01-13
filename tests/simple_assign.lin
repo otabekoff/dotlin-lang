@@ -1,0 +1,10 @@
+fun main(args: Array<String>) {
+    var i = 0
+    println("Initial: " + i.toString())
+    
+    i = i + 1
+    println("After 1st assignment: " + i.toString())
+    
+    i = i + 1
+    println("After 2nd assignment: " + i.toString())
+}

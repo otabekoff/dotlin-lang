@@ -45,6 +45,12 @@ namespace dotlin
       return parseFunctionDeclaration(tokens, pos);
     case TokenType::IF:
       return parseIfStatement(tokens, pos);
+    case TokenType::WHILE:
+      return parseWhileStatement(tokens, pos);
+    case TokenType::FOR:
+      return parseForStatement(tokens, pos);
+    case TokenType::WHEN:
+      return parseWhenStatement(tokens, pos);
     case TokenType::RETURN:
       return parseReturnStatement(tokens, pos);
     case TokenType::LBRACE:
@@ -90,7 +96,29 @@ namespace dotlin
   std::unique_ptr<Expression> parseExpression(const std::vector<Token> &tokens,
                                               size_t &pos)
   {
-    return parseComparisonExpression(tokens, pos);
+    return parseAssignmentExpression(tokens, pos);
+  }
+
+  std::unique_ptr<Expression>
+  parseAssignmentExpression(const std::vector<Token> &tokens, size_t &pos)
+  {
+    auto left = parseComparisonExpression(tokens, pos);
+
+    // Check for assignment operator
+    if (pos < tokens.size() && tokens[pos].type == TokenType::ASSIGN)
+    {
+      TokenType op = tokens[pos].type;
+      pos++;                                               // consume assignment token
+      auto right = parseAssignmentExpression(tokens, pos); // right-associative
+      if (right)
+      {
+        left = std::make_unique<BinaryExpr>(std::move(left), op, std::move(right),
+                                            tokens[pos - 2].line,
+                                            tokens[pos - 2].column);
+      }
+    }
+
+    return left;
   }
 
   std::unique_ptr<Expression>
@@ -550,6 +578,256 @@ namespace dotlin
       pos++; // consume one token to avoid infinite loop
     }
     return nullptr;
+  }
+
+  std::unique_ptr<Statement> parseWhileStatement(const std::vector<Token> &tokens, size_t &pos)
+  {
+    // Skip the 'while' token
+    if (pos < tokens.size() && tokens[pos].type == TokenType::WHILE)
+    {
+      pos++;
+    }
+
+    // Expect opening parenthesis for condition
+    if (pos < tokens.size() && tokens[pos].type == TokenType::LPAREN)
+    {
+      pos++; // consume '('
+    }
+    else
+    {
+      // Error: expected '(' after while
+      return nullptr;
+    }
+
+    // Parse the condition expression
+    auto condition = parseExpression(tokens, pos);
+
+    // Expect closing parenthesis
+    if (pos < tokens.size() && tokens[pos].type == TokenType::RPAREN)
+    {
+      pos++; // consume ')'
+    }
+    else
+    {
+      // Error: expected ')' after while condition
+      return nullptr;
+    }
+
+    // Parse the body of the while loop
+    std::unique_ptr<Statement> body = nullptr;
+    if (pos < tokens.size() && tokens[pos].type == TokenType::LBRACE)
+    {
+      // Block statement
+      body = parseBlockStatement(tokens, pos);
+    }
+    else
+    {
+      // Single statement
+      body = parseStatement(tokens, pos);
+    }
+
+    // Use the last token we consumed for position info, or default to 1,1
+    size_t line = (pos > 0) ? tokens[pos - 1].line : 1;
+    size_t col = (pos > 0) ? tokens[pos - 1].column : 1;
+    return std::make_unique<WhileStmt>(std::move(condition), std::move(body),
+                                       line, col);
+  }
+
+  std::unique_ptr<Statement> parseForStatement(const std::vector<Token> &tokens, size_t &pos)
+  {
+    // Skip the 'for' token
+    if (pos < tokens.size() && tokens[pos].type == TokenType::FOR)
+    {
+      pos++;
+    }
+
+    // Expect opening parenthesis
+    if (pos < tokens.size() && tokens[pos].type == TokenType::LPAREN)
+    {
+      pos++; // consume '('
+    }
+    else
+    {
+      // Error: expected '(' after for
+      return nullptr;
+    }
+
+    std::string variableName;
+    // Parse the variable name
+    if (pos + 1 < tokens.size() &&
+        tokens[pos].type == TokenType::IDENTIFIER &&
+        tokens[pos + 1].type == TokenType::IN)
+    {
+      variableName = tokens[pos].text;
+      pos += 2; // consume variable name and 'in'
+    }
+    else
+    {
+      // Error: expected 'identifier in' after '('
+      return nullptr;
+    }
+
+    // Parse the iterable expression
+    auto iterable = parseExpression(tokens, pos);
+
+    // Expect closing parenthesis
+    if (pos < tokens.size() && tokens[pos].type == TokenType::RPAREN)
+    {
+      pos++; // consume ')'
+    }
+    else
+    {
+      // Error: expected ')' after for clause
+      return nullptr;
+    }
+
+    // Parse the body of the for loop
+    std::unique_ptr<Statement> body = nullptr;
+    if (pos < tokens.size() && tokens[pos].type == TokenType::LBRACE)
+    {
+      // Block statement
+      body = parseBlockStatement(tokens, pos);
+    }
+    else
+    {
+      // Single statement
+      body = parseStatement(tokens, pos);
+    }
+
+    // Use the last token we consumed for position info, or default to 1,1
+    size_t line = (pos > 0) ? tokens[pos - 1].line : 1;
+    size_t col = (pos > 0) ? tokens[pos - 1].column : 1;
+    return std::make_unique<ForStmt>(variableName, std::move(iterable), std::move(body),
+                                     line, col);
+  }
+
+  std::unique_ptr<Statement> parseWhenStatement(const std::vector<Token> &tokens, size_t &pos)
+  {
+    // Skip the 'when' token
+    if (pos < tokens.size() && tokens[pos].type == TokenType::WHEN)
+    {
+      pos++;
+    }
+
+    // Expect opening parenthesis
+    if (pos < tokens.size() && tokens[pos].type == TokenType::LPAREN)
+    {
+      pos++; // consume '('
+    }
+    else
+    {
+      // Error: expected '(' after when
+      return nullptr;
+    }
+
+    // Parse the subject expression
+    auto subject = parseExpression(tokens, pos);
+
+    // Expect closing parenthesis
+    if (pos < tokens.size() && tokens[pos].type == TokenType::RPAREN)
+    {
+      pos++; // consume ')'
+    }
+    else
+    {
+      // Error: expected ')' after when subject
+      return nullptr;
+    }
+
+    // Expect opening brace for branches
+    if (pos < tokens.size() && tokens[pos].type == TokenType::LBRACE)
+    {
+      pos++; // consume '{'
+    }
+    else
+    {
+      // Error: expected '{' after when clause
+      return nullptr;
+    }
+
+    // Parse branches
+    std::vector<std::pair<Expression::Ptr, Statement::Ptr>> branches;
+    std::optional<Statement::Ptr> elseBranch = std::nullopt;
+
+    while (pos < tokens.size() && tokens[pos].type != TokenType::RBRACE)
+    {
+      // Check for 'else' branch
+      if (pos < tokens.size() && tokens[pos].type == TokenType::ELSE)
+      {
+        pos++; // consume 'else'
+
+        if (pos < tokens.size() && tokens[pos].type == TokenType::ARROW)
+        {
+          pos++; // consume '->'
+
+          // Parse the else branch statement
+          Statement::Ptr elseStmt = nullptr;
+          if (pos < tokens.size() && tokens[pos].type == TokenType::LBRACE)
+          {
+            elseStmt = parseBlockStatement(tokens, pos);
+          }
+          else
+          {
+            elseStmt = parseStatement(tokens, pos);
+          }
+
+          elseBranch = std::move(elseStmt);
+        }
+        break; // else should be the last branch
+      }
+      else
+      {
+        // Parse pattern -> statement
+        auto pattern = parseExpression(tokens, pos);
+
+        if (pos < tokens.size() && tokens[pos].type == TokenType::ARROW)
+        {
+          pos++; // consume '->'
+
+          // Parse the statement for this branch
+          Statement::Ptr branchStmt = nullptr;
+          if (pos < tokens.size() && tokens[pos].type == TokenType::LBRACE)
+          {
+            branchStmt = parseBlockStatement(tokens, pos);
+          }
+          else
+          {
+            branchStmt = parseStatement(tokens, pos);
+          }
+
+          branches.push_back(std::make_pair(std::move(pattern), std::move(branchStmt)));
+        }
+        else
+        {
+          // Error: expected '->' after pattern
+          break;
+        }
+      }
+
+      // Skip potential semicolons or commas between branches
+      while (pos < tokens.size() &&
+             (tokens[pos].type == TokenType::SEMICOLON || tokens[pos].type == TokenType::COMMA))
+      {
+        pos++;
+      }
+    }
+
+    // Expect closing brace
+    if (pos < tokens.size() && tokens[pos].type == TokenType::RBRACE)
+    {
+      pos++; // consume '}'
+    }
+    else
+    {
+      // Error: expected '}' after when branches
+      return nullptr;
+    }
+
+    // Use the last token we consumed for position info, or default to 1,1
+    size_t line = (pos > 0) ? tokens[pos - 1].line : 1;
+    size_t col = (pos > 0) ? tokens[pos - 1].column : 1;
+    return std::make_unique<WhenStmt>(std::move(subject), std::move(branches), std::move(elseBranch),
+                                      line, col);
   }
 
 } // namespace dotlin

@@ -47,7 +47,7 @@ namespace dotlin
     throw std::runtime_error("Undefined variable: " + name);
   }
 
-  Interpreter::Interpreter() : environment(&globals), hasMainFunction(false), mainFunctionStmt(nullptr), commandLineArgs({}) {}
+  Interpreter::Interpreter() : globals(std::make_shared<Environment>()), environment(globals), functionEnvironment(nullptr), hasMainFunction(false), mainFunctionStmt(nullptr), commandLineArgs({}) {}
 
   Value Interpreter::interpret(const Program &program)
   {
@@ -94,35 +94,88 @@ namespace dotlin
   void Interpreter::visit(IdentifierExpr &node)
   {
     // Look up identifier in environment
-    // In a real implementation, this would return the value from the environment
+    // This method is for statement execution, not expression evaluation
+    // For expression evaluation, the visitor in evaluate() method is used
     (void)node;
   }
 
   void Interpreter::visit(BinaryExpr &node)
   {
-    // Evaluate binary expressions
-    auto leftValue = node.left ? evaluate(*node.left) : Value(std::string("null"));
-    auto rightValue = node.right ? evaluate(*node.right) : Value(std::string("null"));
-
-    // Perform the operation based on node.op
+    // Handle binary expressions based on operation type
     switch (node.op)
     {
+    case TokenType::ASSIGN:
+      // Handle assignment: left operand should be an identifier
+      if (auto *identifier = dynamic_cast<IdentifierExpr *>(node.left.get()))
+      {
+        // Evaluate the right-hand side
+        auto rightVal = node.right ? evaluate(*node.right) : Value(std::string("null"));
+
+        std::cout << "DEBUG: Assignment statement - trying to assign " << identifier->name << " = ";
+        std::cout << valueToString(rightVal) << std::endl;
+
+        // Try to assign to the variable in the current environment first
+        try
+        {
+          environment->assign(identifier->name, rightVal);
+          std::cout << "DEBUG: Assignment statement successful in current environment" << std::endl;
+        }
+        catch (const std::exception &e)
+        {
+          std::cout << "DEBUG: Assignment statement failed in current environment: " << e.what() << std::endl;
+          // If assignment fails in current environment, try the function environment
+          if (functionEnvironment && functionEnvironment != environment)
+          {
+            try
+            {
+              functionEnvironment->assign(identifier->name, rightVal);
+              std::cout << "DEBUG: Assignment statement successful in function environment" << std::endl;
+            }
+            catch (const std::exception &e2)
+            {
+              std::cout << "DEBUG: Assignment statement failed in function environment: " << e2.what() << std::endl;
+              // If assignment fails everywhere, define in the current environment
+              environment->define(identifier->name, rightVal);
+              std::cout << "DEBUG: Defined new variable in current environment" << std::endl;
+            }
+          }
+          else
+          {
+            // If no function environment or it's the same as current, define in current
+            environment->define(identifier->name, rightVal);
+            std::cout << "DEBUG: Defined new variable in current environment" << std::endl;
+          }
+        }
+      }
+      break;
     case TokenType::PLUS:
-      // Would need to handle different types properly
+      // For arithmetic operations in statements, evaluate both sides
+      evaluate(*node.left);
+      evaluate(*node.right);
       break;
     case TokenType::MINUS:
-      // Would need to handle different types properly
+      evaluate(*node.left);
+      evaluate(*node.right);
       break;
     case TokenType::MULTIPLY:
-      // Would need to handle different types properly
+      evaluate(*node.left);
+      evaluate(*node.right);
       break;
     case TokenType::DIVIDE:
-      // Would need to handle different types properly
+      evaluate(*node.left);
+      evaluate(*node.right);
       break;
     case TokenType::EQUAL:
-      // Would need to handle comparison
+      // For comparison in statements, evaluate both sides
+      evaluate(*node.left);
+      evaluate(*node.right);
       break;
     default:
+      // For other operations, just evaluate both sides
+      if (node.left)
+        evaluate(*node.left);
+      if (node.right)
+        evaluate(*node.right);
       break;
     }
   }
@@ -221,13 +274,19 @@ namespace dotlin
 
   void Interpreter::visit(FunctionDeclStmt &node)
   {
-    // Handle function declarations by storing them in the environment
+    // Store function in environment for later use
+    // For now, we'll just store a marker that the function exists
+    // The actual function calling mechanism would need more sophisticated handling
+    environment->define(node.name, Value(std::string("function_defined")));
+
+    // Special handling for main function
     if (node.name == "main")
     {
-      // This is the main function - execute its body immediately
-      Environment *previousEnv = environment;
-      Environment mainEnv(&globals); // Create environment for main function
-      environment = &mainEnv;
+      // Execute main function if it exists
+      auto previousEnv = environment;
+      auto previousFuncEnv = functionEnvironment;
+      environment = std::make_shared<Environment>(globals, false); // Create environment for main function, not a block scope
+      functionEnvironment = environment;                           // Set the function environment
 
       // If main function has parameters, initialize them with command-line arguments
       for (size_t i = 0; i < node.parameters.size(); ++i)
@@ -244,32 +303,35 @@ namespace dotlin
         }
       }
 
-      // Execute the main function body (which is a single statement)
+      // Execute the main function body
       if (node.body)
       {
-        execute(*node.body);
+        // If the body is a block (which it typically is), execute its statements directly
+        // in the function environment to avoid creating an extra block scope level
+        if (auto *blockBody = dynamic_cast<BlockStmt *>(node.body.get()))
+        {
+          for (const auto &stmt : blockBody->statements)
+          {
+            if (stmt)
+              execute(*stmt);
+          }
+        }
+        else
+        {
+          // For non-block bodies, execute normally
+          execute(*node.body);
+        }
       }
 
-      environment = previousEnv; // Restore previous environment
+      environment = previousEnv;             // Restore previous environment
+      functionEnvironment = previousFuncEnv; // Restore previous function environment
     }
-    // In a complete implementation, we would store the function in the environment
-    // so it can be called later
   }
 
   void Interpreter::visit(BlockStmt &node)
   {
-    // Execute block with new environment
-    Environment blockEnv(environment);
-    Environment *previousEnv = environment;
-    environment = &blockEnv;
-
-    for (const auto &stmt : node.statements)
-    {
-      if (stmt)
-        execute(*stmt);
-    }
-
-    environment = previousEnv;
+    // Execute block with new environment that marks this as a block scope
+    executeBlock(node.statements, environment);
   }
 
   void Interpreter::visit(ReturnStmt &node)
@@ -298,6 +360,149 @@ namespace dotlin
     }
   }
 
+  void Interpreter::visit(WhileStmt &node)
+  {
+    // Execute the while loop
+    while (true)
+    {
+      // Evaluate the condition
+      auto conditionValue = node.condition ? evaluate(*node.condition) : Value(false);
+
+      // Check if the condition is true
+      bool shouldContinue = false;
+      if (std::holds_alternative<bool>(conditionValue))
+      {
+        shouldContinue = std::get<bool>(conditionValue);
+      }
+      else if (std::holds_alternative<int>(conditionValue))
+      {
+        // Treat non-zero integers as true
+        shouldContinue = std::get<int>(conditionValue) != 0;
+      }
+      else if (std::holds_alternative<std::string>(conditionValue))
+      {
+        // Treat non-empty strings as true
+        shouldContinue = !std::get<std::string>(conditionValue).empty();
+      }
+
+      if (!shouldContinue)
+      {
+        break; // Exit the loop if condition is false
+      }
+
+      // Execute the loop body
+      if (node.body)
+      {
+        // If the body is a block, execute its statements directly in the current environment
+        // so that variable changes persist across iterations
+        if (auto *blockBody = dynamic_cast<BlockStmt *>(node.body.get()))
+        {
+          for (const auto &stmt : blockBody->statements)
+          {
+            if (stmt)
+              execute(*stmt);
+          }
+        }
+        else
+        {
+          // For non-block bodies, execute normally
+          execute(*node.body);
+        }
+      }
+    }
+  }
+
+  void Interpreter::visit(ForStmt &node)
+  {
+    // Evaluate the iterable expression
+    Value iterableValue;
+    if (node.iterable)
+    {
+      iterableValue = evaluate(*node.iterable);
+    }
+    else
+    {
+      return; // Nothing to iterate over
+    }
+
+    // Handle iteration over an array
+    if (std::holds_alternative<ArrayValue>(iterableValue))
+    {
+      const ArrayValue &arr = std::get<ArrayValue>(iterableValue);
+
+      // Create a new environment for the loop scope
+      auto loopEnv = std::make_shared<Environment>(environment);
+
+      // Iterate over each element in the array
+      for (const auto &element : arr.elements)
+      {
+        // Define the loop variable in the loop environment
+        loopEnv->define(node.variable, element);
+
+        // Execute the loop body with the current loop environment
+        if (node.body)
+        {
+          auto prevEnv = environment;
+          environment = loopEnv;
+          execute(*node.body);
+          environment = prevEnv;
+        }
+      }
+    }
+    // Handle iteration over integer ranges (e.g., for (i in 0..10))
+    // For now, we'll implement basic range iteration if the iterable is a range
+    // Note: This would require implementing range expressions separately
+    else
+    {
+      // For other types, we might want to implement different iteration strategies
+      // For now, just return
+      return;
+    }
+  }
+
+  void Interpreter::visit(WhenStmt &node)
+  {
+    // Evaluate the subject expression
+    Value subjectValue;
+    if (node.subject)
+    {
+      subjectValue = evaluate(*node.subject);
+    }
+    else
+    {
+      return; // Nothing to match
+    }
+
+    // Try each branch pattern to find a match
+    bool matched = false;
+    for (const auto &branch : node.branches)
+    {
+      // Evaluate the pattern to compare with the subject
+      if (branch.first) // pattern
+      {
+        Value patternValue = evaluate(*branch.first);
+
+        // Simple equality comparison for now
+        if (subjectValue == patternValue)
+        {
+          // Execute the corresponding statement for this branch
+          if (branch.second) // statement
+          {
+            execute(*branch.second);
+          }
+          matched = true;
+          break; // Exit after first match
+        }
+      }
+    }
+
+    // If no branch matched and there's an else branch, execute it
+    if (!matched && node.elseBranch.has_value() && node.elseBranch.value())
+    {
+      execute(*node.elseBranch.value());
+    }
+  }
+
   void Interpreter::visit(ExpressionStmt &node)
   {
     // Evaluate the expression but ignore the result (like in most languages)
@@ -308,7 +513,6 @@ namespace dotlin
 
   Value Interpreter::evaluate(Expression &expr)
   {
-    std::cout << "DEBUG: Starting expression evaluation" << std::endl;
     // Check for potential null expression (this shouldn't happen in normal cases, but as a safeguard)
     // Increment evaluation depth and check for recursion limit
     evaluationDepth++;
@@ -330,7 +534,6 @@ namespace dotlin
       void visit(LiteralExpr &node) override
       {
         // Return the literal value directly
-        std::cout << "DEBUG: In LiteralExpr evaluator" << std::endl;
         // Convert the old variant type to the new Value type
         if (std::holds_alternative<int>(node.value))
         {
@@ -374,7 +577,7 @@ namespace dotlin
           {
             result = interpreter->environment->get(node.name); // This should already return Value type
           }
-          catch (const std::exception &)
+          catch (const std::exception &e)
           {
             // Return a default value if variable not found
             result = Value(std::string("undefined"));
@@ -384,7 +587,55 @@ namespace dotlin
 
       void visit(BinaryExpr &node) override
       {
-        // Evaluate operands and perform operation
+        // Handle assignment specially - don't evaluate left operand as a value
+        if (node.op == TokenType::ASSIGN)
+        {
+          if (auto *identifier = dynamic_cast<IdentifierExpr *>(node.left.get()))
+          {
+            // Evaluate the right-hand side
+            auto rightVal = node.right ? interpreter->evaluate(*node.right) : Value(std::string("null"));
+
+            // Try to assign to the variable in the current environment first
+            try
+            {
+              interpreter->environment->assign(identifier->name, rightVal);
+              result = rightVal; // Assignment returns the assigned value
+            }
+            catch (const std::exception &e)
+            {
+              // If assignment fails in current environment, try the function environment
+              if (interpreter->functionEnvironment && interpreter->functionEnvironment != interpreter->environment)
+              {
+                try
+                {
+                  interpreter->functionEnvironment->assign(identifier->name, rightVal);
+                  result = rightVal; // Assignment returns the assigned value
+                }
+                catch (const std::exception &e2)
+                {
+                  // If assignment fails everywhere, define in the current environment
+                  interpreter->environment->define(identifier->name, rightVal);
+                  result = rightVal; // Assignment returns the assigned value
+                }
+              }
+              else
+              {
+                // If no function environment or it's the same as current, define in current
+                interpreter->environment->define(identifier->name, rightVal);
+                result = rightVal; // Assignment returns the assigned value
+              }
+            }
+            return; // Early return after handling assignment
+          }
+          else
+          {
+            // Assignment to non-identifier is invalid
+            result = 0;
+            return;
+          }
+        }
+
+        // For non-assignment operations, evaluate both operands and perform operation
         auto leftVal = node.left ? interpreter->evaluate(*node.left) : Value(std::string("null"));
         auto rightVal = node.right ? interpreter->evaluate(*node.right) : Value(std::string("null"));
 
@@ -710,6 +961,7 @@ namespace dotlin
             result = false; // Default for unsupported operations
           }
           break;
+
         default:
           result = 0; // Default for unsupported operations
           break;
@@ -788,7 +1040,6 @@ namespace dotlin
       void visit(CallExpr &node) override
       {
         // Handle function calls
-        std::cout << "DEBUG: In CallExpr evaluator" << std::endl;
         std::vector<Value> args;
         for (auto &arg : node.arguments)
         {
@@ -801,8 +1052,6 @@ namespace dotlin
             args.push_back(Value(std::string("undefined")));
           }
         }
-
-        std::cout << "DEBUG: Number of args: " << args.size() << std::endl;
 
         // Check if it's a method call on an object (callee is MemberAccessExpr)
         if (auto *memberAccess = dynamic_cast<MemberAccessExpr *>(node.callee.get()))
@@ -1101,7 +1350,13 @@ namespace dotlin
               }
               Value objValue = interpreter->evaluate(*memberAccess->object);
 
-              if (methodName == "substring" && args.size() == 1 && std::holds_alternative<int>(args[0]))
+              if (methodName == "toString" && args.empty())
+              {
+                // Handle toString() method for all types
+                result = interpreter->valueToString(objValue);
+                return;
+              }
+              else if (methodName == "substring" && args.size() == 1 && std::holds_alternative<int>(args[0]))
               {
                 // Handle substring(start) method call
                 if (std::holds_alternative<std::string>(objValue))
@@ -1418,6 +1673,87 @@ namespace dotlin
               result = 0.0;
             }
           }
+          else if (ident->name == "arrayOf")
+          {
+            // Create an array from the arguments
+            result = ArrayValue(std::vector<Value>(args.begin(), args.end()));
+          }
+          else if (ident->name == "intArrayOf")
+          {
+            // Create an integer array from the arguments (convert all to integers)
+            std::vector<Value> intElements;
+            for (const auto &arg : args)
+            {
+              if (std::holds_alternative<int>(arg))
+              {
+                intElements.push_back(arg);
+              }
+              else if (std::holds_alternative<double>(arg))
+              {
+                intElements.push_back(static_cast<int>(std::get<double>(arg)));
+              }
+              else if (std::holds_alternative<std::string>(arg))
+              {
+                try
+                {
+                  int val = std::stoi(std::get<std::string>(arg));
+                  intElements.push_back(val);
+                }
+                catch (...)
+                {
+                  intElements.push_back(0); // default value
+                }
+              }
+              else
+              {
+                intElements.push_back(0); // default value
+              }
+            }
+            result = ArrayValue(std::move(intElements));
+          }
+          else if (ident->name == "doubleArrayOf")
+          {
+            // Create a double array from the arguments (convert all to doubles)
+            std::vector<Value> doubleElements;
+            for (const auto &arg : args)
+            {
+              if (std::holds_alternative<double>(arg))
+              {
+                doubleElements.push_back(arg);
+              }
+              else if (std::holds_alternative<int>(arg))
+              {
+                doubleElements.push_back(static_cast<double>(std::get<int>(arg)));
+              }
+              else if (std::holds_alternative<std::string>(arg))
+              {
+                try
+                {
+                  double val = std::stod(std::get<std::string>(arg));
+                  doubleElements.push_back(val);
+                }
+                catch (...)
+                {
+                  doubleElements.push_back(0.0); // default value
+                }
+              }
+              else
+              {
+                doubleElements.push_back(0.0); // default value
+              }
+            }
+            result = ArrayValue(std::move(doubleElements));
+          }
+          else if (ident->name == "stringArrayOf")
+          {
+            // Create a string array from the arguments (convert all to strings)
+            std::vector<Value> stringElements;
+            for (const auto &arg : args)
+            {
+              stringElements.push_back(interpreter->valueToString(arg));
+            }
+            result = ArrayValue(std::move(stringElements));
+          }
           else
           {
             // For now, return a placeholder for other function calls
@@ -1475,6 +1811,12 @@ namespace dotlin
           // Handle .length property for strings
           std::string str = std::get<std::string>(objValue);
           result = static_cast<int>(str.length()); // Return the length as an integer
+        }
+        else if (node.property == "size" && std::holds_alternative<ArrayValue>(objValue))
+        {
+          // Handle .size property for arrays
+          const ArrayValue &arr = std::get<ArrayValue>(objValue);
+          result = static_cast<int>(arr.elements.size());
         }
         else if (node.property == "toString")
         {
@@ -1635,6 +1977,21 @@ namespace dotlin
         result = std::string("error: expression visitor called on statement");
         (void)node;
       }
+      void visit(WhileStmt &node) override
+      {
+        result = std::string("error: expression visitor called on statement");
+        (void)node;
+      }
+      void visit(ForStmt &node) override
+      {
+        result = std::string("error: expression visitor called on statement");
+        (void)node;
+      }
+      void visit(WhenStmt &node) override
+      {
+        result = std::string("error: expression visitor called on statement");
+        (void)node;
+      }
     };
 
     EvalVisitor visitor(this);
@@ -1700,6 +2057,9 @@ namespace dotlin
       void visit(BlockStmt &node) override { interpreter->visit(node); }
       void visit(ReturnStmt &node) override { interpreter->visit(node); }
       void visit(IfStmt &node) override { interpreter->visit(node); }
+      void visit(WhileStmt &node) override { interpreter->visit(node); }
+      void visit(ForStmt &node) override { interpreter->visit(node); }
+      void visit(WhenStmt &node) override { interpreter->visit(node); }
     };
 
     ExecVisitor visitor(this);
@@ -1746,10 +2106,12 @@ namespace dotlin
   }
 
   Value Interpreter::executeBlock(const std::vector<Statement::Ptr> &statements,
-                                  Environment *env)
+                                  std::shared_ptr<Environment> parentEnv)
   {
-    Environment *previousEnv = environment;
-    environment = env;
+    // Create new environment that inherits from parent
+    auto blockEnv = std::make_shared<Environment>(parentEnv, true); // Mark as block scope
+    auto previousEnv = environment;
+    environment = blockEnv;
 
     Value result;
     for (const auto &stmt : statements)
@@ -1757,7 +2119,7 @@ namespace dotlin
       execute(*stmt);
     }
 
-    environment = previousEnv;
+    environment = previousEnv; // Restore previous environment
     return result;
   }
 

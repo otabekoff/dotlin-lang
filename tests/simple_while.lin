@@ -1,0 +1,7 @@
+fun main(args: Array<String>) {
+    var i = 0
+    println("Before: " + i.toString())
+    
+    i = i + 1
+    println("After: " + i.toString())
+}
