@@ -1,0 +1,6 @@
+fun main(args: Array<String>) {
+    println("Hello from main with args!")
+    if (args.size() > 0) {
+        println("First arg: " + args[0])
+    }
+}

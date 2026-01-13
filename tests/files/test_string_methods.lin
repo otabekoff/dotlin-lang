@@ -1,0 +1,7 @@
+fun main() {
+    val str = "Hello, Dotlin!"
+    println("String: " + str)
+    println("Length: " + str.length.toString())
+    println("Substring: " + str.substring())
+    println("Index of o: " + str.indexOf())
+}

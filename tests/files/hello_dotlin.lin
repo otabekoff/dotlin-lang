@@ -1,0 +1,4 @@
+val name = "Dotlin"
+val x = 42
+val y = x + 8
+// Simple Dotlin program

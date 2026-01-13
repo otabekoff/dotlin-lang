@@ -1,0 +1,7 @@
+fun main() {
+    println("Hello from main function!")
+    val x = 42
+    println("The answer is: " + x.toString())
+    print("This is a test ")
+    println("of print functions")
+}

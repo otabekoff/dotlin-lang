@@ -1,0 +1,21 @@
+/* Dotlin Program Example */
+val name = "World"
+val greeting = "Hello, " + name + "!"
+
+// Variables with different types
+val integerNum = 42
+val decimalNum = 3.14
+val booleanVal = true
+
+// Basic arithmetic
+val sum = integerNum + 8
+val product = integerNum * 2
+
+// Conditional statement
+if (booleanVal) {
+    val result = "Boolean is true"
+}
+
+// More complex expressions
+val complex = (sum + product) / 2
+

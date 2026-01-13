@@ -1,0 +1,19 @@
+fun main() {
+    println("=== Dotlin I/O Test ===")
+    
+    // Test print function
+    print("Testing ") 
+    print("print ") 
+    print("function...")
+    println("") // newline
+    
+    // Test println function
+    println("Testing println function")
+    
+    // Test readln function
+    println("Enter your favorite color:")
+    val color = readln()
+    println("Your favorite color is: " + color)
+    
+    println("=== Test Complete ===")
+}

@@ -1,0 +1,20 @@
+/* Dotlin Complex Test */
+fun main() {
+    println("=== Dotlin I/O Test ===")
+    
+    // Test print function
+    print("Testing ") 
+    print("print ") 
+    print("function...")
+    println("") // newline
+    
+    // Test println function
+    println("Testing println function")
+    
+    // Test string length property
+    val str = "Hello, Dotlin!"
+    println("String: " + str)
+    println("Length: " + str.length.toString())
+    
+    println("=== Test Complete ===")
+}

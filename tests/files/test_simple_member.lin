@@ -1,0 +1,3 @@
+val str = "Hello"
+val len = str.length
+println(len)

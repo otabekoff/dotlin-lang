@@ -1,0 +1,6 @@
+fun main(args: Array<String>) {
+    println("=== Dotlin Array Test ===")
+    println("Number of args: " + args.size().toString())
+    println("First arg: " + args[0])
+    println("Second arg: " + args[1])
+}

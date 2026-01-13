@@ -1,0 +1,7 @@
+fun main() {
+    val str = "Hello, Dotlin!"
+    println("Original: " + str)
+    println("Substring(0, 5): " + str.substring(0, 5))
+    println("Substring(7): " + str.substring(7))
+    println("Index of \"Dotlin\": " + str.indexOf("Dotlin").toString())
+}

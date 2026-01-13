@@ -1,0 +1,6 @@
+fun main(args: Array<String>) {
+    println("Number of arguments: " + args.size().toString())
+    if (args.size() > 0) {
+        println("First argument: " + args[0])
+    }
+}

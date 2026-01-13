@@ -1,0 +1,23 @@
+fun main(args: Array<String>) {
+    println("=== Dotlin Comprehensive Test ===")
+    
+    // Test command-line arguments
+    println("Number of args: " + args.size().toString())
+    if (args.size() > 0) {
+        println("First arg: " + args[0])
+    }
+    if (args.size() > 1) {
+        println("Second arg: " + args[1])
+    }
+    
+    // Test string methods
+    val str = "Hello, Dotlin!"
+    println("String: " + str)
+    println("Length: " + str.length.toString())
+    println("Substring(0, 5): " + str.substring(0, 5))
+    println("Substring(7): " + str.substring(7))
+    println("Index of \"Dotlin\": " + str.indexOf("Dotlin").toString())
+    println("Index of \"xyz\": " + str.indexOf("xyz").toString())
+    
+    println("=== Test Complete ===")
+}

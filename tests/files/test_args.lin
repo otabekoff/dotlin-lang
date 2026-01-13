@@ -1,0 +1,6 @@
+fun main(args: Array<String>) {
+    println("Number of arguments: " + args.size().toString())
+    for (i in 0..args.size() - 1) {
+        println("Arg[ + '' + ]: " + args[i])
+    }
+}

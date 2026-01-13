@@ -1,0 +1,2 @@
+val num = 42
+println(num.toString())

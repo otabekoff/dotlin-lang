@@ -1,0 +1,6 @@
+fun main() {
+    val str = "Hello, Dotlin!"
+    val index = str.indexOf("Dotlin")
+    println("Index: " + index.toString())
+    println("Done")
+}

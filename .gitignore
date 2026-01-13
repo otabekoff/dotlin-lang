@@ -1,0 +1,16 @@
+.cache/
+build/
+cmake-build-debug/
+arms_cache/
+*.build/
+*.dir/
+CMakeCache.txt
+CMakeFiles/
+compile_commands.json
+/.idea/
+.vscode/settings.json
+*.o
+*.exe
+*.out
+.DS_Store
+Thumbs.db

@@ -1,0 +1,14 @@
+val name = "Dotlin"
+val greeting = "Hello, " + name + "!"
+println(greeting)
+
+val x = 10
+val y = 20
+val sum = x + y
+println("Sum is: " + sum.toString())
+
+if (x < y) {
+    println("x is less than y")
+} else {
+    println("x is greater than or equal to y")
+}

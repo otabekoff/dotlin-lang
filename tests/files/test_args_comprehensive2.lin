@@ -1,0 +1,5 @@
+fun main(args: Array<String>) {
+    println("Arg 0: " + args[0])
+    println("Arg 1: " + args[1])
+    println("Total args: " + args.size().toString())
+}
