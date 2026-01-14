@@ -1,5 +1,3 @@
-As, we're making our programming language the source fiels are being bigger, taller, longer. You can't process long files. Also, it is bad practice to have so long files. So, in src folder we can save main files but move their separatable parts into files in respective folders like taking some extractable parts of interpreter and moving to interpreter folder file and doing so for the whole projects files if applicable. We need to do these by thinking.
-----
 Find all of the commnents in c++ files (cpp, h, and all the others), write them (no need to remove from c++ files or extracting), just reading and writing into one text file. Then in that file find the parts where we said like "for now", "implement later", "did for now", "will be implemented later", "todo", "fixme" and such meaning parts. And find them from the c++ files and do fix.
 ---
 
@@ -10,9 +8,9 @@ Find all of the commnents in c++ files (cpp, h, and all the others), write them 
 - [x] is for completed.
 
 ## Critical Issues (NEW)
-- [ ] Fix class method execution - methods don't actually run
-- [ ] Fix constructor field initialization - fields not set from constructor params
-- [ ] Fix 'this' keyword binding - 'this' doesn't work in methods
+- [x] Fix class method execution - methods don't actually run
+- [x] Fix constructor field initialization - fields not set from constructor params
+- [x] Fix 'this' keyword binding - 'this' doesn't work in methods
 - [ ] Split interpreter.cpp into modular files for maintainability
 
 1. Method Chaining and Property Access
@@ -62,9 +60,9 @@ Find all of the commnents in c++ files (cpp, h, and all the others), write them 
     - [x] Implement closure support for lambda expressions
 10. Class and Object Support
     - [x] Implement class declarations
-    - [-] Add constructor support
+    - [x] Add constructor support
     - [ ] Implement inheritance
-    - [-] Add property and method support in classes
+    - [x] Add property and method support in classes
 11. Standard Library Functions
     - [ ] Implement math functions (sin, cos, sqrt, etc.)
     - [ ] Add file I/O operations
@@ -94,6 +92,3 @@ You said these all functionalities are done already and all ready. But, let's ch
 Update the docs files.
 ---
 Do cd /home/otabek/Projects/langs/cpp/dotlin/build && make and fix the errors.
----
-Before don't forget to make backups. And then begin to do these:
-The cpp files are growing, becoming longer, taller. This makes it hard to debug and read and do actions on them. So, being very careful we can divide into files. In src folder we could create respective folder names to the files being divided and inside it we can put the chunks. You know how to divide. Feature based or other. Make it great. Also don't forget to check if it is successful or not by checking the files and functionalities. 
