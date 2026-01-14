@@ -3,6 +3,7 @@
 #include "dotlin/parser.h"
 // #include <any>
 // #include <functional>
+#include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -264,6 +265,11 @@ struct Environment {
 
 // Interpreter class
 class Interpreter {
+  friend struct EvalVisitor;
+  friend struct ExecVisitor;
+  friend struct TypeCheckVisitor;
+  friend struct StmtTypeCheckVisitor;
+
 public:
   Interpreter();
   Value interpret(const Program &program);
@@ -323,9 +329,38 @@ private:
   std::shared_ptr<FunctionDef>
   findBestFunctionOverload(const std::string &name,
                            const std::vector<Value> &args);
+
+  // Built-in function execution
+  Value executeBuiltinFunction(
+      const std::string &name,
+      const std::vector<std::shared_ptr<Expression>> &arguments);
+
+  // Function execution
+  Value executeFunction(Statement *body, std::shared_ptr<Environment> funcEnv);
+
+  // Static map to store function definitions for overload resolution
+  static std::map<std::string, std::vector<std::shared_ptr<FunctionDef>>>
+      functionDefinitions;
 };
 
 Value interpret(const Program &program);
 Value interpret(const Program &program, const std::vector<std::string> &args);
+
+// TypeChecker class for type checking
+class TypeChecker {
+public:
+  std::shared_ptr<Environment> environment;
+
+  TypeChecker(std::shared_ptr<Environment> env);
+
+  // Helper method to get type of a value
+  std::shared_ptr<Type> getTypeOfValue(const Value &value);
+
+  // Helper method to convert type to string
+  std::string typeToString(const std::shared_ptr<Type> &type);
+
+  std::shared_ptr<Type> checkExpression(Expression &expr);
+  void checkStatement(Statement &stmt);
+};
 
 } // namespace dotlin

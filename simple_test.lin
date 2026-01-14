@@ -1,0 +1,52 @@
+fun main() {
+    // Test basic variables
+    val x = 42
+    val y = 3.14
+    val name = "Dotlin"
+    val flag = true
+    
+    println("Basic variables test:")
+    println("x = ")
+    println(x)
+    println("y = ")
+    println(y) 
+    println("name = ")
+    println(name)
+    println("flag = ")
+    println(flag)
+    
+    // Test arithmetic
+    val sum = x + 10
+    println("Arithmetic: 42 + 10 = ")
+    println(sum)
+    
+    // Test arrays
+    val arr = arrayOf(1, 2, 3, 4, 5)
+    println("Array: ")
+    println(arr)
+    
+    // Test functions
+    fun add(a: Int, b: Int): Int {
+        return a + b
+    }
+    
+    val result = add(5, 7)
+    println("Function call: add(5, 7) = ")
+    println(result)
+    
+    // Test conditionals
+    if (result > 10) {
+        println("Condition: result > 10 is true")
+    } else {
+        println("Condition: result > 10 is false")
+    }
+    
+    // Test loops
+    println("Loop test:")
+    for (i in 0..3) {
+        println("i = ")
+        println(i)
+    }
+    
+    println("All tests completed successfully!")
+}

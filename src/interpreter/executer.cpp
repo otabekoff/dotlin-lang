@@ -28,6 +28,23 @@ void ExecVisitor::visit(FunctionDeclStmt &node) {
   auto lambda = std::make_shared<LambdaValue>(node.parameters, node.body,
                                               interpreter->environment);
   interpreter->environment->define(node.name, Value(lambda));
+
+  // Store function definition for overload resolution and main function
+  // detection
+  std::vector<FunctionParameter> paramsCopy;
+  for (const auto &param : node.parameters) {
+    paramsCopy.push_back(param);
+  }
+
+  auto funcDef = std::make_shared<FunctionDef>(node.name, std::move(paramsCopy),
+                                               std::move(node.body));
+  Interpreter::functionDefinitions[node.name].push_back(funcDef);
+
+  // Handle main function detection
+  if (node.name == "main") {
+    interpreter->hasMainFunction = true;
+    interpreter->mainFunctionStmt = std::make_shared<FunctionDeclStmt>(node);
+  }
 }
 
 void ExecVisitor::visit(BlockStmt &node) {

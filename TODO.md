@@ -7,10 +7,11 @@ Find all of the commnents in c++ files (cpp, h, and all the others), write them 
 - [-] is for partially completed
 - [x] is for completed.
 
-## Critical Issues (NEW)
-- [x] Fix class method execution - methods don't actually run
-- [x] Fix constructor field initialization - fields not set from constructor params
-- [x] Fix 'this' keyword binding - 'this' doesn't work in methods
+### Critical Issues (NEW) ✅ FIXED
+
+- ~~Fix class method execution - methods don't actually run~~ ✅ FIXED - Methods now execute their bodies correctly
+- ~~Fix constructor field initialization - fields not set from constructor params~~ ✅ FIXED - Constructor parameters now properly initialize class fields
+- ~~Fix 'this' keyword binding - 'this' doesn't work in methods~~ ✅ FIXED - The 'this' keyword now works correctly in methods
 - [ ] Split interpreter.cpp into modular files for maintainability
 
 1. Method Chaining and Property Access

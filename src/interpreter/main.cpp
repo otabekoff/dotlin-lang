@@ -10,6 +10,10 @@ using namespace dotlin;
 
 namespace dotlin {
 
+// Define the static member
+std::map<std::string, std::vector<std::shared_ptr<FunctionDef>>>
+    Interpreter::functionDefinitions;
+
 Interpreter::Interpreter()
     : globals(std::make_shared<Environment>()), environment(globals),
       functionEnvironment(nullptr), hasMainFunction(false),
@@ -153,15 +157,17 @@ Value Interpreter::executeFunction(Statement *body,
 std::shared_ptr<FunctionDef>
 Interpreter::findBestFunctionOverload(const std::string &name,
                                       const std::vector<Value> & /*args*/) {
+  auto it = Interpreter::functionDefinitions.find(name);
+  if (it == Interpreter::functionDefinitions.end()) {
+    return nullptr;
+  }
+
   // For now, just return the first function found with the given name
   // In a full implementation, we'd implement proper overload resolution
-  if (name == "main" && mainFunctionStmt) {
-    auto mainFunc = dynamic_cast<FunctionDeclStmt *>(mainFunctionStmt.get());
-    if (mainFunc) {
-      return std::make_shared<FunctionDef>(mainFunc->name, mainFunc->parameters,
-                                           mainFunc->body);
-    }
+  if (!it->second.empty()) {
+    return it->second[0];
   }
+
   return nullptr;
 }
 
@@ -175,67 +181,6 @@ std::shared_ptr<Type> TypeChecker::checkExpression(Expression &expr) {
 void TypeChecker::checkStatement(Statement &stmt) {
   StmtTypeCheckVisitor visitor(this);
   stmt.accept(visitor);
-}
-
-// Helper method to convert value to string
-std::string Interpreter::valueToString(const Value &value) {
-  if (std::holds_alternative<int>(value)) {
-    return std::to_string(std::get<int>(value));
-  } else if (std::holds_alternative<double>(value)) {
-    return std::to_string(std::get<double>(value));
-  } else if (std::holds_alternative<bool>(value)) {
-    return std::get<bool>(value) ? "true" : "false";
-  } else if (std::holds_alternative<std::string>(value)) {
-    return std::get<std::string>(value);
-  } else if (std::holds_alternative<ArrayValue>(value)) {
-    const auto &array = std::get<ArrayValue>(value);
-    std::string result = "[";
-    for (size_t i = 0; i < array.elements.size(); ++i) {
-      if (i > 0)
-        result += ", ";
-      result += valueToString(array.elements[i]);
-    }
-    result += "]";
-    return result;
-  } else if (std::holds_alternative<std::shared_ptr<LambdaValue>>(value)) {
-    return "<lambda>";
-  } else if (std::holds_alternative<std::shared_ptr<ClassInstance>>(value)) {
-    const auto &instance = std::get<std::shared_ptr<ClassInstance>>(value);
-    return "<instance of " + instance->className + ">";
-  } else if (std::holds_alternative<std::shared_ptr<ClassDefinition>>(value)) {
-    const auto &classDef = std::get<std::shared_ptr<ClassDefinition>>(value);
-    return "<class " + classDef->name + ">";
-  }
-  return "<unknown>";
-}
-
-// Helper method to convert type to string
-std::string typeToString(const std::shared_ptr<Type> &type) {
-  if (!type)
-    return "unknown";
-  switch (type->kind) {
-  case TypeKind::INT:
-    return "Int";
-  case TypeKind::DOUBLE:
-    return "Double";
-  case TypeKind::BOOL:
-    return "Boolean";
-  case TypeKind::STRING:
-    return "String";
-  case TypeKind::ARRAY:
-    if (type->elementType) {
-      return "Array<" + typeToString(type->elementType) + ">";
-    }
-    return "Array";
-  case TypeKind::VOID:
-    return "Unit";
-  case TypeKind::UNKNOWN:
-    return "Unknown";
-  case TypeKind::ANY:
-    return "Any";
-  default:
-    return "unknown";
-  }
 }
 
 void Interpreter::performTypeInferenceOnExpression(Expression &expr,

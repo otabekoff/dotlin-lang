@@ -1,5 +1,5 @@
 #include "dotlin/interpreter.h"
-// #include <iostream>
+#include <string>
 #include <variant>
 
 namespace dotlin {
@@ -54,6 +54,27 @@ std::string valueToString(const Value &value) {
     return classDef->name + " class";
   }
   return "null";
+}
+
+std::string typeToString(const std::shared_ptr<Type> &type) {
+  if (!type)
+    return "unknown";
+  switch (type->kind) {
+  case TypeKind::INT:
+    return "Int";
+  case TypeKind::DOUBLE:
+    return "Double";
+  case TypeKind::BOOL:
+    return "Boolean";
+  case TypeKind::STRING:
+    return "String";
+  case TypeKind::ARRAY:
+    return "Array";
+  case TypeKind::UNKNOWN:
+    return "Unknown";
+  default:
+    return "Unknown";
+  }
 }
 
 } // namespace dotlin

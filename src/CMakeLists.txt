@@ -5,7 +5,6 @@ add_library(dotlin::lib ALIAS dotlin_lib)
 set(SOURCES
   lexer.cpp
   parser.cpp
-  interpreter.cpp
   interpreter/environment.cpp
   interpreter/utils.cpp
   interpreter/main.cpp
@@ -13,6 +12,7 @@ set(SOURCES
   interpreter/executer.cpp
   interpreter/typechecker.cpp
   interpreter/builtins.cpp
+  interpreter/interpreter.cpp
 )
 
 # Set sources for the library
