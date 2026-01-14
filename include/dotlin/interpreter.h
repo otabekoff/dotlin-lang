@@ -15,19 +15,134 @@ namespace dotlin
   // Runtime value representation
   using Value = std::variant<int, double, bool, std::string, ArrayValue>;
 
+  // Array element type enumeration
+  enum class ArrayElementType
+  {
+    INT,
+    DOUBLE,
+    BOOL,
+    STRING,
+    MIXED,
+    UNKNOWN
+  };
+
   // Array value structure
   struct ArrayValue
   {
     std::vector<Value> elements;
-    ArrayValue() : elements() {}
-    ArrayValue(const std::vector<Value> &els) : elements(els) {}
-    ArrayValue(std::vector<Value> &&els) : elements(std::move(els)) {}
+    ArrayElementType elementType;
+
+    ArrayValue() : elements(), elementType(ArrayElementType::UNKNOWN) {}
+    ArrayValue(const std::vector<Value> &els) : elements(els), elementType(determineElementType(els)) {}
+    ArrayValue(std::vector<Value> &&els) : elements(std::move(els)), elementType(determineElementType(elements)) {}
+
+    // Constructor with explicit element type
+    ArrayValue(const std::vector<Value> &els, ArrayElementType elemType)
+        : elements(els), elementType(elemType) {}
+    ArrayValue(std::vector<Value> &&els, ArrayElementType elemType)
+        : elements(std::move(els)), elementType(elemType) {}
+
+    // Determine the element type based on the elements in the array
+    static ArrayElementType determineElementType(const std::vector<Value> &elems)
+    {
+      if (elems.empty())
+        return ArrayElementType::UNKNOWN;
+
+      ArrayElementType firstType = getValueType(elems[0]);
+      for (size_t i = 1; i < elems.size(); ++i)
+      {
+        if (getValueType(elems[i]) != firstType)
+        {
+          return ArrayElementType::MIXED;
+        }
+      }
+      return firstType;
+    }
+
+    // Get the type of a value
+    static ArrayElementType getValueType(const Value &val)
+    {
+      if (std::holds_alternative<int>(val))
+        return ArrayElementType::INT;
+      else if (std::holds_alternative<double>(val))
+        return ArrayElementType::DOUBLE;
+      else if (std::holds_alternative<bool>(val))
+        return ArrayElementType::BOOL;
+      else if (std::holds_alternative<std::string>(val))
+        return ArrayElementType::STRING;
+      else
+        return ArrayElementType::UNKNOWN;
+    }
+
+    // Get the size of the array
+    size_t size() const { return elements.size(); }
+
+    // Check if the array is empty
+    bool empty() const { return elements.empty(); }
+
+    // Get element at index
+    Value get(size_t index) const
+    {
+      if (index < elements.size())
+        return elements[index];
+      else
+        throw std::runtime_error("Array index out of bounds");
+    }
+
+    // Set element at index
+    void set(size_t index, const Value &value)
+    {
+      if (index < elements.size())
+        elements[index] = value;
+      else
+        throw std::runtime_error("Array index out of bounds");
+    }
+
+    // Add element to the end
+    void push_back(const Value &value)
+    {
+      elements.push_back(value);
+      // Update type if needed
+      if (elements.size() == 1)
+      {
+        elementType = getValueType(value);
+      }
+      else if (getValueType(value) != elementType)
+      {
+        elementType = ArrayElementType::MIXED;
+      }
+    }
+
+    // Remove last element
+    void pop_back()
+    {
+      if (!elements.empty())
+      {
+        elements.pop_back();
+        // Update type if needed
+        if (elements.empty())
+        {
+          elementType = ArrayElementType::UNKNOWN;
+        }
+        else
+        {
+          // Recalculate type
+          elementType = determineElementType(elements);
+        }
+      }
+    }
   };
 
   // Helper function to create array value
   inline ArrayValue makeArray(const std::vector<Value> &elements)
   {
     return ArrayValue(elements);
+  }
+
+  // Helper function to create typed array value
+  inline ArrayValue makeTypedArray(const std::vector<Value> &elements, ArrayElementType type)
+  {
+    return ArrayValue(elements, type);
   }
 
   // Helper function to convert ArrayValue to vector
@@ -128,6 +243,7 @@ namespace dotlin
     void visit(WhileStmt &node);
     void visit(ForStmt &node);
     void visit(WhenStmt &node);
+    void visit(TryStmt &node);
 
   private:
     std::shared_ptr<Environment> globals;
@@ -144,6 +260,13 @@ namespace dotlin
     Value executeBlock(const std::vector<Statement::Ptr> &statements,
                        std::shared_ptr<Environment> env);
     std::string valueToString(const Value &value);
+    std::shared_ptr<Type> getTypeOfValue(const Value &value);
+    std::string typeToString(const std::shared_ptr<Type> &type);
+
+    // Type inference methods
+    void performTypeInference(Program &program);
+    void performTypeInferenceOnStatement(Statement &stmt, class TypeChecker &typeChecker);
+    void performTypeInferenceOnExpression(Expression &expr, class TypeChecker &typeChecker);
   };
 
   Value interpret(const Program &program);

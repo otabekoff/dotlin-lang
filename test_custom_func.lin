@@ -1,0 +1,1 @@
+fun customFunction(x: Int): Int { return x * 2; } fun main(args: Array<String>) { val result = customFunction(5); println("Result: " + result.toString()); }

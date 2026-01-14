@@ -51,6 +51,8 @@ namespace dotlin
       return parseForStatement(tokens, pos);
     case TokenType::WHEN:
       return parseWhenStatement(tokens, pos);
+    case TokenType::TRY:
+      return parseTryStatement(tokens, pos);
     case TokenType::RETURN:
       return parseReturnStatement(tokens, pos);
     case TokenType::LBRACE:
@@ -75,6 +77,82 @@ namespace dotlin
     std::string name = tokens[pos].text;
     pos++; // consume identifier
 
+    // Check for type annotation (after identifier, before assignment)
+    std::optional<std::shared_ptr<dotlin::Type>> typeAnnotation = std::nullopt;
+    if (pos < tokens.size() && tokens[pos].type == TokenType::COLON)
+    {
+      pos++; // consume colon
+      if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER)
+      {
+        // Parse type name
+        std::string typeName = tokens[pos].text;
+        pos++; // consume type name
+
+        // Map type name to TypeKind
+        dotlin::TypeKind kind = dotlin::TypeKind::UNKNOWN;
+        std::shared_ptr<dotlin::Type> elementType = nullptr;
+        std::vector<std::shared_ptr<dotlin::Type>> genericTypes;
+
+        if (typeName == "Int")
+          kind = dotlin::TypeKind::INT;
+        else if (typeName == "Double")
+          kind = dotlin::TypeKind::DOUBLE;
+        else if (typeName == "Boolean" || typeName == "Bool")
+          kind = dotlin::TypeKind::BOOL;
+        else if (typeName == "String")
+          kind = dotlin::TypeKind::STRING;
+        else if (typeName == "Array")
+        {
+          kind = dotlin::TypeKind::ARRAY;
+          // Check for generic type parameter in angle brackets
+          if (pos < tokens.size() && tokens[pos].type == TokenType::LESS)
+          {
+            pos++; // consume '<'
+            if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER)
+            {
+              std::string genericTypeName = tokens[pos].text;
+              pos++; // consume generic type name
+
+              // Map generic type name to TypeKind
+              dotlin::TypeKind genericKind = dotlin::TypeKind::UNKNOWN;
+              if (genericTypeName == "Int")
+                genericKind = dotlin::TypeKind::INT;
+              else if (genericTypeName == "Double")
+                genericKind = dotlin::TypeKind::DOUBLE;
+              else if (genericTypeName == "Boolean" || genericTypeName == "Bool")
+                genericKind = dotlin::TypeKind::BOOL;
+              else if (genericTypeName == "String")
+                genericKind = dotlin::TypeKind::STRING;
+              else if (genericTypeName == "Array")
+                genericKind = dotlin::TypeKind::ARRAY;
+              else if (genericTypeName == "Unit" || genericTypeName == "Void")
+                genericKind = dotlin::TypeKind::VOID;
+
+              auto genericType = std::make_shared<dotlin::Type>(genericKind);
+              genericTypes.push_back(genericType);
+
+              // Check for closing '>'
+              if (pos < tokens.size() && tokens[pos].type == TokenType::GREATER)
+              {
+                pos++; // consume '>'
+              }
+            }
+          }
+        }
+        else if (typeName == "Unit" || typeName == "Void")
+          kind = dotlin::TypeKind::VOID;
+
+        if (!genericTypes.empty())
+        {
+          typeAnnotation = std::make_shared<dotlin::Type>(kind, elementType, std::move(genericTypes));
+        }
+        else
+        {
+          typeAnnotation = std::make_shared<dotlin::Type>(kind, elementType);
+        }
+      }
+    }
+
     std::optional<Expression::Ptr> initializer = std::nullopt;
     if (pos < tokens.size() && tokens[pos].type == TokenType::ASSIGN)
     {
@@ -89,7 +167,7 @@ namespace dotlin
     // Use the last token we consumed for position info, or default to 1,1
     size_t line = (pos > 0) ? tokens[pos - 1].line : 1;
     size_t col = (pos > 0) ? tokens[pos - 1].column : 1;
-    return std::make_unique<VariableDeclStmt>(isVal, name, std::move(initializer),
+    return std::make_unique<VariableDeclStmt>(isVal, name, typeAnnotation, std::move(initializer),
                                               line, col);
   }
 
@@ -394,7 +472,7 @@ namespace dotlin
     }
 
     // Expect opening parenthesis for parameters
-    std::vector<std::string> parameters;
+    std::vector<dotlin::FunctionParameter> parameters;
     if (pos < tokens.size() && tokens[pos].type == TokenType::LPAREN)
     {
       pos++; // consume '('
@@ -404,8 +482,40 @@ namespace dotlin
       {
         if (tokens[pos].type == TokenType::IDENTIFIER)
         {
-          parameters.push_back(tokens[pos].text);
+          std::string paramName = tokens[pos].text;
           pos++;
+
+          // Check for parameter type annotation
+          std::optional<std::shared_ptr<dotlin::Type>> paramType = std::nullopt;
+          if (pos < tokens.size() && tokens[pos].type == TokenType::COLON)
+          {
+            pos++; // consume colon
+            if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER)
+            {
+              // Parse parameter type name
+              std::string typeName = tokens[pos].text;
+              pos++; // consume type name
+
+              // Map type name to TypeKind
+              dotlin::TypeKind kind = dotlin::TypeKind::UNKNOWN;
+              if (typeName == "Int")
+                kind = dotlin::TypeKind::INT;
+              else if (typeName == "Double")
+                kind = dotlin::TypeKind::DOUBLE;
+              else if (typeName == "Boolean" || typeName == "Bool")
+                kind = dotlin::TypeKind::BOOL;
+              else if (typeName == "String")
+                kind = dotlin::TypeKind::STRING;
+              else if (typeName == "Array")
+                kind = dotlin::TypeKind::ARRAY;
+              else if (typeName == "Unit" || typeName == "Void")
+                kind = dotlin::TypeKind::VOID;
+
+              paramType = std::make_shared<dotlin::Type>(kind);
+            }
+          }
+
+          parameters.push_back(dotlin::FunctionParameter(paramName, paramType));
 
           // Expect comma or closing parenthesis
           if (pos < tokens.size() && tokens[pos].type == TokenType::COMMA)
@@ -426,6 +536,36 @@ namespace dotlin
       }
     }
 
+    // Check for return type annotation
+    std::optional<std::shared_ptr<dotlin::Type>> returnType = std::nullopt;
+    if (pos < tokens.size() && tokens[pos].type == TokenType::COLON)
+    {
+      pos++; // consume colon
+      if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER)
+      {
+        // Parse return type name
+        std::string typeName = tokens[pos].text;
+        pos++; // consume type name
+
+        // Map type name to TypeKind
+        dotlin::TypeKind kind = dotlin::TypeKind::UNKNOWN;
+        if (typeName == "Int")
+          kind = dotlin::TypeKind::INT;
+        else if (typeName == "Double")
+          kind = dotlin::TypeKind::DOUBLE;
+        else if (typeName == "Boolean" || typeName == "Bool")
+          kind = dotlin::TypeKind::BOOL;
+        else if (typeName == "String")
+          kind = dotlin::TypeKind::STRING;
+        else if (typeName == "Array")
+          kind = dotlin::TypeKind::ARRAY;
+        else if (typeName == "Unit" || typeName == "Void")
+          kind = dotlin::TypeKind::VOID;
+
+        returnType = std::make_shared<dotlin::Type>(kind);
+      }
+    }
+
     // Expect opening brace for function body
     Statement::Ptr body = nullptr;
     if (pos < tokens.size() && tokens[pos].type == TokenType::LBRACE)
@@ -443,7 +583,7 @@ namespace dotlin
     size_t line = (pos > 0) ? tokens[pos - 1].line : 1;
     size_t col = (pos > 0) ? tokens[pos - 1].column : 1;
     return std::make_unique<FunctionDeclStmt>(
-        name, std::move(parameters), std::move(body), line, col);
+        name, std::move(parameters), std::move(body), returnType, line, col);
   }
 
   std::unique_ptr<Statement> parseIfStatement(const std::vector<Token> &tokens,
@@ -699,6 +839,110 @@ namespace dotlin
     size_t col = (pos > 0) ? tokens[pos - 1].column : 1;
     return std::make_unique<ForStmt>(variableName, std::move(iterable), std::move(body),
                                      line, col);
+  }
+
+  std::unique_ptr<Statement> parseTryStatement(const std::vector<Token> &tokens, size_t &pos)
+  {
+    // Skip the 'try' token
+    if (pos < tokens.size() && tokens[pos].type == TokenType::TRY)
+    {
+      pos++;
+    }
+    else
+    {
+      return nullptr;
+    }
+
+    // Parse the try block (must be a block statement)
+    Statement::Ptr tryBlock = nullptr;
+    if (pos < tokens.size() && tokens[pos].type == TokenType::LBRACE)
+    {
+      tryBlock = parseBlockStatement(tokens, pos);
+    }
+    else
+    {
+      // Error: try block must be a block statement
+      return nullptr;
+    }
+
+    // Expect 'catch' keyword
+    if (pos < tokens.size() && tokens[pos].type == TokenType::CATCH)
+    {
+      pos++; // consume 'catch'
+    }
+    else
+    {
+      // Error: expected catch after try
+      return nullptr;
+    }
+
+    // Expect opening parenthesis for exception variable
+    std::string exceptionVar;
+    if (pos < tokens.size() && tokens[pos].type == TokenType::LPAREN)
+    {
+      pos++; // consume '('
+
+      if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER)
+      {
+        exceptionVar = tokens[pos].text;
+        pos++; // consume identifier
+      }
+      else
+      {
+        // Error: expected identifier in catch clause
+        return nullptr;
+      }
+
+      if (pos < tokens.size() && tokens[pos].type == TokenType::RPAREN)
+      {
+        pos++; // consume ')'
+      }
+      else
+      {
+        // Error: expected ')' after exception variable
+        return nullptr;
+      }
+    }
+    else
+    {
+      // Error: expected '(' after catch
+      return nullptr;
+    }
+
+    // Parse the catch block (must be a block statement)
+    Statement::Ptr catchBlock = nullptr;
+    if (pos < tokens.size() && tokens[pos].type == TokenType::LBRACE)
+    {
+      catchBlock = parseBlockStatement(tokens, pos);
+    }
+    else
+    {
+      // Error: catch block must be a block statement
+      return nullptr;
+    }
+
+    // Check for optional finally block
+    std::optional<Statement::Ptr> finallyBlock = std::nullopt;
+    if (pos < tokens.size() && tokens[pos].type == TokenType::FINALLY)
+    {
+      pos++; // consume 'finally'
+
+      if (pos < tokens.size() && tokens[pos].type == TokenType::LBRACE)
+      {
+        finallyBlock = parseBlockStatement(tokens, pos);
+      }
+      else
+      {
+        // Error: finally block must be a block statement
+        return nullptr;
+      }
+    }
+
+    // Use the last token we consumed for position info, or default to 1,1
+    size_t line = (pos > 0) ? tokens[pos - 1].line : 1;
+    size_t col = (pos > 0) ? tokens[pos - 1].column : 1;
+    return std::make_unique<TryStmt>(std::move(tryBlock), exceptionVar, std::move(catchBlock),
+                                     std::move(finallyBlock), line, col);
   }
 
   std::unique_ptr<Statement> parseWhenStatement(const std::vector<Token> &tokens, size_t &pos)

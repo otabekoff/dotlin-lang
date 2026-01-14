@@ -4,6 +4,8 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#include <map>
+#include <memory>
 
 namespace dotlin
 {
@@ -258,26 +260,92 @@ namespace dotlin
   void Interpreter::visit(VariableDeclStmt &node)
   {
     Value value;
-    if (node.initializer)
+    if (node.initializer.has_value())
     {
       // Evaluate the initializer expression
-      value = node.initializer ? evaluate(**node.initializer) : Value(0);
+      value = evaluate(*(node.initializer.value()));
+
+      // If type annotation exists, validate the type
+      if (node.typeAnnotation.has_value() && node.typeAnnotation.value())
+      {
+        auto expectedType = node.typeAnnotation.value();
+        auto actualType = getTypeOfValue(value);
+
+        if (!expectedType->isCompatibleWith(*actualType))
+        {
+          std::cout << "Type error: variable " << node.name
+                    << " declared with type " << typeToString(expectedType)
+                    << " but initialized with incompatible type" << std::endl;
+        }
+      }
+      else
+      {
+        // Type inference: infer the type from the initializer value
+        auto inferredType = getTypeOfValue(value);
+        // In a real implementation, we might want to store the inferred type in the environment
+        // For now, just use the value as is
+      }
     }
     else
     {
       // Default value for uninitialized variables
-      value = 0; // Default to integer 0 for now
+      if (node.typeAnnotation.has_value() && node.typeAnnotation.value())
+      {
+        // Initialize with default value based on type annotation
+        auto type = node.typeAnnotation.value();
+        switch (type->kind)
+        {
+        case TypeKind::INT:
+          value = 0;
+          break;
+        case TypeKind::DOUBLE:
+          value = 0.0;
+          break;
+        case TypeKind::BOOL:
+          value = false;
+          break;
+        case TypeKind::STRING:
+          value = std::string("");
+          break;
+        default:
+          value = 0; // Default to integer 0
+          break;
+        }
+      }
+      else
+      {
+        // Type inference: no type annotation and no initializer, use unknown/default
+        value = 0; // Default to integer 0 for now
+      }
     }
 
     environment->define(node.name, value);
   }
 
+  // Structure to represent a function definition
+  struct FunctionDef
+  {
+    std::string name;
+    std::vector<FunctionParameter> parameters;
+    Statement::Ptr body;
+
+    FunctionDef(std::string funcName, std::vector<FunctionParameter> params, Statement::Ptr funcBody)
+        : name(std::move(funcName)), parameters(std::move(params)), body(std::move(funcBody)) {}
+  };
+
+  // Static map to store function definitions
+  static std::map<std::string, std::shared_ptr<FunctionDef>> functionDefinitions;
+
   void Interpreter::visit(FunctionDeclStmt &node)
   {
-    // Store function in environment for later use
-    // For now, we'll just store a marker that the function exists
-    // The actual function calling mechanism would need more sophisticated handling
-    environment->define(node.name, Value(std::string("function_defined")));
+    // Create a function definition object
+    auto funcDef = std::make_shared<FunctionDef>(node.name, std::move(node.parameters), std::move(node.body));
+
+    // Store function in environment for later use as a special marker
+    std::string funcMarker = "function:" + node.name;
+    environment->define(node.name, Value(funcMarker));
+    // Store in a map so we can retrieve it later
+    functionDefinitions[node.name] = funcDef;
 
     // Special handling for main function
     if (node.name == "main")
@@ -291,15 +359,43 @@ namespace dotlin
       // If main function has parameters, initialize them with command-line arguments
       for (size_t i = 0; i < node.parameters.size(); ++i)
       {
+        std::string paramName = node.parameters[i].name;
         if (i < commandLineArgs.size())
         {
           // Initialize parameter with command-line argument
-          environment->define(node.parameters[i], commandLineArgs[i]);
+          environment->define(paramName, commandLineArgs[i]);
         }
         else
         {
-          // Initialize parameter with empty/default value
-          environment->define(node.parameters[i], std::string(""));
+          // Initialize parameter with empty/default value based on type annotation
+          Value defaultValue;
+          if (node.parameters[i].typeAnnotation.has_value() && node.parameters[i].typeAnnotation.value())
+          {
+            auto type = node.parameters[i].typeAnnotation.value();
+            switch (type->kind)
+            {
+            case TypeKind::INT:
+              defaultValue = 0;
+              break;
+            case TypeKind::DOUBLE:
+              defaultValue = 0.0;
+              break;
+            case TypeKind::BOOL:
+              defaultValue = false;
+              break;
+            case TypeKind::STRING:
+              defaultValue = std::string("");
+              break;
+            default:
+              defaultValue = std::string("");
+              break;
+            }
+          }
+          else
+          {
+            defaultValue = std::string("");
+          }
+          environment->define(paramName, defaultValue);
         }
       }
 
@@ -336,9 +432,18 @@ namespace dotlin
 
   void Interpreter::visit(ReturnStmt &node)
   {
-    // Handle return statements
-    // In a real implementation, would set return value and exit function
-    (void)node;
+    // Handle return statements by throwing an exception with the return value
+    if (node.value)
+    {
+      Value retVal = evaluate(*node.value);
+      std::string returnStr = "RETURN:" + valueToString(retVal);
+      throw std::runtime_error(returnStr);
+    }
+    else
+    {
+      // Default return value
+      throw std::runtime_error("RETURN:undefined");
+    }
   }
 
   void Interpreter::visit(IfStmt &node)
@@ -500,6 +605,55 @@ namespace dotlin
     if (!matched && node.elseBranch.has_value() && node.elseBranch.value())
     {
       execute(*node.elseBranch.value());
+    }
+  }
+
+  void Interpreter::visit(TryStmt &node)
+  {
+    // Execute the try block with exception handling
+    bool exceptionOccurred = false;
+    std::string exceptionMessage = "";
+
+    try
+    {
+      if (node.tryBlock)
+      {
+        execute(*node.tryBlock);
+      }
+    }
+    catch (const std::exception &e)
+    {
+      exceptionOccurred = true;
+      exceptionMessage = e.what();
+    }
+    catch (...)
+    {
+      exceptionOccurred = true;
+      exceptionMessage = "Unknown exception occurred";
+    }
+
+    // If an exception occurred, execute the catch block
+    if (exceptionOccurred && node.catchBlock)
+    {
+      // Create new environment for catch block to add exception variable
+      auto catchEnv = std::make_shared<Environment>(environment);
+      catchEnv->define(node.exceptionVar, exceptionMessage);
+
+      // Save current environment
+      auto prevEnv = environment;
+      environment = catchEnv;
+
+      // Execute catch block
+      execute(*node.catchBlock);
+
+      // Restore environment
+      environment = prevEnv;
+    }
+
+    // Execute finally block if present (always executes)
+    if (node.finallyBlock.has_value() && node.finallyBlock.value())
+    {
+      execute(*node.finallyBlock.value());
     }
   }
 
@@ -1754,10 +1908,90 @@ namespace dotlin
             }
             result = ArrayValue(std::move(stringElements));
           }
+          else if (ident->name == "throw")
+          {
+            // Throw an exception with the provided message
+            std::string errorMsg = "Runtime error";
+            if (!args.empty())
+            {
+              errorMsg = interpreter->valueToString(args[0]);
+            }
+            throw std::runtime_error(errorMsg);
+          }
           else
           {
-            // For now, return a placeholder for other function calls
-            result = std::string("call_result");
+            // Check if this is a user-defined function call
+            auto it = functionDefinitions.find(ident->name);
+            if (it != functionDefinitions.end())
+            {
+              // Found user-defined function, execute it
+              auto funcDef = it->second;
+
+              // Create new environment for function execution
+              auto funcEnv = std::make_shared<Environment>(interpreter->environment);
+
+              // Bind parameters to arguments
+              for (size_t i = 0; i < funcDef->parameters.size() && i < args.size(); ++i)
+              {
+                funcEnv->define(funcDef->parameters[i].name, args[i]);
+              }
+
+              // Save current environment
+              auto prevEnv = interpreter->environment;
+              auto prevFuncEnv = interpreter->functionEnvironment;
+
+              // Switch to function environment
+              interpreter->environment = funcEnv;
+              interpreter->functionEnvironment = funcEnv;
+
+              // Execute function body
+              Value returnValue = std::string("undefined"); // Default return value
+              try
+              {
+                if (funcDef->body)
+                {
+                  if (auto *blockBody = dynamic_cast<BlockStmt *>(funcDef->body.get()))
+                  {
+                    for (const auto &stmt : blockBody->statements)
+                    {
+                      if (stmt)
+                        interpreter->execute(*stmt);
+                    }
+                  }
+                  else
+                  {
+                    interpreter->execute(*funcDef->body);
+                  }
+                }
+              }
+              catch (const std::runtime_error &e)
+              {
+                // Check if this is a return value wrapped in an exception
+                std::string msg = e.what();
+                if (msg.substr(0, 7) == "RETURN:")
+                {
+                  // Extract the return value
+                  std::string returnValStr = msg.substr(7);
+                  returnValue = Value(returnValStr);
+                }
+                else
+                {
+                  // Re-throw non-return exceptions
+                  throw;
+                }
+              }
+
+              // Restore environment
+              interpreter->environment = prevEnv;
+              interpreter->functionEnvironment = prevFuncEnv;
+
+              result = returnValue;
+            }
+            else
+            {
+              // For now, return a placeholder for other function calls
+              result = std::string("call_result");
+            }
           }
         }
         else
@@ -1992,6 +2226,11 @@ namespace dotlin
         result = std::string("error: expression visitor called on statement");
         (void)node;
       }
+      void visit(TryStmt &node) override
+      {
+        result = std::string("error: expression visitor called on statement");
+        (void)node;
+      }
     };
 
     EvalVisitor visitor(this);
@@ -2060,10 +2299,66 @@ namespace dotlin
       void visit(WhileStmt &node) override { interpreter->visit(node); }
       void visit(ForStmt &node) override { interpreter->visit(node); }
       void visit(WhenStmt &node) override { interpreter->visit(node); }
+      void visit(TryStmt &node) override { interpreter->visit(node); }
     };
 
     ExecVisitor visitor(this);
     stmt.accept(visitor);
+  }
+
+  std::shared_ptr<Type> Interpreter::getTypeOfValue(const Value &value)
+  {
+    if (std::holds_alternative<int>(value))
+    {
+      return std::make_shared<Type>(TypeKind::INT);
+    }
+    else if (std::holds_alternative<double>(value))
+    {
+      return std::make_shared<Type>(TypeKind::DOUBLE);
+    }
+    else if (std::holds_alternative<bool>(value))
+    {
+      return std::make_shared<Type>(TypeKind::BOOL);
+    }
+    else if (std::holds_alternative<std::string>(value))
+    {
+      return std::make_shared<Type>(TypeKind::STRING);
+    }
+    else if (std::holds_alternative<ArrayValue>(value))
+    {
+      return std::make_shared<Type>(TypeKind::ARRAY);
+    }
+    else
+    {
+      return std::make_shared<Type>(TypeKind::UNKNOWN);
+    }
+  }
+
+  std::string Interpreter::typeToString(const std::shared_ptr<Type> &type)
+  {
+    if (!type)
+      return "unknown";
+    switch (type->kind)
+    {
+    case TypeKind::INT:
+      return "Int";
+    case TypeKind::DOUBLE:
+      return "Double";
+    case TypeKind::BOOL:
+      return "Boolean";
+    case TypeKind::STRING:
+      return "String";
+    case TypeKind::ARRAY:
+      return "Array";
+    case TypeKind::VOID:
+      return "Unit";
+    case TypeKind::UNKNOWN:
+      return "Unknown";
+    case TypeKind::ANY:
+      return "Any";
+    default:
+      return "unknown";
+    }
   }
 
   std::string Interpreter::valueToString(const Value &value)
@@ -2087,11 +2382,11 @@ namespace dotlin
     else if (std::holds_alternative<ArrayValue>(value))
     {
       std::string result = "[";
-      std::vector<Value> arr = std::get<ArrayValue>(value).elements;
-      for (size_t i = 0; i < arr.size(); ++i)
+      const ArrayValue &arr = std::get<ArrayValue>(value);
+      for (size_t i = 0; i < arr.elements.size(); ++i)
       {
-        result += valueToString(arr[i]);
-        if (i < arr.size() - 1)
+        result += valueToString(arr.elements[i]);
+        if (i < arr.elements.size() - 1)
         {
           result += ", ";
         }
@@ -2104,6 +2399,364 @@ namespace dotlin
       return "undefined";
     }
   }
+
+  // Type checker implementation
+  class TypeChecker
+  {
+  public:
+    std::shared_ptr<Environment> environment;
+
+    TypeChecker(std::shared_ptr<Environment> env) : environment(env) {}
+
+    // Helper method to get type of a value
+    std::shared_ptr<dotlin::Type> getTypeOfValue(const Value &value)
+    {
+      if (std::holds_alternative<int>(value))
+      {
+        return std::make_shared<dotlin::Type>(dotlin::TypeKind::INT);
+      }
+      else if (std::holds_alternative<double>(value))
+      {
+        return std::make_shared<dotlin::Type>(dotlin::TypeKind::DOUBLE);
+      }
+      else if (std::holds_alternative<bool>(value))
+      {
+        return std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+      }
+      else if (std::holds_alternative<std::string>(value))
+      {
+        return std::make_shared<dotlin::Type>(dotlin::TypeKind::STRING);
+      }
+      else if (std::holds_alternative<ArrayValue>(value))
+      {
+        auto arrayValue = std::get<ArrayValue>(value);
+        std::shared_ptr<Type> elementType = nullptr;
+        if (!arrayValue.elements.empty())
+        {
+          elementType = getTypeOfValue(arrayValue.elements[0]);
+        }
+        return std::make_shared<dotlin::Type>(dotlin::TypeKind::ARRAY, elementType);
+      }
+      else
+      {
+        return std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+      }
+    }
+
+    // Helper method to convert type to string
+    std::string typeToString(const std::shared_ptr<dotlin::Type> &type)
+    {
+      if (!type)
+        return "unknown";
+      switch (type->kind)
+      {
+      case dotlin::TypeKind::INT:
+        return "Int";
+      case dotlin::TypeKind::DOUBLE:
+        return "Double";
+      case dotlin::TypeKind::BOOL:
+        return "Boolean";
+      case dotlin::TypeKind::STRING:
+        return "String";
+      case dotlin::TypeKind::ARRAY:
+        if (type->elementType)
+        {
+          return "Array<" + typeToString(type->elementType) + ">";
+        }
+        return "Array";
+      case dotlin::TypeKind::VOID:
+        return "Unit";
+      case dotlin::TypeKind::UNKNOWN:
+        return "Unknown";
+      case dotlin::TypeKind::ANY:
+        return "Any";
+      default:
+        return "unknown";
+      }
+    }
+
+    std::shared_ptr<dotlin::Type> checkExpression(dotlin::Expression &expr)
+    {
+      // Use visitor pattern to check expression types
+      struct TypeCheckVisitor : public dotlin::AstVisitor
+      {
+        std::shared_ptr<dotlin::Type> result;
+        TypeChecker *checker;
+
+        TypeCheckVisitor(TypeChecker *chk) : checker(chk) {}
+
+        void visit(dotlin::LiteralExpr &node) override
+        {
+          // Determine type from literal value
+          if (std::holds_alternative<int>(node.value))
+          {
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::INT);
+          }
+          else if (std::holds_alternative<double>(node.value))
+          {
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::DOUBLE);
+          }
+          else if (std::holds_alternative<bool>(node.value))
+          {
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+          }
+          else if (std::holds_alternative<std::string>(node.value))
+          {
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::STRING);
+          }
+          else
+          {
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+          }
+        }
+
+        void visit(dotlin::IdentifierExpr &node) override
+        {
+          // Look up the type of the identifier in the environment
+          // Try to get the value and infer its type
+          try
+          {
+            auto value = checker->environment->get(node.name);
+            result = checker->getTypeOfValue(value);
+          }
+          catch (const std::exception &)
+          {
+            // Variable not found in environment
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+          }
+        }
+
+        void visit(dotlin::BinaryExpr &node) override
+        {
+          auto leftType = checker->checkExpression(*node.left);
+          auto rightType = checker->checkExpression(*node.right);
+
+          // Check type compatibility based on operator
+          switch (node.op)
+          {
+          case dotlin::TokenType::PLUS:
+            // Addition: both operands should be numeric or one string
+            if (leftType->kind == dotlin::TypeKind::STRING || rightType->kind == dotlin::TypeKind::STRING)
+            {
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::STRING);
+            }
+            else if (leftType->isCompatibleWith(*rightType))
+            {
+              result = std::make_shared<dotlin::Type>(leftType->kind);
+            }
+            else
+            {
+              std::cout << "Type error: incompatible types for + operator" << std::endl;
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+            }
+            break;
+          case dotlin::TokenType::MINUS:
+          case dotlin::TokenType::MULTIPLY:
+          case dotlin::TokenType::DIVIDE:
+            // Arithmetic operations require numeric types
+            if (leftType->kind == dotlin::TypeKind::INT || leftType->kind == dotlin::TypeKind::DOUBLE)
+            {
+              if (rightType->kind == dotlin::TypeKind::INT || rightType->kind == dotlin::TypeKind::DOUBLE)
+              {
+                // Result is the higher precision type
+                if (leftType->kind == dotlin::TypeKind::DOUBLE || rightType->kind == dotlin::TypeKind::DOUBLE)
+                {
+                  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::DOUBLE);
+                }
+                else
+                {
+                  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::INT);
+                }
+              }
+              else
+              {
+                std::cout << "Type error: right operand must be numeric for arithmetic operator" << std::endl;
+                result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+              }
+            }
+            else
+            {
+              std::cout << "Type error: left operand must be numeric for arithmetic operator" << std::endl;
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+            }
+            break;
+          case dotlin::TokenType::EQUAL:
+          case dotlin::TokenType::NOT_EQUAL:
+            // Comparison operators return boolean
+            if (leftType->isCompatibleWith(*rightType))
+            {
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+            }
+            else
+            {
+              std::cout << "Type error: incompatible types for comparison operator" << std::endl;
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+            }
+            break;
+          case dotlin::TokenType::LESS:
+          case dotlin::TokenType::LESS_EQUAL:
+          case dotlin::TokenType::GREATER:
+          case dotlin::TokenType::GREATER_EQUAL:
+            // Relational operators return boolean, require comparable types
+            if (leftType->isCompatibleWith(*rightType))
+            {
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+            }
+            else
+            {
+              std::cout << "Type error: incompatible types for relational operator" << std::endl;
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+            }
+            break;
+          case dotlin::TokenType::AND:
+          case dotlin::TokenType::OR:
+            // Logical operators require boolean types
+            if (leftType->kind == dotlin::TypeKind::BOOL && rightType->kind == dotlin::TypeKind::BOOL)
+            {
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+            }
+            else
+            {
+              std::cout << "Type error: logical operators require boolean operands" << std::endl;
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+            }
+            break;
+          case dotlin::TokenType::ASSIGN:
+            // Assignment: right operand type should be compatible with left
+            if (rightType->isCompatibleWith(*leftType))
+            {
+              result = rightType; // Assignment returns the assigned value type
+            }
+            else
+            {
+              std::cout << "Type error: incompatible types for assignment" << std::endl;
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+            }
+            break;
+          default:
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+            break;
+          }
+        }
+
+        void visit(dotlin::UnaryExpr &node) override
+        {
+          auto operandType = checker->checkExpression(*node.operand);
+
+          switch (node.op)
+          {
+          case dotlin::TokenType::MINUS:
+            // Unary minus requires numeric type
+            if (operandType->kind == dotlin::TypeKind::INT || operandType->kind == dotlin::TypeKind::DOUBLE)
+            {
+              result = operandType;
+            }
+            else
+            {
+              std::cout << "Type error: unary minus requires numeric operand" << std::endl;
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+            }
+            break;
+          case dotlin::TokenType::NOT:
+            // Logical NOT requires boolean type
+            if (operandType->kind == dotlin::TypeKind::BOOL)
+            {
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+            }
+            else
+            {
+              std::cout << "Type error: logical NOT requires boolean operand" << std::endl;
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+            }
+            break;
+          default:
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+            break;
+          }
+        }
+
+        void visit(dotlin::CallExpr &node) override
+        {
+          // For now, assume built-in functions have correct types
+          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+        }
+
+        void visit(dotlin::MemberAccessExpr &node) override
+        {
+          auto objectType = checker->checkExpression(*node.object);
+          // For now, return unknown for member access
+          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+        }
+
+        void visit(dotlin::ArrayAccessExpr &node) override
+        {
+          auto arrayType = checker->checkExpression(*node.array);
+          auto indexType = checker->checkExpression(*node.index);
+
+          // Index must be integer
+          if (indexType->kind != dotlin::TypeKind::INT)
+          {
+            std::cout << "Type error: array index must be integer" << std::endl;
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+          }
+          else
+          {
+            // Array access returns the element type
+            // For now, return unknown since we don't track element types in the array
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+          }
+        }
+
+        void visit(dotlin::ArrayLiteralExpr &node) override
+        {
+          if (node.elements.empty())
+          {
+            // Empty array - return array of unknown type
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::ARRAY);
+          }
+          else
+          {
+            // Check if all elements have the same type
+            auto elementType = checker->checkExpression(*node.elements[0]);
+            for (size_t i = 1; i < node.elements.size(); ++i)
+            {
+              auto currElementType = checker->checkExpression(*node.elements[i]);
+              if (!elementType->isCompatibleWith(*currElementType))
+              {
+                std::cout << "Type error: array elements must have compatible types" << std::endl;
+                result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+                return;
+              }
+            }
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::ARRAY, elementType);
+          }
+        }
+
+        // Statement visitor methods (shouldn't be called for expressions)
+        void visit(dotlin::ExpressionStmt &node) override { result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID); }
+        void visit(dotlin::VariableDeclStmt &node) override { result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID); }
+        void visit(dotlin::FunctionDeclStmt &node) override { result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID); }
+        void visit(dotlin::BlockStmt &node) override { result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID); }
+        void visit(dotlin::ReturnStmt &node) override { result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID); }
+        void visit(dotlin::IfStmt &node) override { result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID); }
+        void visit(dotlin::WhileStmt &node) override { result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID); }
+        void visit(dotlin::ForStmt &node) override { result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID); }
+        void visit(dotlin::WhenStmt &node) override { result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID); }
+        void visit(dotlin::TryStmt &node) override { result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID); }
+      };
+
+      TypeCheckVisitor visitor(this);
+      expr.accept(visitor);
+      return visitor.result;
+    }
+
+    bool checkStatement(dotlin::Statement &stmt)
+    {
+      // For now, we'll just type-check expressions within statements
+      // This is a simplified approach
+      return true; // Placeholder - implement as needed
+    }
+  };
 
   Value Interpreter::executeBlock(const std::vector<Statement::Ptr> &statements,
                                   std::shared_ptr<Environment> parentEnv)
@@ -2121,6 +2774,151 @@ namespace dotlin
 
     environment = previousEnv; // Restore previous environment
     return result;
+  }
+
+  // Perform type inference on a program
+  void Interpreter::performTypeInference(Program &program)
+  {
+    // Create a type checker instance
+    TypeChecker typeChecker(environment);
+
+    // Perform type inference for each statement in the program
+    for (auto &stmt : program.statements)
+    {
+      performTypeInferenceOnStatement(*stmt, typeChecker);
+    }
+  }
+
+  // Perform type inference on a statement
+  void Interpreter::performTypeInferenceOnStatement(Statement &stmt, TypeChecker &typeChecker)
+  {
+    // For variable declarations, infer the type from the initializer if no explicit type annotation is provided
+    if (auto *varDecl = dynamic_cast<VariableDeclStmt *>(&stmt))
+    {
+      if (!varDecl->typeAnnotation.has_value() && varDecl->initializer.has_value())
+      {
+        // Infer the type from the initializer expression
+        auto inferredType = typeChecker.checkExpression(*(varDecl->initializer.value()));
+
+        // Store the inferred type in the variable declaration
+        varDecl->typeAnnotation = inferredType;
+
+        std::cout << "Type inferred for variable '" << varDecl->name << "': " << typeToString(inferredType) << std::endl;
+      }
+    }
+    else if (auto *blockStmt = dynamic_cast<BlockStmt *>(&stmt))
+    {
+      // Recursively perform type inference on statements in the block
+      for (auto &innerStmt : blockStmt->statements)
+      {
+        performTypeInferenceOnStatement(*innerStmt, typeChecker);
+      }
+    }
+    else if (auto *ifStmt = dynamic_cast<IfStmt *>(&stmt))
+    {
+      // Perform type inference on the condition and branches
+      if (ifStmt->condition)
+      {
+        performTypeInferenceOnExpression(*ifStmt->condition, typeChecker);
+      }
+      if (ifStmt->thenBranch)
+      {
+        performTypeInferenceOnStatement(*ifStmt->thenBranch, typeChecker);
+      }
+      if (ifStmt->elseBranch.has_value() && ifStmt->elseBranch.value())
+      {
+        performTypeInferenceOnStatement(*(ifStmt->elseBranch.value()), typeChecker);
+      }
+    }
+    else if (auto *whileStmt = dynamic_cast<WhileStmt *>(&stmt))
+    {
+      // Perform type inference on the condition and body
+      if (whileStmt->condition)
+      {
+        performTypeInferenceOnExpression(*whileStmt->condition, typeChecker);
+      }
+      if (whileStmt->body)
+      {
+        performTypeInferenceOnStatement(*whileStmt->body, typeChecker);
+      }
+    }
+    else if (auto *forStmt = dynamic_cast<ForStmt *>(&stmt))
+    {
+      // Perform type inference on the iterable and body
+      if (forStmt->iterable)
+      {
+        performTypeInferenceOnExpression(*forStmt->iterable, typeChecker);
+      }
+      if (forStmt->body)
+      {
+        performTypeInferenceOnStatement(*forStmt->body, typeChecker);
+      }
+    }
+    // Add more statement types as needed
+  }
+
+  // Perform type inference on an expression
+  void Interpreter::performTypeInferenceOnExpression(Expression &expr, TypeChecker &typeChecker)
+  {
+    // Visit child expressions recursively
+    if (auto *binaryExpr = dynamic_cast<BinaryExpr *>(&expr))
+    {
+      if (binaryExpr->left)
+      {
+        performTypeInferenceOnExpression(*binaryExpr->left, typeChecker);
+      }
+      if (binaryExpr->right)
+      {
+        performTypeInferenceOnExpression(*binaryExpr->right, typeChecker);
+      }
+    }
+    else if (auto *unaryExpr = dynamic_cast<UnaryExpr *>(&expr))
+    {
+      if (unaryExpr->operand)
+      {
+        performTypeInferenceOnExpression(*unaryExpr->operand, typeChecker);
+      }
+    }
+    else if (auto *callExpr = dynamic_cast<CallExpr *>(&expr))
+    {
+      for (auto &arg : callExpr->arguments)
+      {
+        if (arg)
+        {
+          performTypeInferenceOnExpression(*arg, typeChecker);
+        }
+      }
+    }
+    else if (auto *memberAccess = dynamic_cast<MemberAccessExpr *>(&expr))
+    {
+      if (memberAccess->object)
+      {
+        performTypeInferenceOnExpression(*memberAccess->object, typeChecker);
+      }
+    }
+    else if (auto *arrayAccess = dynamic_cast<ArrayAccessExpr *>(&expr))
+    {
+      if (arrayAccess->array)
+      {
+        performTypeInferenceOnExpression(*arrayAccess->array, typeChecker);
+      }
+      if (arrayAccess->index)
+      {
+        performTypeInferenceOnExpression(*arrayAccess->index, typeChecker);
+      }
+    }
+    else if (auto *arrayLiteral = dynamic_cast<ArrayLiteralExpr *>(&expr))
+    {
+      for (auto &element : arrayLiteral->elements)
+      {
+        if (element)
+        {
+          performTypeInferenceOnExpression(*element, typeChecker);
+        }
+      }
+    }
+    // For identifier expressions, we can get the type from the environment
+    // but don't need to recurse further
   }
 
 } // namespace dotlin

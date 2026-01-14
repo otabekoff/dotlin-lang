@@ -30,6 +30,7 @@ namespace dotlin
   struct WhileStmt;
   struct ForStmt;
   struct WhenStmt;
+  struct TryStmt;
 
   // Base class for all AST nodes
   struct AstNode
@@ -46,7 +47,8 @@ namespace dotlin
   struct Expression : AstNode
   {
     using Ptr = std::unique_ptr<Expression>;
-    Expression(size_t l, size_t c) : AstNode(l, c) {}
+    std::shared_ptr<Type> exprType;
+    Expression(size_t l, size_t c) : AstNode(l, c), exprType(std::make_shared<Type>(TypeKind::UNKNOWN)) {}
     virtual ~Expression() = default;
   };
 
@@ -111,20 +113,46 @@ namespace dotlin
     size_t column;
   };
 
+  struct TypeAnnotation
+  {
+    std::string typeName;
+    std::optional<std::string> genericType; // For generic types like Array<Int>
+    size_t line;
+    size_t column;
+
+    TypeAnnotation(std::string type, size_t l, size_t c) : typeName(std::move(type)), line(l), column(c) {}
+    TypeAnnotation(std::string type, std::optional<std::string> genType, size_t l, size_t c)
+        : typeName(std::move(type)), genericType(std::move(genType)), line(l), column(c) {}
+  };
+
   struct VariableDeclaration
   {
     bool isVal; // true for val, false for var
     Identifier name;
+    std::optional<TypeAnnotation> typeAnnotation;
     std::optional<std::unique_ptr<Expression>> initializer;
     size_t line;
     size_t column;
   };
 
+  struct ParameterDeclaration
+  {
+    Identifier name;
+    std::optional<TypeAnnotation> typeAnnotation;
+    size_t line;
+    size_t column;
+
+    ParameterDeclaration(Identifier n, size_t l, size_t c) : name(std::move(n)), line(l), column(c) {}
+    ParameterDeclaration(Identifier n, std::optional<TypeAnnotation> type, size_t l, size_t c)
+        : name(std::move(n)), typeAnnotation(std::move(type)), line(l), column(c) {}
+  };
+
   struct FunctionDeclaration
   {
     Identifier name;
-    std::vector<Identifier> parameters;
+    std::vector<ParameterDeclaration> parameters;
     std::unique_ptr<Expression> body;
+    std::optional<TypeAnnotation> returnType;
     size_t line;
     size_t column;
   };
@@ -174,6 +202,16 @@ namespace dotlin
     std::unique_ptr<Expression> subject;
     std::vector<std::pair<std::unique_ptr<Expression>, std::unique_ptr<Statement>>> branches;
     std::optional<std::unique_ptr<Statement>> elseBranch;
+    size_t line;
+    size_t column;
+  };
+
+  struct TryStatement
+  {
+    std::unique_ptr<Statement> tryBlock;
+    std::string exceptionVar;
+    std::unique_ptr<Statement> catchBlock;
+    std::optional<std::unique_ptr<Statement>> finallyBlock;
     size_t line;
     size_t column;
   };
@@ -232,6 +270,7 @@ namespace dotlin
     virtual void visit(WhileStmt &node) = 0;
     virtual void visit(ForStmt &node) = 0;
     virtual void visit(WhenStmt &node) = 0;
+    virtual void visit(TryStmt &node) = 0;
   };
 
   // Concrete expression types
@@ -331,24 +370,51 @@ namespace dotlin
   {
     bool isVal; // true for val, false for var
     std::string name;
+    std::optional<std::shared_ptr<Type>> typeAnnotation;
     std::optional<Expression::Ptr> initializer;
     VariableDeclStmt(bool is_val, std::string n,
                      std::optional<Expression::Ptr> init, size_t l, size_t c)
         : Statement(l, c), isVal(is_val), name(std::move(n)),
-          initializer(std::move(init)) {}
+          typeAnnotation(std::nullopt), initializer(std::move(init)) {}
+
+    VariableDeclStmt(bool is_val, std::string n, std::optional<std::shared_ptr<Type>> type,
+                     std::optional<Expression::Ptr> init, size_t l, size_t c)
+        : Statement(l, c), isVal(is_val), name(std::move(n)),
+          typeAnnotation(std::move(type)), initializer(std::move(init)) {}
 
     void accept(AstVisitor &visitor) override { visitor.visit(*this); }
+  };
+
+  struct FunctionParameter
+  {
+    std::string name;
+    std::optional<std::shared_ptr<Type>> typeAnnotation;
+    FunctionParameter(std::string n) : name(std::move(n)), typeAnnotation(std::nullopt) {}
+    FunctionParameter(std::string n, std::optional<std::shared_ptr<Type>> type)
+        : name(std::move(n)), typeAnnotation(std::move(type)) {}
   };
 
   struct FunctionDeclStmt : Statement
   {
     std::string name;
-    std::vector<std::string> parameters;
+    std::vector<FunctionParameter> parameters;
     Statement::Ptr body;
+    std::optional<std::shared_ptr<Type>> returnType;
     FunctionDeclStmt(std::string n, std::vector<std::string> params,
                      Statement::Ptr b, size_t l, size_t c)
+        : Statement(l, c), name(std::move(n)), body(std::move(b)), returnType(std::nullopt)
+    {
+      // Convert string parameters to FunctionParameter with no type annotation
+      for (const auto &param : params)
+      {
+        parameters.emplace_back(param);
+      }
+    }
+
+    FunctionDeclStmt(std::string n, std::vector<FunctionParameter> params,
+                     Statement::Ptr b, std::optional<std::shared_ptr<Type>> retType, size_t l, size_t c)
         : Statement(l, c), name(std::move(n)), parameters(std::move(params)),
-          body(std::move(b)) {}
+          body(std::move(b)), returnType(std::move(retType)) {}
 
     void accept(AstVisitor &visitor) override { visitor.visit(*this); }
   };
@@ -422,6 +488,80 @@ namespace dotlin
     }
 
     void accept(AstVisitor &visitor) override { visitor.visit(*this); }
+  };
+
+  struct TryStmt : Statement
+  {
+    Statement::Ptr tryBlock;
+    std::string exceptionVar;
+    Statement::Ptr catchBlock;
+    std::optional<Statement::Ptr> finallyBlock;
+    TryStmt(Statement::Ptr try_block, std::string ex_var, Statement::Ptr catch_block,
+            std::optional<Statement::Ptr> finally_block, size_t l, size_t c)
+        : Statement(l, c), tryBlock(std::move(try_block)), exceptionVar(std::move(ex_var)),
+          catchBlock(std::move(catch_block)), finallyBlock(std::move(finally_block)) {}
+
+    void accept(AstVisitor &visitor) override { visitor.visit(*this); }
+  };
+
+  // Type system
+  enum class TypeKind
+  {
+    INT,
+    DOUBLE,
+    BOOL,
+    STRING,
+    ARRAY,
+    VOID,
+    UNKNOWN,
+    ANY
+  };
+
+  struct Type
+  {
+    TypeKind kind;
+    std::shared_ptr<Type> elementType;               // For arrays
+    std::vector<std::shared_ptr<Type>> genericTypes; // For generic type parameters
+
+    Type(TypeKind k) : kind(k), elementType(nullptr), genericTypes() {}
+    Type(TypeKind k, std::shared_ptr<Type> elemType) : kind(k), elementType(elemType), genericTypes() {}
+    Type(TypeKind k, std::shared_ptr<Type> elemType, std::vector<std::shared_ptr<Type>> genTypes)
+        : kind(k), elementType(elemType), genericTypes(std::move(genTypes)) {}
+
+    bool isCompatibleWith(const Type &other) const
+    {
+      if (kind == other.kind)
+      {
+        // For generic types, check if generic parameters are compatible
+        if (kind == TypeKind::ARRAY && !genericTypes.empty() && !other.genericTypes.empty())
+        {
+          if (genericTypes.size() != other.genericTypes.size())
+            return false;
+          for (size_t i = 0; i < genericTypes.size(); ++i)
+          {
+            if (!genericTypes[i]->isCompatibleWith(*other.genericTypes[i]))
+              return false;
+          }
+          return true;
+        }
+        return true;
+      }
+      if (kind == TypeKind::UNKNOWN || other.kind == TypeKind::UNKNOWN)
+        return true;
+      if (kind == TypeKind::INT && other.kind == TypeKind::DOUBLE)
+        return true; // int can be promoted to double
+      if (kind == TypeKind::DOUBLE && other.kind == TypeKind::INT)
+        return true; // double can be demoted to int
+      if (kind == TypeKind::ARRAY && other.kind == TypeKind::ARRAY)
+      {
+        if (elementType && other.elementType)
+        {
+          return elementType->isCompatibleWith(*other.elementType);
+        }
+        return true; // Arrays with unknown element types are compatible
+      }
+      return false;
+    }
   };
 
   Program parse(const std::vector<Token> &tokens);

@@ -26,7 +26,7 @@ Find all of the commnents in c++ files (cpp, h, and all the others), write them 
     - [-] Implement Array data type
     - [x] Add array indexing operations ([]) 
     - [x] Implement array methods (.size, .get(), .set(), etc.)
-    - [ ] Add array construction syntax
+    - [x] Add array construction syntax
 5. Complex Expression Handling
     - [x] Add proper null pointer checks in AST traversal
     - [x] Fix unique_ptr dereference issues in complex expressions
@@ -39,18 +39,18 @@ Find all of the commnents in c++ files (cpp, h, and all the others), write them 
     - [x] Implement .toUpperCase(), .toLowerCase()
     - [x] Implement .trim(), .split()
 7. Enhanced Type System
-    - [ ] Implement proper type checking
-    - [ ] Add explicit type annotations support
-    - [ ] Implement generics support
-    - [ ] Add type inference improvements
+    - [x] Implement proper type checking
+    - [x] Add explicit type annotations support
+    - [x] Implement generics support
+    - [x] Add type inference improvements
 8. Control Flow Enhancements
-    - [ ] Implement while loops
-    - [ ] Implement for loops
-    - [ ] Implement when expressions (Kotlin equivalent of switch)
-    - [ ] Add exception handling support
+    - [x] Implement while loops
+    - [x] Implement for loops
+    - [x] Implement when expressions (Kotlin equivalent of switch)
+    - [x] Add exception handling support
 9. Function System Improvements
-    - [ ] Implement user-defined functions beyond main
-    - [ ] Add function return type support
+    - [x] Implement user-defined functions beyond main
+    - [x] Add function return type support
     - [ ] Implement function overloading
     - [ ] Add lambda expressions support
 10. Class and Object Support
