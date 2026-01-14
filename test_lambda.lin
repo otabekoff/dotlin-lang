@@ -1,0 +1,16 @@
+fun main() {
+    // Test lambda expressions
+    val add = { x, y -> x + y }
+    println(add(5, 3))
+    
+    val multiplyByTwo = { x -> x * 2 }
+    println(multiplyByTwo(10))
+    
+    // Pass lambda as argument
+    val result = applyOperation(7, { x -> x * x })
+    println(result)
+}
+
+fun applyOperation(x: Int, op: (Int) -> Int): Int {
+    return op(x)
+}

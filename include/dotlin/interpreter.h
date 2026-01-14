@@ -1,6 +1,12 @@
 // Interpreter for Dotlin - Kotlin-like language implementation in C++
 #pragma once
 #include "dotlin/parser.h"
+#include <vector>
+#include <memory>
+#include <string>
+#include <variant>
+#include <unordered_map>
+#include <functional>
 #include <any>
 #include <string>
 #include <unordered_map>
@@ -9,11 +15,63 @@
 namespace dotlin
 {
 
-  // Forward declaration
+  // Forward declarations
   struct ArrayValue;
+  struct FunctionDef;
+  struct LambdaValue;
+  struct Environment;
 
   // Runtime value representation
-  using Value = std::variant<int, double, bool, std::string, ArrayValue>;
+  using Value = std::variant<int, double, bool, std::string, ArrayValue, std::shared_ptr<LambdaValue>>;
+
+  // Structure to represent a function definition
+  struct FunctionDef
+  {
+    std::string name;
+    std::vector<FunctionParameter> parameters;
+    Statement::Ptr body;
+    size_t paramHash; // Hash based on parameter types for overload resolution
+
+    FunctionDef(std::string funcName, std::vector<FunctionParameter> params, Statement::Ptr funcBody)
+        : name(std::move(funcName)), parameters(std::move(params)), body(std::move(funcBody)), paramHash(calculateParamHash()) {}
+
+    // Calculate a hash based on parameter types for overload resolution
+    size_t calculateParamHash() const
+    {
+      size_t hash = 0;
+      for (const auto &param : parameters)
+      {
+        if (param.typeAnnotation.has_value() && param.typeAnnotation.value())
+        {
+          hash ^= static_cast<size_t>(param.typeAnnotation.value()->kind) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+        }
+        else
+        {
+          // Use a special value for untyped parameters
+          hash ^= static_cast<size_t>(TypeKind::UNKNOWN) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+        }
+      }
+      return hash;
+    }
+  };
+
+  // Forward declaration for LambdaExpr
+  struct LambdaExpr;
+
+  // Structure to represent a lambda expression value
+  struct LambdaValue
+  {
+    std::vector<FunctionParameter> parameters;
+    Statement::Ptr body;
+    std::shared_ptr<Environment> closure;
+    const LambdaExpr *original_node; // Reference to original lambda expression in AST
+
+    LambdaValue(std::vector<FunctionParameter> params, Statement::Ptr b, std::shared_ptr<Environment> env)
+        : parameters(std::move(params)), body(std::move(b)), closure(std::move(env)), original_node(nullptr) {}
+
+    LambdaValue(std::vector<FunctionParameter> params, Statement::Ptr b, std::shared_ptr<Environment> env, const LambdaExpr *node)
+        : parameters(std::move(params)), body(std::move(b)), closure(std::move(env)), original_node(node) {}
+  };
 
   // Array element type enumeration
   enum class ArrayElementType
@@ -244,6 +302,9 @@ namespace dotlin
     void visit(ForStmt &node);
     void visit(WhenStmt &node);
     void visit(TryStmt &node);
+    void visit(ClassDeclStmt &node);
+    void visit(ConstructorDeclStmt &node);
+    void visit(LambdaExpr &node);
 
   private:
     std::shared_ptr<Environment> globals;
@@ -267,6 +328,9 @@ namespace dotlin
     void performTypeInference(Program &program);
     void performTypeInferenceOnStatement(Statement &stmt, class TypeChecker &typeChecker);
     void performTypeInferenceOnExpression(Expression &expr, class TypeChecker &typeChecker);
+
+    // Helper method for function overloading
+    std::shared_ptr<FunctionDef> findBestFunctionOverload(const std::string &name, const std::vector<Value> &args);
   };
 
   Value interpret(const Program &program);

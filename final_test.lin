@@ -1,0 +1,1 @@
+fun main() { val add = { x, y -> x + y }; println("Test passed") }

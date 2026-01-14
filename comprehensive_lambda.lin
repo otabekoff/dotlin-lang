@@ -1,0 +1,22 @@
+fun main() {
+    // Test lambda expressions
+    val add = { x: Int, y: Int -> x + y }
+    val result = add(5, 3)
+    println("Addition result: " + result.toString())
+    
+    val multiplyByTwo = { x: Int -> x * 2 }
+    val result2 = multiplyByTwo(10)
+    println("Multiply by 2 result: " + result2.toString())
+    
+    // Pass lambda as argument
+    val finalResult = applyOperation(7, { x: Int -> x * x })
+    println("Apply operation result: " + finalResult.toString())
+    
+    // Test lambda with no parameters
+    val greet = { "Hello, World!" }
+    println(greet())
+}
+
+fun applyOperation(x: Int, op: (Int) -> Int): Int {
+    return op(x)
+}

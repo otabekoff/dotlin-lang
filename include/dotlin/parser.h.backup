@@ -93,7 +93,6 @@ namespace dotlin
   struct WhenStmt;
   struct TryStmt;
   struct ClassDeclStmt;
-  struct ConstructorDeclStmt;
 
   // Base class for all AST nodes
   struct AstNode

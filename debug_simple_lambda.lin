@@ -1,0 +1,1 @@
+fun main() { val add = { x: Int, y: Int -> x + y }; val result = add(5, 3); println("Result: " + result.toString()) }

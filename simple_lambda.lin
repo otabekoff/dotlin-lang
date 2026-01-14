@@ -1,0 +1,6 @@
+fun main() {
+    // Test basic lambda expression
+    val add = { x: Int, y: Int -> x + y }
+    val result = add(5, 3)
+    println("Simple lambda test: " + result.toString())
+}

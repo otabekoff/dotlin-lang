@@ -53,6 +53,8 @@ namespace dotlin
       return parseWhenStatement(tokens, pos);
     case TokenType::TRY:
       return parseTryStatement(tokens, pos);
+    case TokenType::CLASS:
+      return parseClassDeclaration(tokens, pos);
     case TokenType::RETURN:
       return parseReturnStatement(tokens, pos);
     case TokenType::LBRACE:
@@ -352,6 +354,151 @@ namespace dotlin
   }
 
   std::unique_ptr<Expression>
+  parseLambdaExpression(const std::vector<Token> &tokens, size_t &pos)
+  {
+    if (pos >= tokens.size() || tokens[pos].type != TokenType::LBRACE)
+      return nullptr;
+
+    // Consume the opening brace
+    size_t lambdaLine = tokens[pos].line;
+    size_t lambdaCol = tokens[pos].column;
+    pos++;
+
+    // Parse parameters if present (before arrow)
+    std::vector<dotlin::FunctionParameter> parameters;
+
+    // Check if the first token after '{' is an identifier (parameter) or '->' (no parameters)
+    if (pos < tokens.size() && tokens[pos].type == TokenType::ARROW)
+    {
+      // No parameters, just '->'
+      pos++; // consume '->'
+    }
+    else if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER)
+    {
+      // Parse parameters
+      while (pos < tokens.size())
+      {
+        if (tokens[pos].type == TokenType::IDENTIFIER)
+        {
+          std::string paramName = tokens[pos].text;
+          pos++;
+
+          // Check for parameter type annotation
+          std::optional<std::shared_ptr<dotlin::Type>> paramType = std::nullopt;
+          if (pos < tokens.size() && tokens[pos].type == TokenType::COLON)
+          {
+            pos++; // consume colon
+            if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER)
+            {
+              // Parse parameter type name
+              std::string typeName = tokens[pos].text;
+              pos++; // consume type name
+
+              // Map type name to TypeKind
+              dotlin::TypeKind kind = dotlin::TypeKind::UNKNOWN;
+              if (typeName == "Int")
+                kind = dotlin::TypeKind::INT;
+              else if (typeName == "Double")
+                kind = dotlin::TypeKind::DOUBLE;
+              else if (typeName == "Boolean" || typeName == "Bool")
+                kind = dotlin::TypeKind::BOOL;
+              else if (typeName == "String")
+                kind = dotlin::TypeKind::STRING;
+              else if (typeName == "Array")
+                kind = dotlin::TypeKind::ARRAY;
+              else if (typeName == "Unit" || typeName == "Void")
+                kind = dotlin::TypeKind::VOID;
+
+              paramType = std::make_shared<dotlin::Type>(kind);
+            }
+          }
+
+          parameters.push_back(dotlin::FunctionParameter(paramName, paramType));
+
+          // Check for comma or arrow
+          if (pos < tokens.size() && tokens[pos].type == TokenType::COMMA)
+          {
+            pos++; // consume comma
+            continue;
+          }
+          else if (pos < tokens.size() && tokens[pos].type == TokenType::ARROW)
+          {
+            pos++; // consume arrow
+            break;
+          }
+          else
+          {
+            // Unexpected token
+            break;
+          }
+        }
+        else if (pos < tokens.size() && tokens[pos].type == TokenType::ARROW)
+        {
+          pos++; // consume arrow
+          break;
+        }
+        else
+        {
+          // Unexpected token
+          break;
+        }
+      }
+    }
+    else
+    {
+      // Just consume the lambda body without parameters
+      // This is an error case, but we'll handle it by treating everything until '}' as the body
+    }
+
+    // Parse the lambda body (everything until closing brace)
+    // For now, we'll create a simple block with expressions/statements
+    std::vector<Statement::Ptr> bodyStatements;
+
+    // Parse statements until we hit the closing brace
+    while (pos < tokens.size() && tokens[pos].type != TokenType::RBRACE)
+    {
+      // Try to parse an expression statement
+      auto expr = parseExpression(tokens, pos);
+      if (expr)
+      {
+        // Add the expression as a statement
+        bodyStatements.push_back(std::make_unique<ExpressionStmt>(std::move(expr),
+                                                                  tokens[pos > 0 ? pos - 1 : 0].line, tokens[pos > 0 ? pos - 1 : 0].column));
+
+        // Skip semicolon if present
+        if (pos < tokens.size() && tokens[pos].type == TokenType::SEMICOLON)
+        {
+          pos++;
+        }
+        continue;
+      }
+
+      // If we couldn't parse an expression, try parsing other statements
+      // For now, we'll just break if we encounter a closing brace or EOF
+      if (pos >= tokens.size() || tokens[pos].type == TokenType::RBRACE ||
+          tokens[pos].type == TokenType::EOF_TOKEN)
+      {
+        break;
+      }
+
+      // Skip unrecognized token to avoid infinite loop
+      pos++;
+    }
+
+    // Create a block statement for the body
+    auto body = std::make_unique<BlockStmt>(std::move(bodyStatements), lambdaLine, lambdaCol);
+
+    // Consume the closing brace
+    if (pos < tokens.size() && tokens[pos].type == TokenType::RBRACE)
+    {
+      pos++; // consume '}'
+    }
+
+    return std::make_unique<LambdaExpr>(std::move(parameters), std::move(body),
+                                        lambdaLine, lambdaCol);
+  }
+
+  std::unique_ptr<Expression>
   parsePrimaryExpression(const std::vector<Token> &tokens, size_t &pos)
   {
     if (pos >= tokens.size())
@@ -406,6 +553,12 @@ namespace dotlin
       std::string name = token.text;
       pos++;
       return std::make_unique<IdentifierExpr>(name, token.line, token.column);
+    }
+    case TokenType::LBRACE:
+    {
+      // Check if this is a lambda expression
+      // Lambda syntax: { param1, param2 -> body }
+      return parseLambdaExpression(tokens, pos);
     }
     case TokenType::LPAREN:
     {
@@ -1072,6 +1225,161 @@ namespace dotlin
     size_t col = (pos > 0) ? tokens[pos - 1].column : 1;
     return std::make_unique<WhenStmt>(std::move(subject), std::move(branches), std::move(elseBranch),
                                       line, col);
+  }
+
+  std::unique_ptr<Statement> parseClassDeclaration(const std::vector<Token> &tokens, size_t &pos)
+  {
+    // Skip the 'class' token
+    if (pos < tokens.size() && tokens[pos].type == TokenType::CLASS)
+    {
+      pos++;
+    }
+
+    // Expect class name
+    std::string className = "Anonymous"; // default name
+    if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER)
+    {
+      className = tokens[pos].text;
+      pos++;
+    }
+
+    // Check for inheritance (class Parent : SuperClass)
+    std::optional<std::string> superClass = std::nullopt;
+    if (pos < tokens.size() && tokens[pos].type == TokenType::COLON)
+    {
+      pos++; // consume ':'
+      if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER)
+      {
+        superClass = tokens[pos].text;
+        pos++; // consume superclass name
+      }
+    }
+
+    // Expect opening brace for class body
+    std::vector<Statement::Ptr> members;
+    if (pos < tokens.size() && tokens[pos].type == TokenType::LBRACE)
+    {
+      pos++; // consume '{'
+
+      // Parse class members (fields, methods, constructors) until closing brace
+      while (pos < tokens.size() && tokens[pos].type != TokenType::RBRACE &&
+             tokens[pos].type != TokenType::EOF_TOKEN)
+      {
+        // Check if this is a constructor
+        if (pos < tokens.size() && tokens[pos].type == TokenType::CONSTRUCTOR)
+        {
+          pos++; // consume 'constructor' token
+
+          // Expect opening parenthesis for constructor parameters
+          std::vector<dotlin::FunctionParameter> parameters;
+          if (pos < tokens.size() && tokens[pos].type == TokenType::LPAREN)
+          {
+            pos++; // consume '('
+
+            // Parse constructor parameters
+            while (pos < tokens.size() && tokens[pos].type != TokenType::RPAREN)
+            {
+              if (tokens[pos].type == TokenType::IDENTIFIER)
+              {
+                std::string paramName = tokens[pos].text;
+                pos++;
+
+                // Check for parameter type annotation
+                std::optional<std::shared_ptr<dotlin::Type>> paramType = std::nullopt;
+                if (pos < tokens.size() && tokens[pos].type == TokenType::COLON)
+                {
+                  pos++; // consume colon
+                  if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER)
+                  {
+                    // Parse parameter type name
+                    std::string typeName = tokens[pos].text;
+                    pos++; // consume type name
+
+                    // Map type name to TypeKind
+                    dotlin::TypeKind kind = dotlin::TypeKind::UNKNOWN;
+                    if (typeName == "Int")
+                      kind = dotlin::TypeKind::INT;
+                    else if (typeName == "Double")
+                      kind = dotlin::TypeKind::DOUBLE;
+                    else if (typeName == "Boolean" || typeName == "Bool")
+                      kind = dotlin::TypeKind::BOOL;
+                    else if (typeName == "String")
+                      kind = dotlin::TypeKind::STRING;
+                    else if (typeName == "Array")
+                      kind = dotlin::TypeKind::ARRAY;
+                    else if (typeName == "Unit" || typeName == "Void")
+                      kind = dotlin::TypeKind::VOID;
+
+                    paramType = std::make_shared<dotlin::Type>(kind);
+                  }
+                }
+
+                parameters.push_back(dotlin::FunctionParameter(paramName, paramType));
+
+                // Expect comma or closing parenthesis
+                if (pos < tokens.size() && tokens[pos].type == TokenType::COMMA)
+                {
+                  pos++; // consume comma
+                }
+              }
+              else
+              {
+                // Skip unexpected token
+                pos++;
+              }
+            }
+
+            if (pos < tokens.size() && tokens[pos].type == TokenType::RPAREN)
+            {
+              pos++; // consume ')'
+            }
+          }
+
+          // Expect opening brace for constructor body
+          Statement::Ptr body = nullptr;
+          if (pos < tokens.size() && tokens[pos].type == TokenType::LBRACE)
+          {
+            // Parse block statement as constructor body
+            size_t temp_pos = pos;
+            body = parseBlockStatement(tokens, temp_pos);
+            if (body)
+            {
+              pos = temp_pos; // update position if block was successfully parsed
+            }
+          }
+
+          // Create constructor declaration statement
+          auto constructor = std::make_unique<ConstructorDeclStmt>(std::move(parameters), std::move(body), className, tokens[pos - 1].line, tokens[pos - 1].column);
+          members.push_back(std::move(constructor));
+        }
+        else
+        {
+          // Parse other members (methods, fields)
+          auto member = parseStatement(tokens, pos);
+          if (member)
+          {
+            members.push_back(std::move(member));
+          }
+          else
+          {
+            // Skip token to avoid infinite loop
+            pos++;
+          }
+        }
+      }
+
+      // Consume closing brace
+      if (pos < tokens.size() && tokens[pos].type == TokenType::RBRACE)
+      {
+        pos++;
+      }
+    }
+
+    // Use the last token we consumed for position info, or default to 1,1
+    size_t line = (pos > 0) ? tokens[pos - 1].line : 1;
+    size_t col = (pos > 0) ? tokens[pos - 1].column : 1;
+    return std::make_unique<ClassDeclStmt>(
+        className, std::move(members), superClass, line, col);
   }
 
 } // namespace dotlin

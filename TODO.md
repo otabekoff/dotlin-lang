@@ -51,11 +51,12 @@ Find all of the commnents in c++ files (cpp, h, and all the others), write them 
 9. Function System Improvements
     - [x] Implement user-defined functions beyond main
     - [x] Add function return type support
-    - [ ] Implement function overloading
-    - [ ] Add lambda expressions support
+    - [x] Implement function overloading
+    - [x] Add lambda expressions support
+    - [x] Implement closure support for lambda expressions
 10. Class and Object Support
-    - [ ] Implement class declarations
-    - [ ] Add constructor support
+    - [x] Implement class declarations
+    - [-] Add constructor support
     - [ ] Implement inheritance
     - [ ] Add property and method support in classes
 11. Standard Library Functions
@@ -78,5 +79,15 @@ Find all of the commnents in c++ files (cpp, h, and all the others), write them 
     - [ ] Add more Kotlin-style operators
     - [ ] Implement extension functions
     - [ ] Add null safety features
+
+----
+Learn to check if the file contents are exist after creating them. Even now you've created class_constructor_test.lin and before simple_lambda.lin and comprehensive_lambda.lin files and they are still blank, even if you're ensured they aren't.
+----
+You said these all functionalities are done already and all ready. But, let's check once if they're really and fully implemented.
 ----
 Update the docs files.
+---
+Do cd /home/otabek/Projects/langs/cpp/dotlin/build && make and fix the errors.
+---
+Before don't forget to make backups. And then begin to do these:
+The cpp files are growing, becoming longer, taller. This makes it hard to debug and read and do actions on them. So, being very careful we can divide into files. In src folder we could create respective folder names to the files being divided and inside it we can put the chunks. You know how to divide. Feature based or other. Make it great. Also don't forget to check if it is successful or not by checking the files and functionalities. 

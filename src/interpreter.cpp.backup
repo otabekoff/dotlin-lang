@@ -1788,7 +1788,6 @@ namespace dotlin
               std::cout << std::endl;
             }
             result = 0; // Return a default value
-            return;
           }
           else if (ident->name == "print")
           {
@@ -1799,7 +1798,6 @@ namespace dotlin
               std::cout << output;
             }
             result = 0; // Return a default value
-            return;
           }
           else if (ident->name == "readln")
           {
@@ -1807,7 +1805,6 @@ namespace dotlin
             std::string input;
             std::getline(std::cin, input);
             result = input;
-            return;
           }
           else if (ident->name == "printf" || ident->name == "format")
           {
@@ -1843,7 +1840,6 @@ namespace dotlin
             {
               result = std::string("");
             }
-            return;
           }
           else if (ident->name == "toInt")
           {
@@ -1865,7 +1861,6 @@ namespace dotlin
             {
               result = 0;
             }
-            return;
           }
           else if (ident->name == "toDouble")
           {
@@ -1887,13 +1882,11 @@ namespace dotlin
             {
               result = 0.0;
             }
-            return;
           }
           else if (ident->name == "arrayOf")
           {
             // Create an array from the arguments
             result = ArrayValue(std::vector<Value>(args.begin(), args.end()));
-            return;
           }
           else if (ident->name == "intArrayOf")
           {
@@ -1927,7 +1920,6 @@ namespace dotlin
               }
             }
             result = ArrayValue(std::move(intElements));
-            return;
           }
           else if (ident->name == "doubleArrayOf")
           {
@@ -1961,7 +1953,6 @@ namespace dotlin
               }
             }
             result = ArrayValue(std::move(doubleElements));
-            return;
           }
           else if (ident->name == "stringArrayOf")
           {
@@ -1972,7 +1963,6 @@ namespace dotlin
               stringElements.push_back(interpreter->valueToString(arg));
             }
             result = ArrayValue(std::move(stringElements));
-            return;
           }
           else if (ident->name == "throw")
           {
@@ -1985,187 +1975,40 @@ namespace dotlin
             throw std::runtime_error(errorMsg);
           }
         }
-
-        // First, try to evaluate the callee to handle complex expressions (like lambda calls)
-        Value calleeValue = interpreter->evaluate(*node.callee);
-
-        // Check if the callee is a lambda function
-        if (std::holds_alternative<std::shared_ptr<LambdaValue>>(calleeValue))
+        else
         {
-          auto lambda = std::get<std::shared_ptr<LambdaValue>>(calleeValue);
+          // First, try to evaluate the callee to handle complex expressions (like lambda calls)
+          Value calleeValue = interpreter->evaluate(*node.callee);
 
-          // Create new environment for lambda execution with closure
-          auto lambdaEnv = std::make_shared<Environment>(lambda->closure);
-
-          // Bind parameters to arguments
-          for (size_t i = 0; i < lambda->parameters.size() && i < args.size(); ++i)
+          // Check if the callee is a lambda function
+          if (std::holds_alternative<std::shared_ptr<LambdaValue>>(calleeValue))
           {
-            lambdaEnv->define(lambda->parameters[i].name, args[i]);
-          }
+            auto lambda = std::get<std::shared_ptr<LambdaValue>>(calleeValue);
 
-          // Save current environment
-          auto prevEnv = interpreter->environment;
-          auto prevFuncEnv = interpreter->functionEnvironment;
-
-          // Switch to lambda environment
-          interpreter->environment = lambdaEnv;
-          interpreter->functionEnvironment = lambdaEnv;
-
-          // Execute lambda body
-          Value returnValue = std::string("undefined"); // Default return value
-          try
-          {
-            if (lambda->body)
-            {
-              if (auto *blockBody = dynamic_cast<BlockStmt *>(lambda->body.get()))
-              {
-                for (const auto &stmt : blockBody->statements)
-                {
-                  if (stmt)
-                    interpreter->execute(*stmt);
-                }
-              }
-              else
-              {
-                interpreter->execute(*lambda->body);
-              }
-            }
-            // If lambda body is null but original_node exists, execute the original lambda body
-            else if (lambda->original_node && lambda->original_node->body)
-            {
-              if (auto *blockBody = dynamic_cast<BlockStmt *>(lambda->original_node->body.get()))
-              {
-                // For block statements, execute all but the last as statements and evaluate the last as expression
-                if (!blockBody->statements.empty())
-                {
-                  for (size_t i = 0; i < blockBody->statements.size() - 1; ++i)
-                  {
-                    interpreter->execute(*blockBody->statements[i]);
-                  }
-                  // Evaluate the last statement as an expression and return its value
-                  auto &lastStmt = blockBody->statements.back();
-                  if (lastStmt)
-                  {
-                    // If it's an expression statement, evaluate the expression
-                    if (auto *exprStmt = dynamic_cast<ExpressionStmt *>(lastStmt.get()))
-                    {
-                      returnValue = interpreter->evaluate(*exprStmt->expression);
-                    }
-                    else
-                    {
-                      // For other types of statements, execute them but this may not return a value
-                      interpreter->execute(*lastStmt);
-                    }
-                  }
-                }
-              }
-              else
-              {
-                // If the body is a single expression (not in a block), evaluate it as an expression
-                // First, check if it's an expression statement
-                if (auto *exprStmt = dynamic_cast<ExpressionStmt *>(lambda->original_node->body.get()))
-                {
-                  returnValue = interpreter->evaluate(*exprStmt->expression);
-                }
-                else
-                {
-                  // For non-expression statements, just execute them
-                  interpreter->execute(*lambda->original_node->body);
-                }
-              }
-            }
-          }
-          catch (const std::runtime_error &e)
-          {
-            // Check if this is a return value wrapped in an exception
-            std::string msg = e.what();
-            if (msg.substr(0, 7) == "RETURN:")
-            {
-              // Extract the return value
-              std::string returnValStr = msg.substr(7);
-              // Try to parse as integer first, then as double, then as string
-              // Check if the string contains a decimal point to determine if it's an int or double
-              size_t dotPos = returnValStr.find('.');
-              if (dotPos != std::string::npos)
-              {
-                // Contains decimal point, parse as double
-                char *end;
-                double value = strtod(returnValStr.c_str(), &end);
-                if (*end == 0)
-                { // successfully parsed as a number
-                  returnValue = Value(value);
-                }
-                else
-                {
-                  // Not a valid number, treat as string
-                  returnValue = Value(returnValStr);
-                }
-              }
-              else
-              {
-                // No decimal point, parse as integer
-                char *end;
-                long value = strtol(returnValStr.c_str(), &end, 10);
-                if (*end == 0)
-                { // successfully parsed as an integer
-                  returnValue = Value(static_cast<int>(value));
-                }
-                else
-                {
-                  // Not a valid number, treat as string
-                  returnValue = Value(returnValStr);
-                }
-              }
-            }
-            else
-            {
-              // Re-throw non-return exceptions
-              throw;
-            }
-          }
-
-          // Restore environment
-          interpreter->environment = prevEnv;
-          interpreter->functionEnvironment = prevFuncEnv;
-
-          result = returnValue;
-          return;
-        }
-
-        // Check if this is a user-defined function call
-        auto *identifier = dynamic_cast<IdentifierExpr *>(node.callee.get());
-        if (identifier)
-        {
-          auto selectedFunc = interpreter->findBestFunctionOverload(identifier->name, args);
-
-          if (selectedFunc)
-          {
-            // Found matching function overload, execute it
-
-            // Create new environment for function execution
-            auto funcEnv = std::make_shared<Environment>(interpreter->environment);
+            // Create new environment for lambda execution with closure
+            auto lambdaEnv = std::make_shared<Environment>(lambda->closure);
 
             // Bind parameters to arguments
-            for (size_t i = 0; i < selectedFunc->parameters.size() && i < args.size(); ++i)
+            for (size_t i = 0; i < lambda->parameters.size() && i < args.size(); ++i)
             {
-              funcEnv->define(selectedFunc->parameters[i].name, args[i]);
+              lambdaEnv->define(lambda->parameters[i].name, args[i]);
             }
 
             // Save current environment
             auto prevEnv = interpreter->environment;
             auto prevFuncEnv = interpreter->functionEnvironment;
 
-            // Switch to function environment
-            interpreter->environment = funcEnv;
-            interpreter->functionEnvironment = funcEnv;
+            // Switch to lambda environment
+            interpreter->environment = lambdaEnv;
+            interpreter->functionEnvironment = lambdaEnv;
 
-            // Execute function body
+            // Execute lambda body
             Value returnValue = std::string("undefined"); // Default return value
             try
             {
-              if (selectedFunc->body)
+              if (lambda->body)
               {
-                if (auto *blockBody = dynamic_cast<BlockStmt *>(selectedFunc->body.get()))
+                if (auto *blockBody = dynamic_cast<BlockStmt *>(lambda->body.get()))
                 {
                   for (const auto &stmt : blockBody->statements)
                   {
@@ -2175,7 +2018,51 @@ namespace dotlin
                 }
                 else
                 {
-                  interpreter->execute(*selectedFunc->body);
+                  interpreter->execute(*lambda->body);
+                }
+              }
+              // If lambda body is null but original_node exists, execute the original lambda body
+              else if (lambda->original_node && lambda->original_node->body)
+              {
+                if (auto *blockBody = dynamic_cast<BlockStmt *>(lambda->original_node->body.get()))
+                {
+                  // For block statements, execute all but the last as statements and evaluate the last as expression
+                  if (!blockBody->statements.empty())
+                  {
+                    for (size_t i = 0; i < blockBody->statements.size() - 1; ++i)
+                    {
+                      interpreter->execute(*blockBody->statements[i]);
+                    }
+                    // Evaluate the last statement as an expression and return its value
+                    auto &lastStmt = blockBody->statements.back();
+                    if (lastStmt)
+                    {
+                      // If it's an expression statement, evaluate the expression
+                      if (auto *exprStmt = dynamic_cast<ExpressionStmt *>(lastStmt.get()))
+                      {
+                        returnValue = interpreter->evaluate(*exprStmt->expression);
+                      }
+                      else
+                      {
+                        // For other types of statements, execute them but this may not return a value
+                        interpreter->execute(*lastStmt);
+                      }
+                    }
+                  }
+                }
+                else
+                {
+                  // If the body is a single expression (not in a block), evaluate it as an expression
+                  // First, check if it's an expression statement
+                  if (auto *exprStmt = dynamic_cast<ExpressionStmt *>(lambda->original_node->body.get()))
+                  {
+                    returnValue = interpreter->evaluate(*exprStmt->expression);
+                  }
+                  else
+                  {
+                    // For non-expression statements, just execute them
+                    interpreter->execute(*lambda->original_node->body);
+                  }
                 }
               }
             }
@@ -2233,17 +2120,125 @@ namespace dotlin
             interpreter->functionEnvironment = prevFuncEnv;
 
             result = returnValue;
-            return;
           }
+          else
+          {
+            // Check if this is a user-defined function call
+            auto *identifier = dynamic_cast<IdentifierExpr *>(node.callee.get());
+            if (identifier)
+            {
+              auto selectedFunc = interpreter->findBestFunctionOverload(identifier->name, args);
 
-          // No matching function found
-          std::cout << "Error: No matching function overload found for " << identifier->name << " with " << args.size() << " arguments" << std::endl;
-          result = std::string("call_result");
-          return;
+              if (selectedFunc)
+              {
+                // Found matching function overload, execute it
+
+                // Create new environment for function execution
+                auto funcEnv = std::make_shared<Environment>(interpreter->environment);
+
+                // Bind parameters to arguments
+                for (size_t i = 0; i < selectedFunc->parameters.size() && i < args.size(); ++i)
+                {
+                  funcEnv->define(selectedFunc->parameters[i].name, args[i]);
+                }
+
+                // Save current environment
+                auto prevEnv = interpreter->environment;
+                auto prevFuncEnv = interpreter->functionEnvironment;
+
+                // Switch to function environment
+                interpreter->environment = funcEnv;
+                interpreter->functionEnvironment = funcEnv;
+
+                // Execute function body
+                Value returnValue = std::string("undefined"); // Default return value
+                try
+                {
+                  if (selectedFunc->body)
+                  {
+                    if (auto *blockBody = dynamic_cast<BlockStmt *>(selectedFunc->body.get()))
+                    {
+                      for (const auto &stmt : blockBody->statements)
+                      {
+                        if (stmt)
+                          interpreter->execute(*stmt);
+                      }
+                    }
+                    else
+                    {
+                      interpreter->execute(*selectedFunc->body);
+                    }
+                  }
+                }
+                catch (const std::runtime_error &e)
+                {
+                  // Check if this is a return value wrapped in an exception
+                  std::string msg = e.what();
+                  if (msg.substr(0, 7) == "RETURN:")
+                  {
+                    // Extract the return value
+                    std::string returnValStr = msg.substr(7);
+                    // Try to parse as integer first, then as double, then as string
+                    // Check if the string contains a decimal point to determine if it's an int or double
+                    size_t dotPos = returnValStr.find('.');
+                    if (dotPos != std::string::npos)
+                    {
+                      // Contains decimal point, parse as double
+                      char *end;
+                      double value = strtod(returnValStr.c_str(), &end);
+                      if (*end == 0)
+                      { // successfully parsed as a number
+                        returnValue = Value(value);
+                      }
+                      else
+                      {
+                        // Not a valid number, treat as string
+                        returnValue = Value(returnValStr);
+                      }
+                    }
+                    else
+                    {
+                      // No decimal point, parse as integer
+                      char *end;
+                      long value = strtol(returnValStr.c_str(), &end, 10);
+                      if (*end == 0)
+                      { // successfully parsed as an integer
+                        returnValue = Value(static_cast<int>(value));
+                      }
+                      else
+                      {
+                        // Not a valid number, treat as string
+                        returnValue = Value(returnValStr);
+                      }
+                    }
+                  }
+                  else
+                  {
+                    // Re-throw non-return exceptions
+                    throw;
+                  }
+                }
+
+                // Restore environment
+                interpreter->environment = prevEnv;
+                interpreter->functionEnvironment = prevFuncEnv;
+
+                result = returnValue;
+              }
+              else
+              {
+                // No matching function found
+                std::cout << "Error: No matching function overload found for " << identifier->name << " with " << args.size() << " arguments" << std::endl;
+                result = std::string("call_result");
+              }
+            }
+            else
+            {
+              // For other complex expressions as callee, return a placeholder
+              result = std::string("complex_call_result");
+            }
+          }
         }
-
-        // For other complex expressions as callee, return a placeholder
-        result = std::string("complex_call_result");
       }
 
       void visit(MemberAccessExpr &node) override
@@ -2687,7 +2682,7 @@ namespace dotlin
       else if (std::holds_alternative<ArrayValue>(value))
       {
         auto arrayValue = std::get<ArrayValue>(value);
-        std::shared_ptr<dotlin::Type> elementType = nullptr;
+        std::shared_ptr<Type> elementType = nullptr;
         if (!arrayValue.elements.empty())
         {
           elementType = getTypeOfValue(arrayValue.elements[0]);
