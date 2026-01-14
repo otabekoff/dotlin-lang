@@ -102,7 +102,7 @@ struct Expression : AstNode {
 
 // Statement base class
 struct Statement : AstNode {
-  using Ptr = std::unique_ptr<Statement>;
+  using Ptr = std::shared_ptr<Statement>;
   Statement(size_t l, size_t c) : AstNode(l, c) {}
   virtual ~Statement() = default;
 };

@@ -576,10 +576,13 @@ void Interpreter::visit(TryStmt &node) {
 }
 
 void Interpreter::visit(ExpressionStmt &node) {
-  // Evaluate the expression but ignore the result (like in most languages)
-  // Expression statements are typically used for side effects
-  if (node.expression)
-    evaluate(*node.expression);
+  // Execute the expression for its side effects
+  std::cout << "DEBUG: Executing ExpressionStmt" << std::endl;
+  if (auto *callExpr = dynamic_cast<CallExpr *>(node.expression.get())) {
+    std::cout << "DEBUG: Expression is a CallExpr" << std::endl;
+    (void)callExpr; // Suppress unused variable warning
+  }
+  evaluate(*node.expression);
 }
 
 void Interpreter::visit(ClassDeclStmt &node) {
@@ -610,7 +613,7 @@ void Interpreter::visit(ClassDeclStmt &node) {
       // Create a function definition for constructor
       auto constructorDef = std::make_shared<FunctionDef>(
           "constructor", std::move(params),
-          std::shared_ptr<Statement>(constructorDecl->body.get()));
+          Statement::Ptr(constructorDecl->body.get()));
       classDef->constructors.push_back(constructorDef);
     } else if (auto *methodDecl =
                    dynamic_cast<FunctionDeclStmt *>(member.get())) {
@@ -620,10 +623,10 @@ void Interpreter::visit(ClassDeclStmt &node) {
         params.push_back(param);
       }
 
-      // Create a function definition for the method
-      auto methodDef = std::make_shared<FunctionDef>(
-          methodDecl->name, std::move(params),
-          std::shared_ptr<Statement>(methodDecl->body.get()));
+      // Create a function definition for method
+      auto methodDef =
+          std::make_shared<FunctionDef>(methodDecl->name, std::move(params),
+                                        Statement::Ptr(methodDecl->body.get()));
       classDef->methods.push_back(methodDef);
     }
   }
@@ -692,6 +695,18 @@ Value Interpreter::evaluate(Expression &expr) {
           argsVector.push_back(arg);
         }
         result = Value(ArrayValue(std::move(argsVector)));
+      }
+      // Special handling for "this" keyword
+      else if (node.name == "this") {
+        std::cout << "DEBUG: Looking up 'this' in environment" << std::endl;
+        try {
+          result = interpreter->environment->get("this");
+          std::cout << "DEBUG: Found 'this' in environment" << std::endl;
+        } catch (const std::exception &e) {
+          std::cout << "DEBUG: 'this' not found in environment: " << e.what()
+                    << std::endl;
+          result = Value(std::string("undefined"));
+        }
       }
       // Look up the value in the environment
       else {
@@ -1070,25 +1085,23 @@ Value Interpreter::evaluate(Expression &expr) {
 
     void visit(CallExpr &node) override {
       // Handle function calls
+
+      // Evaluate arguments
       std::vector<Value> args;
-      for (auto &arg : node.arguments) {
+      for (const auto &arg : node.arguments) {
         if (arg) {
           args.push_back(interpreter->evaluate(*arg));
-        } else {
-          args.push_back(Value(std::string("undefined")));
         }
       }
 
-      // Check if it's a method call on an object (callee is MemberAccessExpr)
+      // Check if this is a method call on a class instance
       if (auto *memberAccess =
               dynamic_cast<MemberAccessExpr *>(node.callee.get())) {
-        // Check if the member access has a valid object
-        if (!memberAccess->object) {
-          std::cout << "ERROR: Member access expression has null object"
-                    << std::endl;
-          result = std::string("null_object_error");
-          return;
-        }
+        std::cout << "DEBUG: CallExpr callee is a MemberAccessExpr"
+                  << std::endl;
+        // Handle method calls like obj.method()
+        auto objValue = interpreter->evaluate(*memberAccess->object);
+        std::string methodName = memberAccess->property;
 
         // Check if it's the special case of args.size() or
         // args.contentToString()
@@ -1102,7 +1115,7 @@ Value Interpreter::evaluate(Expression &expr) {
         }
 
         if (isArgsObject) {
-          std::string methodName = memberAccess->property;
+          // methodName is already declared above, reuse it
 
           if (objName == "args" && methodName == "size" && args.empty()) {
             // Handle args.size() method call
@@ -1140,7 +1153,7 @@ Value Interpreter::evaluate(Expression &expr) {
                                   : Value(std::string("null"));
 
             // Now handle method calls on the result
-            std::string methodName = memberAccess->property;
+            // methodName is already declared above, reuse it
 
             if (methodName == "toString" && args.empty()) {
               result = interpreter->valueToString(baseValue);
@@ -1314,7 +1327,7 @@ Value Interpreter::evaluate(Expression &expr) {
           } else {
             // Handle general method calls on expressions (variables, literals,
             // etc.) - direct calls
-            std::string methodName = memberAccess->property;
+            // methodName is already declared above, reuse it
 
             // Get the object value by evaluating the object expression
             // Safety check for null object
@@ -1324,7 +1337,8 @@ Value Interpreter::evaluate(Expression &expr) {
               result = std::string("null_object_error");
               return;
             }
-            Value objValue = interpreter->evaluate(*memberAccess->object);
+            // objValue is already declared above, reuse it
+            objValue = interpreter->evaluate(*memberAccess->object);
 
             if (methodName == "toString" && args.empty()) {
               // Handle toString() method for all types
@@ -1493,6 +1507,9 @@ Value Interpreter::evaluate(Expression &expr) {
               for (const auto &method : instance->classDef->methods) {
                 if (method->name == methodName) {
                   // Found the method, execute it
+                  std::cout << "DEBUG: Found method '" << methodName
+                            << "' in class '" << instance->className << "'"
+                            << std::endl;
                   // Create new environment for method execution with 'this'
                   // bound to the instance
                   auto methodEnv =
@@ -1521,15 +1538,26 @@ Value Interpreter::evaluate(Expression &expr) {
                       std::string("undefined"); // Default return value
                   try {
                     if (method->body) {
+                      std::cout << "DEBUG: Executing method body" << std::endl;
                       if (auto *blockBody =
                               dynamic_cast<BlockStmt *>(method->body.get())) {
+                        std::cout << "DEBUG: Method body is a block with "
+                                  << blockBody->statements.size()
+                                  << " statements" << std::endl;
                         for (const auto &stmt : blockBody->statements) {
-                          if (stmt)
+                          if (stmt) {
+                            std::cout << "DEBUG: Executing statement in method"
+                                      << std::endl;
                             interpreter->execute(*stmt);
+                          }
                         }
                       } else {
+                        std::cout << "DEBUG: Method body is not a block"
+                                  << std::endl;
                         interpreter->execute(*method->body);
                       }
+                    } else {
+                      std::cout << "DEBUG: Method body is null" << std::endl;
                     }
                   } catch (const std::runtime_error &e) {
                     std::string msg = e.what();
@@ -2037,8 +2065,23 @@ Value Interpreter::evaluate(Expression &expr) {
         result = std::string("null_object_error");
         return;
       }
+
+      // Debug: Print object type
+      if (auto *identifier =
+              dynamic_cast<IdentifierExpr *>(node.object.get())) {
+        std::cout << "DEBUG: Member access on identifier '" << identifier->name
+                  << "' property '" << node.property << "'" << std::endl;
+      }
+
       auto objValue = node.object ? interpreter->evaluate(*node.object)
                                   : Value(std::string("null"));
+
+      // Debug: Print if object evaluation succeeded
+      if (auto *identifier =
+              dynamic_cast<IdentifierExpr *>(node.object.get())) {
+        std::cout << "DEBUG: Evaluated object '" << identifier->name << "'"
+                  << std::endl;
+      }
 
       // Check if the object is an identifier "args" and the property is "size"
       // or "contentToString"
