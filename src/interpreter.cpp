@@ -776,8 +776,34 @@ Value Interpreter::evaluate(Expression &expr) {
             }
           }
           return; // Early return after handling assignment
+        } else if (auto *memberAccess =
+                       dynamic_cast<MemberAccessExpr *>(node.left.get())) {
+          // Handle assignment to member access (e.g., this.name = value)
+          auto rightVal = node.right ? interpreter->evaluate(*node.right)
+                                     : Value(std::string("null"));
+
+          // Evaluate the object to get the instance
+          if (memberAccess->object) {
+            auto objValue = interpreter->evaluate(*memberAccess->object);
+
+            // Check if the object is a ClassInstance
+            if (std::holds_alternative<std::shared_ptr<ClassInstance>>(
+                    objValue)) {
+              auto instance =
+                  std::get<std::shared_ptr<ClassInstance>>(objValue);
+
+              // Set the field value
+              instance->fields[memberAccess->property] = rightVal;
+              result = rightVal; // Assignment returns the assigned value
+              return;
+            }
+          }
+
+          // If we get here, the assignment failed
+          result = 0;
+          return;
         } else {
-          // Assignment to non-identifier is invalid
+          // Assignment to non-identifier/non-member-access is invalid
           result = 0;
           return;
         }
@@ -1909,47 +1935,55 @@ Value Interpreter::evaluate(Expression &expr) {
               auto instance =
                   std::make_shared<ClassInstance>(classDef->name, classDef);
 
-              // Assign constructor arguments to corresponding fields
-              // This assumes the constructor parameters correspond to class
-              // fields by position
-              for (size_t i = 0; i < selectedConstructor->parameters.size() &&
-                                 i < args.size();
-                   ++i) {
-                // Find the corresponding field in the class definition
-                for (const auto &field : classDef->fields) {
-                  if (field.first == selectedConstructor->parameters[i].name) {
-                    instance->fields[field.first] = args[i];
-                    break;
-                  }
-                }
-              }
+              // Execute constructor body with 'this' bound to the instance
+              if (selectedConstructor->body) {
+                // Create environment for constructor execution
+                auto constructorEnv =
+                    std::make_shared<Environment>(interpreter->environment);
 
-              // Set default values for any remaining fields that weren't set by
-              // the constructor
-              for (const auto &field : classDef->fields) {
-                if (instance->fields.find(field.first) ==
-                    instance->fields.end()) {
-                  // Field wasn't set by constructor, assign default value
-                  Value defaultValue;
-                  switch (field.second->kind) {
-                  case TypeKind::INT:
-                    defaultValue = 0;
-                    break;
-                  case TypeKind::DOUBLE:
-                    defaultValue = 0.0;
-                    break;
-                  case TypeKind::BOOL:
-                    defaultValue = false;
-                    break;
-                  case TypeKind::STRING:
-                    defaultValue = std::string("");
-                    break;
-                  default:
-                    defaultValue = std::string("undefined");
-                    break;
-                  }
-                  instance->fields[field.first] = defaultValue;
+                // Bind 'this' to the instance
+                constructorEnv->define("this", Value(instance));
+
+                // Bind constructor parameters to arguments
+                for (size_t i = 0; i < selectedConstructor->parameters.size() &&
+                                   i < args.size();
+                     ++i) {
+                  constructorEnv->define(
+                      selectedConstructor->parameters[i].name, args[i]);
                 }
+
+                // Save current environment
+                auto prevEnv = interpreter->environment;
+                auto prevFuncEnv = interpreter->functionEnvironment;
+
+                // Switch to constructor environment
+                interpreter->environment = constructorEnv;
+                interpreter->functionEnvironment = constructorEnv;
+
+                // Execute constructor body
+                try {
+                  if (auto *blockBody = dynamic_cast<BlockStmt *>(
+                          selectedConstructor->body.get())) {
+                    for (const auto &stmt : blockBody->statements) {
+                      if (stmt) {
+                        interpreter->execute(*stmt);
+                      }
+                    }
+                  } else {
+                    interpreter->execute(*selectedConstructor->body);
+                  }
+                } catch (const std::runtime_error &e) {
+                  std::string msg = e.what();
+                  if (msg.substr(0, 7) != "RETURN:") {
+                    // Re-throw non-return exceptions
+                    throw;
+                  }
+                  // Ignore return statements in constructors
+                }
+
+                // Restore environment
+                interpreter->environment = prevEnv;
+                interpreter->functionEnvironment = prevFuncEnv;
               }
 
               result = instance;

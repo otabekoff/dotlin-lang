@@ -1,8 +1,8 @@
 // src/parser.cpp
 #include "dotlin/parser.h"
 #include <cstring>
-#include <iostream>
-#include <stdexcept>
+// #include <iostream>
+// #include <stdexcept>
 
 namespace dotlin {
 
