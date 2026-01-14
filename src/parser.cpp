@@ -666,6 +666,38 @@ namespace dotlin
 
               paramType = std::make_shared<dotlin::Type>(kind);
             }
+            else
+            {
+              // Unsupported/complex type annotation (e.g. function type). Treat as unknown.
+              paramType = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+            }
+
+            // Skip remaining tokens of complex type annotations until ',' or ')' at top-level.
+            int parenDepth = 0;
+            while (pos < tokens.size())
+            {
+              if (tokens[pos].type == TokenType::LPAREN)
+              {
+                parenDepth++;
+                pos++;
+                continue;
+              }
+              if (tokens[pos].type == TokenType::RPAREN)
+              {
+                if (parenDepth == 0)
+                {
+                  break;
+                }
+                parenDepth--;
+                pos++;
+                continue;
+              }
+              if (parenDepth == 0 && tokens[pos].type == TokenType::COMMA)
+              {
+                break;
+              }
+              pos++;
+            }
           }
 
           parameters.push_back(dotlin::FunctionParameter(paramName, paramType));

@@ -69,6 +69,94 @@ namespace dotlin
       execute(*stmt);
     }
 
+    if (hasMainFunction)
+    {
+      std::vector<Value> mainArgs;
+      for (const auto &arg : commandLineArgs)
+      {
+        mainArgs.push_back(arg);
+      }
+
+      auto mainDef = findBestFunctionOverload("main", mainArgs);
+      if (mainDef)
+      {
+        auto previousEnv = environment;
+        auto previousFuncEnv = functionEnvironment;
+        environment = std::make_shared<Environment>(globals, false);
+        functionEnvironment = environment;
+
+        for (size_t i = 0; i < mainDef->parameters.size(); ++i)
+        {
+          std::string paramName = mainDef->parameters[i].name;
+          if (i < commandLineArgs.size())
+          {
+            environment->define(paramName, commandLineArgs[i]);
+          }
+          else
+          {
+            Value defaultValue;
+            if (mainDef->parameters[i].typeAnnotation.has_value() && mainDef->parameters[i].typeAnnotation.value())
+            {
+              auto type = mainDef->parameters[i].typeAnnotation.value();
+              switch (type->kind)
+              {
+              case TypeKind::INT:
+                defaultValue = 0;
+                break;
+              case TypeKind::DOUBLE:
+                defaultValue = 0.0;
+                break;
+              case TypeKind::BOOL:
+                defaultValue = false;
+                break;
+              case TypeKind::STRING:
+                defaultValue = std::string("");
+                break;
+              default:
+                defaultValue = std::string("");
+                break;
+              }
+            }
+            else
+            {
+              defaultValue = std::string("");
+            }
+            environment->define(paramName, defaultValue);
+          }
+        }
+
+        if (mainDef->body)
+        {
+          try
+          {
+            if (auto *blockBody = dynamic_cast<BlockStmt *>(mainDef->body.get()))
+            {
+              for (const auto &stmt : blockBody->statements)
+              {
+                if (stmt)
+                  execute(*stmt);
+              }
+            }
+            else
+            {
+              execute(*mainDef->body);
+            }
+          }
+          catch (const std::runtime_error &e)
+          {
+            std::string msg = e.what();
+            if (msg.substr(0, 7) != "RETURN:")
+            {
+              throw;
+            }
+          }
+        }
+
+        environment = previousEnv;
+        functionEnvironment = previousFuncEnv;
+      }
+    }
+
     // For now, return a dummy value
     return Value(std::string("Program executed successfully"));
   }
@@ -343,94 +431,9 @@ namespace dotlin
     // Store in a map so we can retrieve it later - now appending to vector for overloading support
     functionDefinitions[node.name].push_back(funcDef);
 
-    // Special handling for main function - execute immediately
     if (node.name == "main")
     {
-      // Execute main function if it exists
-      auto previousEnv = environment;
-      auto previousFuncEnv = functionEnvironment;
-      environment = std::make_shared<Environment>(globals, false); // Create environment for main function, not a block scope
-      functionEnvironment = environment;                           // Set the function environment
-
-      // If main function has parameters, initialize them with command-line arguments
-      for (size_t i = 0; i < node.parameters.size(); ++i)
-      {
-        std::string paramName = node.parameters[i].name;
-        if (i < commandLineArgs.size())
-        {
-          // Initialize parameter with command-line argument
-          environment->define(paramName, commandLineArgs[i]);
-        }
-        else
-        {
-          // Initialize parameter with empty/default value based on type annotation
-          Value defaultValue;
-          if (node.parameters[i].typeAnnotation.has_value() && node.parameters[i].typeAnnotation.value())
-          {
-            auto type = node.parameters[i].typeAnnotation.value();
-            switch (type->kind)
-            {
-            case TypeKind::INT:
-              defaultValue = 0;
-              break;
-            case TypeKind::DOUBLE:
-              defaultValue = 0.0;
-              break;
-            case TypeKind::BOOL:
-              defaultValue = false;
-              break;
-            case TypeKind::STRING:
-              defaultValue = std::string("");
-              break;
-            default:
-              defaultValue = std::string("");
-              break;
-            }
-          }
-          else
-          {
-            defaultValue = std::string("");
-          }
-          environment->define(paramName, defaultValue);
-        }
-      }
-
-      // Execute the main function body using the function definition we just created
-      if (funcDef->body)
-      {
-        try
-        {
-          // If the body is a block (which it typically is), execute its statements directly
-          // in the function environment to avoid creating an extra block scope level
-          if (auto *blockBody = dynamic_cast<BlockStmt *>(funcDef->body.get()))
-          {
-            for (const auto &stmt : blockBody->statements)
-            {
-              if (stmt)
-                execute(*stmt);
-            }
-          }
-          else
-          {
-            // For non-block bodies, execute normally
-            execute(*funcDef->body);
-          }
-        }
-        catch (const std::runtime_error &e)
-        {
-          // Handle return statements from main function
-          std::string msg = e.what();
-          if (msg.substr(0, 7) != "RETURN:")
-          {
-            // Re-throw non-return exceptions
-            throw;
-          }
-          // For return statements in main, just continue (return value ignored for main)
-        }
-      }
-
-      environment = previousEnv;             // Restore previous environment
-      functionEnvironment = previousFuncEnv; // Restore previous function environment
+      hasMainFunction = true;
     }
   }
 
