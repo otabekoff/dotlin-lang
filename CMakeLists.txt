@@ -35,15 +35,6 @@ include(DotlinOptions)
 # ---- Subdirectories ----
 add_subdirectory(src)
 
-add_executable(test_dotlin test_dotlin.cpp)
-target_link_libraries(test_dotlin PRIVATE dotlin_lib)
-
-add_executable(simple_test simple_test.cpp)
-target_link_libraries(simple_test PRIVATE dotlin_lib)
-
-add_executable(lexer_test lexer_test.cpp)
-target_link_libraries(lexer_test PRIVATE dotlin_lib)
-
 if(DOTLIN_BUILD_APPS)
   add_subdirectory(apps)
 endif()

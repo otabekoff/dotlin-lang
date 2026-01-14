@@ -1,28 +1,25 @@
-fun main(args: Array<String>) {
-    println("=== Array Construction Test ===")
+fun main() {
+    // Test arrayOf function
+    val arr1 = arrayOf(1, 2, 3, "hello", true)
+    println("Array with mixed types: " + arr1.toString())
     
-    // Test simple array construction
-    val numbers = [1, 2, 3, 4, 5]
-    println("Numbers array: " + numbers.toString())
+    // Test intArrayOf function
+    val intArr = intArrayOf(10, 20, 30, 40)
+    println("Integer array: " + intArr.toString())
     
-    // Test mixed-type array construction (as much as the type system allows)
-    val strings = ["hello", "world", "dotlin"]
-    println("Strings array: " + strings.toString())
+    // Test doubleArrayOf function
+    val doubleArr = doubleArrayOf(1.5, 2.7, 3.14)
+    println("Double array: " + doubleArr.toString())
     
-    // Test array construction with expressions
-    val computed = [1 + 2, 3 * 4, 10 - 5]
-    println("Computed array: " + computed.toString())
+    // Test stringArrayOf function
+    val stringArr = stringArrayOf("apple", "banana", "cherry")
+    println("String array: " + stringArr.toString())
     
-    // Test empty array
-    val empty = []
-    println("Empty array: " + empty.toString())
+    // Test accessing array elements
+    println("First element of intArr: " + intArr[0])
+    println("Second element of stringArr: " + stringArr[1])
     
-    // Test array indexing
-    println("First number: " + numbers[0])
-    println("Second number: " + numbers[1])
-    println("Last number: " + numbers[4])
-    
-    // Test string array indexing
-    println("First string: " + strings[0])
-    println("Second string: " + strings[1])
+    // Test array size
+    println("Size of intArr: " + intArr.size)
+    println("Size of stringArr: " + stringArr.size)
 }

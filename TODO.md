@@ -9,6 +9,12 @@ Find all of the commnents in c++ files (cpp, h, and all the others), write them 
 - [-] is for partially completed
 - [x] is for completed.
 
+## Critical Issues (NEW)
+- [ ] Fix class method execution - methods don't actually run
+- [ ] Fix constructor field initialization - fields not set from constructor params
+- [ ] Fix 'this' keyword binding - 'this' doesn't work in methods
+- [ ] Split interpreter.cpp into modular files for maintainability
+
 1. Method Chaining and Property Access
     - [x] Implement .toString() method for basic types (int, double, bool)
     - [x] Fix method chaining to properly chain return values
@@ -58,7 +64,7 @@ Find all of the commnents in c++ files (cpp, h, and all the others), write them 
     - [x] Implement class declarations
     - [-] Add constructor support
     - [ ] Implement inheritance
-    - [ ] Add property and method support in classes
+    - [-] Add property and method support in classes
 11. Standard Library Functions
     - [ ] Implement math functions (sin, cos, sqrt, etc.)
     - [ ] Add file I/O operations

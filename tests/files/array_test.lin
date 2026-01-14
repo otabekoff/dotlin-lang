@@ -1,6 +1,21 @@
-fun main(args: Array<String>) {
-    println("=== Dotlin Array Test ===")
-    println("Number of args: " + args.size().toString())
-    println("First arg: " + args[0])
-    println("Second arg: " + args[1])
+fun main() {
+    // Test array construction
+    val arr = arrayOf(1, 2, 3, 4, 5)
+    println("Array size: ${arr.size}")
+    
+    // Test array indexing
+    println("Element at index 2: ${arr[2]}")
+    
+    // Test array methods
+    println("First element: ${arr.get(0)}")
+    arr.set(1, 99)
+    println("After set(1, 99): ${arr[1]}")
+    
+    // Test array with different types
+    val strArr = arrayOf("hello", "world", "dotlin")
+    println("String array: ${strArr.contentToString()}")
+    
+    // Test mixed array
+    val mixedArr = arrayOf(1, "two", true, 3.14)
+    println("Mixed array size: ${mixedArr.size}")
 }

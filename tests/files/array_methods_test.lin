@@ -1,0 +1,29 @@
+fun main() {
+    // Test array methods
+    val arr = arrayOf(1, 2, 3, 4, 5)
+    
+    // Test size method
+    println("Array size: " + arr.size())
+    
+    // Test get method
+    println("Element at index 2: " + arr.get(2))
+    
+    // Test set method (returns the value being set)
+    println("Setting index 1 to 99: " + arr.set(1, 99))
+    
+    // Test add method (returns the value being added)
+    println("Adding 42: " + arr.add(42))
+    
+    // Test remove method (returns the value being removed)
+    println("Removing index 0: " + arr.remove(0))
+    
+    // Test string methods
+    val str = "Hello Dotlin"
+    println("Original: " + str)
+    println("Upper: " + str.toUpperCase())
+    println("Lower: " + str.toLowerCase())
+    println("Trim: '" + str.trim() + "'")
+    println("Substring: " + str.substring(6))
+    println("Substring with range: " + str.substring(0, 5))
+    println("Split: " + str.split(" "))
+}

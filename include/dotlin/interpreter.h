@@ -20,9 +20,33 @@ namespace dotlin
   struct FunctionDef;
   struct LambdaValue;
   struct Environment;
+  struct Type;
+  struct ClassDefinition;
 
   // Runtime value representation
-  using Value = std::variant<int, double, bool, std::string, ArrayValue, std::shared_ptr<LambdaValue>>;
+  using Value = std::variant<int, double, bool, std::string, ArrayValue, std::shared_ptr<LambdaValue>, std::shared_ptr<class ClassInstance>, std::shared_ptr<ClassDefinition>>;
+
+  // Class instance structure
+  struct ClassInstance
+  {
+    std::string className;
+    std::unordered_map<std::string, Value> fields;
+    std::shared_ptr<ClassDefinition> classDef;
+    
+    ClassInstance(const std::string &clsName, std::shared_ptr<ClassDefinition> def)
+        : className(clsName), classDef(std::move(def)) {}
+  };
+  
+  // Class definition structure
+  struct ClassDefinition
+  {
+    std::string name;
+    std::vector<std::pair<std::string, std::shared_ptr<Type>>> fields;
+    std::vector<std::shared_ptr<FunctionDef>> constructors;
+    std::vector<std::shared_ptr<FunctionDef>> methods;
+    
+    ClassDefinition(const std::string &className) : name(className) {}
+  };
 
   // Structure to represent a function definition
   struct FunctionDef
