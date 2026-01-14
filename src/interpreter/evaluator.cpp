@@ -70,6 +70,15 @@ void EvalVisitor::visit(IdentifierExpr &node) {
       }
     }
   }
+  if (node.name == "println" || node.name == "print" || node.name == "sqrt" ||
+      node.name == "abs" || node.name == "pow" || node.name == "readln") {
+    // Return a special lambda that represents a built-in function
+    auto builtinLambda = std::make_shared<LambdaValue>(
+        std::vector<FunctionParameter>(), nullptr, interpreter->environment);
+    result = Value(builtinLambda);
+  } else {
+    result = Value(std::string("undefined"));
+  }
 }
 
 void EvalVisitor::visit(LambdaExpr &node) {
