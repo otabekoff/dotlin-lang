@@ -1,0 +1,16 @@
+class Test {
+    val value: String
+    
+    constructor(value: String) {
+        this.value = value
+    }
+    
+    fun getValue() {
+        println("Value is: " + this.value)
+    }
+}
+
+fun main() {
+    val test = Test("hello")
+    test.getValue()
+}

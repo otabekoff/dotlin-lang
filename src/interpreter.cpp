@@ -1518,6 +1518,8 @@ Value Interpreter::evaluate(Expression &expr) {
                   // Bind 'this' to the instance (for now, we'll use a special
                   // variable name)
                   methodEnv->define("this", Value(instance));
+                  std::cout << "DEBUG: Defined 'this' in method environment"
+                            << std::endl;
 
                   // Bind method parameters to arguments
                   for (size_t i = 0;
@@ -1532,6 +1534,8 @@ Value Interpreter::evaluate(Expression &expr) {
                   // Switch to method environment
                   interpreter->environment = methodEnv;
                   interpreter->functionEnvironment = methodEnv;
+                  std::cout << "DEBUG: Switched to method environment"
+                            << std::endl;
 
                   // Execute method body
                   Value returnValue =
