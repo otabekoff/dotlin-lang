@@ -8,7 +8,6 @@ using namespace dotlin;
 
 // Type checking visitor for expressions - Implementation
 void TypeCheckVisitor::visit(LiteralExpr &node) {
-  (void)node;
   // Determine type from literal value
   if (std::holds_alternative<int>(node.value)) {
     result = std::make_shared<dotlin::Type>(dotlin::TypeKind::INT);
@@ -24,7 +23,6 @@ void TypeCheckVisitor::visit(LiteralExpr &node) {
 }
 
 void TypeCheckVisitor::visit(IdentifierExpr &node) {
-  (void)node;
   // Look up the identifier in the current environment
   if (checker->environment) {
     try {
@@ -40,7 +38,6 @@ void TypeCheckVisitor::visit(IdentifierExpr &node) {
 }
 
 void TypeCheckVisitor::visit(LambdaExpr &node) {
-  (void)node;
   // For now, just return UNKNOWN type for lambdas
   // In a full implementation, we'd analyze the lambda body and parameters
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
@@ -67,6 +64,21 @@ void TypeCheckVisitor::visit(BinaryExpr &node) {
              node.op == TokenType::GREATER ||
              node.op == TokenType::GREATER_EQUAL) {
     result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+  } else if (node.op == TokenType::AND || node.op == TokenType::OR) {
+    // Logical operators require boolean types
+    if (leftType->kind == dotlin::TypeKind::BOOL &&
+        rightType->kind == dotlin::TypeKind::BOOL) {
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+    } else {
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
+  } else if (node.op == TokenType::ASSIGN) {
+    // Assignment: right operand type should be compatible with left
+    if (rightType->isCompatibleWith(*leftType)) {
+      result = rightType; // Assignment returns the assigned value type
+    } else {
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
   } else {
     // For other operations, return the more general numeric type
     if (leftType->kind == dotlin::TypeKind::DOUBLE ||
@@ -81,12 +93,16 @@ void TypeCheckVisitor::visit(BinaryExpr &node) {
 void TypeCheckVisitor::visit(UnaryExpr &node) {
   auto operandType = checker->checkExpression(*node.operand);
 
-  if (node.op == TokenType::MINUS) {
+  switch (node.op) {
+  case dotlin::TokenType::MINUS:
     result = operandType;
-  } else if (node.op == TokenType::NOT) {
+    break;
+  case dotlin::TokenType::NOT:
     result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
-  } else {
+    break;
+  default:
     result = operandType;
+    break;
   }
 }
 
@@ -109,7 +125,6 @@ void TypeCheckVisitor::visit(MemberAccessExpr &node) {
 }
 
 void TypeCheckVisitor::visit(ArrayLiteralExpr &node) {
-  (void)node;
   // Create an array type
   auto arrayType = std::make_shared<dotlin::Type>(dotlin::TypeKind::ARRAY);
 
@@ -122,12 +137,12 @@ void TypeCheckVisitor::visit(ArrayLiteralExpr &node) {
 }
 
 void TypeCheckVisitor::visit(ArrayAccessExpr &node) {
-  (void)node;
   auto arrayType = checker->checkExpression(*node.array);
   auto indexType = checker->checkExpression(*node.index);
 
   if (arrayType->kind == dotlin::TypeKind::ARRAY &&
       indexType->kind == dotlin::TypeKind::INT) {
+    result = arrayType->elementType;
     result = arrayType;
   } else {
     result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
@@ -237,7 +252,7 @@ void StmtTypeCheckVisitor::visit(FunctionDeclStmt &node) {
 void StmtTypeCheckVisitor::visit(BlockStmt &node) {
   (void)node;
   // Create a new environment for the block
-  auto previousEnv = checker->environment;
+  auto previousEnv = checker->currentEnvironment;
   // For now, we'll just use the same environment
   // In a full implementation, we'd create a new environment
 
@@ -245,7 +260,7 @@ void StmtTypeCheckVisitor::visit(BlockStmt &node) {
     checker->checkStatement(*stmt);
   }
 
-  checker->environment = previousEnv;
+  checker->currentEnvironment = previousEnv;
 }
 
 void StmtTypeCheckVisitor::visit(IfStmt &node) {
@@ -317,44 +332,53 @@ void StmtTypeCheckVisitor::visit(ConstructorDeclStmt &node) {
 void StmtTypeCheckVisitor::visit(LiteralExpr &node) {
   (void)node;
   // Not used in statement type checking
+  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
 void StmtTypeCheckVisitor::visit(IdentifierExpr &node) {
   (void)node;
   // Not used in statement type checking
+  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
 void StmtTypeCheckVisitor::visit(LambdaExpr &node) {
   (void)node;
   // Not used in statement type checking
+  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
 void StmtTypeCheckVisitor::visit(BinaryExpr &node) {
   (void)node;
   // Not used in statement type checking
+  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
 void StmtTypeCheckVisitor::visit(UnaryExpr &node) {
   (void)node;
   // Not used in statement type checking
+  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
 void StmtTypeCheckVisitor::visit(CallExpr &node) {
   (void)node;
   // Not used in statement type checking
+  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
 void StmtTypeCheckVisitor::visit(MemberAccessExpr &node) {
   (void)node;
   // Not used in statement type checking
+  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
 void StmtTypeCheckVisitor::visit(ArrayLiteralExpr &node) {
   (void)node;
   // Not used in statement type checking
+  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
 void StmtTypeCheckVisitor::visit(ArrayAccessExpr &node) {
   (void)node;
   // Not used in statement type checking
+  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }

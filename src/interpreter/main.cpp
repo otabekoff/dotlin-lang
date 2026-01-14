@@ -276,7 +276,7 @@ void Interpreter::performTypeInferenceOnExpression(Expression &expr,
       }
     }
   }
-  // For identifier expressions, we can get the type from the environment
+  // For identifier expressions, we can get type from environment
   // but don't need to recurse further
 }
 
