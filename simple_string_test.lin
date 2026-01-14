@@ -1,0 +1,4 @@
+fun main() {
+    val str = "Hello"
+    println(str.length)
+}

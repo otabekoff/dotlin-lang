@@ -1,0 +1,3 @@
+println("Hello without main!")
+val x = 42
+println(x)

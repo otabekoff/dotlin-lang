@@ -79,13 +79,8 @@ Value Interpreter::interpret(const Program &program,
       }
 
       try {
-        auto mainFunc =
-            dynamic_cast<FunctionDeclStmt *>(mainFunctionStmt.get());
-        if (mainFunc) {
-          Value result = executeFunction(mainFunc->body.get(), environment);
-          environment = previousEnv;
-          functionEnvironment = previousFuncEnv;
-          return result;
+        if (mainDef->body) {
+          execute(*mainDef->body);
         }
       } catch (const std::runtime_error &e) {
         environment = previousEnv;

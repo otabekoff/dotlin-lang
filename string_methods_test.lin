@@ -1,0 +1,13 @@
+fun main() {
+    val str = "Hello World"
+    println("Length: " + str.length.toString())
+    println("Substring: " + str.substring(6).toString())
+    println("Index: " + str.indexOf("World").toString())
+    println("Starts with Hello: " + str.startsWith("Hello").toString())
+    println("Ends with World: " + str.endsWith("World").toString())
+    println("Upper: " + str.toUpperCase().toString())
+    println("Lower: " + str.toLowerCase().toString())
+    println("Trim: " + str.trim().toString())
+    val parts = str.split(" ")
+    println("Split: " + parts.contentToString())
+}

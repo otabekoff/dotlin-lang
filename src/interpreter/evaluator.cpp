@@ -1,9 +1,10 @@
+#include "dotlin/interpreter.h"
 #include "dotlin/parser.h"
 #include "dotlin/visitors.h"
 // #include <algorithm>
 // #include <cmath>
+#include <algorithm>
 #include <iostream>
-// #include <sstream>
 #include <stdexcept>
 
 // Forward declaration of valueToString
@@ -55,7 +56,18 @@ void EvalVisitor::visit(IdentifierExpr &node) {
     try {
       result = interpreter->environment->get(node.name);
     } catch (const std::runtime_error &e) {
-      result = Value(std::string("undefined"));
+      // Check if this is a built-in function
+      if (node.name == "println" || node.name == "print" ||
+          node.name == "sqrt" || node.name == "abs" || node.name == "pow" ||
+          node.name == "readln") {
+        // Return a special lambda that represents a built-in function
+        auto builtinLambda =
+            std::make_shared<LambdaValue>(std::vector<FunctionParameter>(),
+                                          nullptr, interpreter->environment);
+        result = Value(builtinLambda);
+      } else {
+        result = Value(std::string("undefined"));
+      }
     }
   }
 }
@@ -323,14 +335,20 @@ void EvalVisitor::visit(CallExpr &node) {
   if (auto *lambda = std::get_if<std::shared_ptr<LambdaValue>>(&calleeValue)) {
     // Check if this is a built-in function
     if ((*lambda)->parameters.empty() && (*lambda)->body == nullptr) {
-      // This is a built-in function
+      // This is a built-in function - get the function name
+      std::string functionName = "";
+      if (auto *identifier =
+              dynamic_cast<IdentifierExpr *>(node.callee.get())) {
+        functionName = identifier->name;
+      }
+
       // Convert unique_ptr to shared_ptr for built-in function call
       std::vector<std::shared_ptr<Expression>> sharedArgs;
       for (const auto &arg : node.arguments) {
         sharedArgs.push_back(
             std::shared_ptr<Expression>(arg.get(), [](Expression *) {}));
       }
-      result = interpreter->executeBuiltinFunction("", sharedArgs);
+      result = interpreter->executeBuiltinFunction(functionName, sharedArgs);
       return;
     }
 
@@ -420,6 +438,52 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
     }
 
     throw std::runtime_error("Property '" + node.property + "' not found");
+  }
+
+  // Check if the object is a string and has string properties/methods
+  if (auto *strValue = std::get_if<std::string>(&objValue)) {
+    if (node.property == "length") {
+      result = Value(static_cast<int>(strValue->length()));
+      return;
+    } else if (node.property == "substring") {
+      throw std::runtime_error("Substring method requires arguments");
+    } else if (node.property == "indexOf") {
+      throw std::runtime_error("IndexOf method requires arguments");
+    } else if (node.property == "startsWith") {
+      throw std::runtime_error("StartsWith method requires arguments");
+    } else if (node.property == "endsWith") {
+      throw std::runtime_error("EndsWith method requires arguments");
+    } else if (node.property == "toUpperCase") {
+      std::string upperStr = *strValue;
+      std::transform(upperStr.begin(), upperStr.end(), upperStr.begin(),
+                     ::toupper);
+      result = Value(upperStr);
+      return;
+    } else if (node.property == "toLowerCase") {
+      std::string lowerStr = *strValue;
+      std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(),
+                     ::tolower);
+      result = Value(lowerStr);
+      return;
+    } else if (node.property == "trim") {
+      std::string trimmedStr = *strValue;
+      // Left trim
+      size_t start = trimmedStr.find_first_not_of(" \t\n\r\f\v");
+      if (start == std::string::npos) {
+        result = Value(trimmedStr);
+        return;
+      } else {
+        // Right trim
+        size_t end = trimmedStr.find_last_not_of(" \t\n\r\f\v");
+        result = Value(trimmedStr.substr(start, end - start + 1));
+        return;
+      }
+    } else if (node.property == "split") {
+      throw std::runtime_error("Split method requires arguments");
+    }
+    // For now, just throw an error for unimplemented string properties
+    throw std::runtime_error("String property '" + node.property +
+                             "' not implemented yet");
   }
 
   // Check if the object is an array

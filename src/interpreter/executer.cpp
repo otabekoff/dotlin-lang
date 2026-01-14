@@ -1,3 +1,4 @@
+#include "dotlin/interpreter.h"
 #include "dotlin/parser.h"
 #include "dotlin/visitors.h"
 #include <stdexcept>

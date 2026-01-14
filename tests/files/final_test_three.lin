@@ -1,0 +1,37 @@
+fun main() {
+    // Test basic functionality
+    println("=== Basic Functionality Test ===")
+    
+    val x = 42
+    val y = 3.14
+    val name = "Dotlin"
+    val flag = true
+    
+    println("Variables work")
+    println("Arithmetic: " + (x + 10))
+    
+    // Test arrays
+    val arr = arrayOf(1, 2, 3)
+    println("Arrays work: " + arr.size)
+    
+    // Test functions
+    fun test(): String {
+        return "Functions work"
+    }
+    
+    println(test())
+    
+    // Test conditionals
+    if (x > 0) {
+        println("Conditionals work")
+    }
+    
+    // Test loops
+    var i = 0
+    while (i < 3) {
+        i = i + 1
+    }
+    println("Loops work: " + i)
+    
+    println("=== All tests passed! ===")
+}

@@ -11,6 +11,38 @@ using namespace dotlin;
 Value Interpreter::executeBuiltinFunction(
     const std::string &name,
     const std::vector<std::shared_ptr<Expression>> &arguments) {
+  // I/O functions
+  if (name == "println") {
+    if (arguments.empty()) {
+      std::cout << std::endl;
+      return Value();
+    }
+    for (size_t i = 0; i < arguments.size(); ++i) {
+      Value arg = evaluate(*arguments[i]);
+      std::cout << valueToString(arg);
+      if (i == arguments.size() - 1) {
+        std::cout << std::endl;
+      } else {
+        std::cout << " ";
+      }
+    }
+    return Value();
+  }
+
+  if (name == "print") {
+    for (const auto &arg : arguments) {
+      Value argValue = evaluate(*arg);
+      std::cout << valueToString(argValue);
+    }
+    return Value();
+  }
+
+  if (name == "readln") {
+    std::string input;
+    std::getline(std::cin, input);
+    return Value(input);
+  }
+
   // Mathematical functions
   if (name == "sqrt") {
     if (arguments.size() != 1) {
