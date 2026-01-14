@@ -2511,479 +2511,468 @@ std::string Interpreter::valueToString(const Value &value) {
   }
 }
 
-// Type checker implementation
-class TypeChecker {
-public:
-  std::shared_ptr<Environment> environment;
+// TypeChecker implementation
 
-  TypeChecker(std::shared_ptr<Environment> env) : environment(env) {}
+TypeChecker::TypeChecker(std::shared_ptr<Environment> env) : environment(env) {}
 
-  // Helper method to get type of a value
-  std::shared_ptr<dotlin::Type> getTypeOfValue(const Value &value) {
-    if (std::holds_alternative<int>(value)) {
-      return std::make_shared<dotlin::Type>(dotlin::TypeKind::INT);
-    } else if (std::holds_alternative<double>(value)) {
-      return std::make_shared<dotlin::Type>(dotlin::TypeKind::DOUBLE);
-    } else if (std::holds_alternative<bool>(value)) {
-      return std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
-    } else if (std::holds_alternative<std::string>(value)) {
-      return std::make_shared<dotlin::Type>(dotlin::TypeKind::STRING);
-    } else if (std::holds_alternative<ArrayValue>(value)) {
-      auto arrayValue = std::get<ArrayValue>(value);
-      std::shared_ptr<dotlin::Type> elementType = nullptr;
-      if (!arrayValue.elements.empty()) {
-        elementType = getTypeOfValue(arrayValue.elements[0]);
-      }
-      return std::make_shared<dotlin::Type>(dotlin::TypeKind::ARRAY,
-                                            elementType);
-    } else if (std::holds_alternative<std::shared_ptr<ClassInstance>>(value)) {
-      return std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-    } else {
-      return std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+// Helper method to get type of a value
+std::shared_ptr<dotlin::Type> TypeChecker::getTypeOfValue(const Value &value) {
+  if (std::holds_alternative<int>(value)) {
+    return std::make_shared<dotlin::Type>(dotlin::TypeKind::INT);
+  } else if (std::holds_alternative<double>(value)) {
+    return std::make_shared<dotlin::Type>(dotlin::TypeKind::DOUBLE);
+  } else if (std::holds_alternative<bool>(value)) {
+    return std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+  } else if (std::holds_alternative<std::string>(value)) {
+    return std::make_shared<dotlin::Type>(dotlin::TypeKind::STRING);
+  } else if (std::holds_alternative<ArrayValue>(value)) {
+    auto arrayValue = std::get<ArrayValue>(value);
+    std::shared_ptr<dotlin::Type> elementType = nullptr;
+    if (!arrayValue.elements.empty()) {
+      elementType = getTypeOfValue(arrayValue.elements[0]);
     }
+    return std::make_shared<dotlin::Type>(dotlin::TypeKind::ARRAY, elementType);
+  } else if (std::holds_alternative<std::shared_ptr<ClassInstance>>(value)) {
+    return std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+  } else {
+    return std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
   }
+}
 
-  // Helper method to convert type to string
-  std::string typeToString(const std::shared_ptr<dotlin::Type> &type) {
-    if (!type)
-      return "unknown";
-    switch (type->kind) {
-    case dotlin::TypeKind::INT:
-      return "Int";
-    case dotlin::TypeKind::DOUBLE:
-      return "Double";
-    case dotlin::TypeKind::BOOL:
-      return "Boolean";
-    case dotlin::TypeKind::STRING:
-      return "String";
-    case dotlin::TypeKind::ARRAY:
-      if (type->elementType) {
-        return "Array<" + typeToString(type->elementType) + ">";
-      }
-      return "Array";
-    case dotlin::TypeKind::VOID:
-      return "Unit";
-    case dotlin::TypeKind::UNKNOWN:
-      return "Unknown";
-    case dotlin::TypeKind::ANY:
-      return "Any";
-    default:
-      return "unknown";
+// Helper method to convert type to string
+std::string
+TypeChecker::typeToString(const std::shared_ptr<dotlin::Type> &type) {
+  if (!type)
+    return "unknown";
+  switch (type->kind) {
+  case dotlin::TypeKind::INT:
+    return "Int";
+  case dotlin::TypeKind::DOUBLE:
+    return "Double";
+  case dotlin::TypeKind::BOOL:
+    return "Boolean";
+  case dotlin::TypeKind::STRING:
+    return "String";
+  case dotlin::TypeKind::ARRAY:
+    if (type->elementType) {
+      return "Array<" + typeToString(type->elementType) + ">";
     }
+    return "Array";
+  case dotlin::TypeKind::VOID:
+    return "Unit";
+  case dotlin::TypeKind::UNKNOWN:
+    return "Unknown";
+  case dotlin::TypeKind::ANY:
+    return "Any";
+  default:
+    return "unknown";
   }
+}
 
-  std::shared_ptr<dotlin::Type> checkExpression(dotlin::Expression &expr) {
-    (void)expr; // Suppress unused parameter warning
-    // Use visitor pattern to check expression types
-    struct TypeCheckVisitor : public dotlin::AstVisitor {
-      std::shared_ptr<dotlin::Type> result;
-      TypeChecker *checker;
+std::shared_ptr<dotlin::Type>
+TypeChecker::checkExpression(dotlin::Expression &expr) {
+  (void)expr; // Suppress unused parameter warning
+  // Use visitor pattern to check expression types
+  struct TypeCheckVisitor : public dotlin::AstVisitor {
+    std::shared_ptr<dotlin::Type> result;
+    TypeChecker *checker;
 
-      TypeCheckVisitor(TypeChecker *chk) : checker(chk) {}
+    TypeCheckVisitor(TypeChecker *chk) : checker(chk) {}
 
-      void visit(dotlin::LiteralExpr &node) override {
-        // Determine type from literal value
-        if (std::holds_alternative<int>(node.value)) {
-          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::INT);
-        } else if (std::holds_alternative<double>(node.value)) {
-          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::DOUBLE);
-        } else if (std::holds_alternative<bool>(node.value)) {
-          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
-        } else if (std::holds_alternative<std::string>(node.value)) {
+    void visit(dotlin::LiteralExpr &node) override {
+      // Determine type from literal value
+      if (std::holds_alternative<int>(node.value)) {
+        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::INT);
+      } else if (std::holds_alternative<double>(node.value)) {
+        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::DOUBLE);
+      } else if (std::holds_alternative<bool>(node.value)) {
+        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+      } else if (std::holds_alternative<std::string>(node.value)) {
+        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::STRING);
+      } else {
+        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+      }
+    }
+
+    void visit(dotlin::IdentifierExpr &node) override {
+      // Look up the type of the identifier in the environment
+      // Try to get the value and infer its type
+      try {
+        auto value = checker->environment->get(node.name);
+        result = checker->getTypeOfValue(value);
+      } catch (const std::exception &) {
+        // Variable not found in environment
+        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+      }
+    }
+
+    void visit(dotlin::BinaryExpr &node) override {
+      auto leftType = checker->checkExpression(*node.left);
+      auto rightType = checker->checkExpression(*node.right);
+
+      // Check type compatibility based on operator
+      switch (node.op) {
+      case dotlin::TokenType::PLUS:
+        // Addition: both operands should be numeric or one string
+        if (leftType->kind == dotlin::TypeKind::STRING ||
+            rightType->kind == dotlin::TypeKind::STRING) {
           result = std::make_shared<dotlin::Type>(dotlin::TypeKind::STRING);
+        } else if (leftType->isCompatibleWith(*rightType)) {
+          result = std::make_shared<dotlin::Type>(leftType->kind);
         } else {
+          std::cout << "Type error: incompatible types for + operator"
+                    << std::endl;
           result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
         }
-      }
-
-      void visit(dotlin::IdentifierExpr &node) override {
-        // Look up the type of the identifier in the environment
-        // Try to get the value and infer its type
-        try {
-          auto value = checker->environment->get(node.name);
-          result = checker->getTypeOfValue(value);
-        } catch (const std::exception &) {
-          // Variable not found in environment
-          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-        }
-      }
-
-      void visit(dotlin::BinaryExpr &node) override {
-        auto leftType = checker->checkExpression(*node.left);
-        auto rightType = checker->checkExpression(*node.right);
-
-        // Check type compatibility based on operator
-        switch (node.op) {
-        case dotlin::TokenType::PLUS:
-          // Addition: both operands should be numeric or one string
-          if (leftType->kind == dotlin::TypeKind::STRING ||
-              rightType->kind == dotlin::TypeKind::STRING) {
-            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::STRING);
-          } else if (leftType->isCompatibleWith(*rightType)) {
-            result = std::make_shared<dotlin::Type>(leftType->kind);
-          } else {
-            std::cout << "Type error: incompatible types for + operator"
-                      << std::endl;
-            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-          }
-          break;
-        case dotlin::TokenType::MINUS:
-        case dotlin::TokenType::MULTIPLY:
-        case dotlin::TokenType::DIVIDE:
-          // Arithmetic operations require numeric types
-          if (leftType->kind == dotlin::TypeKind::INT ||
-              leftType->kind == dotlin::TypeKind::DOUBLE) {
-            if (rightType->kind == dotlin::TypeKind::INT ||
+        break;
+      case dotlin::TokenType::MINUS:
+      case dotlin::TokenType::MULTIPLY:
+      case dotlin::TokenType::DIVIDE:
+        // Arithmetic operations require numeric types
+        if (leftType->kind == dotlin::TypeKind::INT ||
+            leftType->kind == dotlin::TypeKind::DOUBLE) {
+          if (rightType->kind == dotlin::TypeKind::INT ||
+              rightType->kind == dotlin::TypeKind::DOUBLE) {
+            // Result is the higher precision type
+            if (leftType->kind == dotlin::TypeKind::DOUBLE ||
                 rightType->kind == dotlin::TypeKind::DOUBLE) {
-              // Result is the higher precision type
-              if (leftType->kind == dotlin::TypeKind::DOUBLE ||
-                  rightType->kind == dotlin::TypeKind::DOUBLE) {
-                result =
-                    std::make_shared<dotlin::Type>(dotlin::TypeKind::DOUBLE);
-              } else {
-                result = std::make_shared<dotlin::Type>(dotlin::TypeKind::INT);
-              }
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::DOUBLE);
             } else {
-              std::cout << "Type error: right operand must be numeric for "
-                           "arithmetic operator"
-                        << std::endl;
-              result =
-                  std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+              result = std::make_shared<dotlin::Type>(dotlin::TypeKind::INT);
             }
           } else {
-            std::cout << "Type error: left operand must be numeric for "
+            std::cout << "Type error: right operand must be numeric for "
                          "arithmetic operator"
                       << std::endl;
             result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
           }
-          break;
-        case dotlin::TokenType::EQUAL:
-        case dotlin::TokenType::NOT_EQUAL:
-          // Comparison operators return boolean
-          if (leftType->isCompatibleWith(*rightType)) {
-            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
-          } else {
-            std::cout
-                << "Type error: incompatible types for comparison operator"
-                << std::endl;
-            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-          }
-          break;
-        case dotlin::TokenType::LESS:
-        case dotlin::TokenType::LESS_EQUAL:
-        case dotlin::TokenType::GREATER:
-        case dotlin::TokenType::GREATER_EQUAL:
-          // Relational operators return boolean, require comparable types
-          if (leftType->isCompatibleWith(*rightType)) {
-            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
-          } else {
-            std::cout
-                << "Type error: incompatible types for relational operator"
-                << std::endl;
-            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-          }
-          break;
-        case dotlin::TokenType::AND:
-        case dotlin::TokenType::OR:
-          // Logical operators require boolean types
-          if (leftType->kind == dotlin::TypeKind::BOOL &&
-              rightType->kind == dotlin::TypeKind::BOOL) {
-            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
-          } else {
-            std::cout
-                << "Type error: logical operators require boolean operands"
-                << std::endl;
-            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-          }
-          break;
-        case dotlin::TokenType::ASSIGN:
-          // Assignment: right operand type should be compatible with left
-          if (rightType->isCompatibleWith(*leftType)) {
-            result = rightType; // Assignment returns the assigned value type
-          } else {
-            std::cout << "Type error: incompatible types for assignment"
-                      << std::endl;
-            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-          }
-          break;
-        default:
-          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-          break;
-        }
-      }
-
-      void visit(dotlin::UnaryExpr &node) override {
-        auto operandType = checker->checkExpression(*node.operand);
-
-        switch (node.op) {
-        case dotlin::TokenType::MINUS:
-          // Unary minus requires numeric type
-          if (operandType->kind == dotlin::TypeKind::INT ||
-              operandType->kind == dotlin::TypeKind::DOUBLE) {
-            result = operandType;
-          } else {
-            std::cout << "Type error: unary minus requires numeric operand"
-                      << std::endl;
-            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-          }
-          break;
-        case dotlin::TokenType::NOT:
-          // Logical NOT requires boolean type
-          if (operandType->kind == dotlin::TypeKind::BOOL) {
-            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
-          } else {
-            std::cout << "Type error: logical NOT requires boolean operand"
-                      << std::endl;
-            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-          }
-          break;
-        default:
-          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-          break;
-        }
-      }
-
-      void visit(dotlin::CallExpr &node) override {
-        (void)node; /* For now, assume built-in functions have correct types */
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-      }
-
-      void visit(dotlin::MemberAccessExpr &node) override {
-        auto objectType = checker->checkExpression(*node.object);
-        // For now, return unknown for member access
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-      }
-
-      void visit(dotlin::ArrayAccessExpr &node) override {
-        auto arrayType = checker->checkExpression(*node.array);
-        auto indexType = checker->checkExpression(*node.index);
-
-        // Index must be integer
-        if (indexType->kind != dotlin::TypeKind::INT) {
-          std::cout << "Type error: array index must be integer" << std::endl;
-          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
         } else {
-          // Array access returns the element type
-          // For now, return unknown since we don't track element types in the
-          // array
+          std::cout << "Type error: left operand must be numeric for "
+                       "arithmetic operator"
+                    << std::endl;
           result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
         }
-      }
-
-      void visit(dotlin::ArrayLiteralExpr &node) override {
-        if (node.elements.empty()) {
-          // Empty array - return array of unknown type
-          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::ARRAY);
+        break;
+      case dotlin::TokenType::EQUAL:
+      case dotlin::TokenType::NOT_EQUAL:
+        // Comparison operators return boolean
+        if (leftType->isCompatibleWith(*rightType)) {
+          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
         } else {
-          // Check if all elements have the same type
-          auto elementType = checker->checkExpression(*node.elements[0]);
-          for (size_t i = 1; i < node.elements.size(); ++i) {
-            auto currElementType = checker->checkExpression(*node.elements[i]);
-            if (!elementType->isCompatibleWith(*currElementType)) {
-              std::cout
-                  << "Type error: array elements must have compatible types"
-                  << std::endl;
-              result =
-                  std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-              return;
-            }
-          }
-          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::ARRAY,
-                                                  elementType);
+          std::cout << "Type error: incompatible types for comparison operator"
+                    << std::endl;
+          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
         }
+        break;
+      case dotlin::TokenType::LESS:
+      case dotlin::TokenType::LESS_EQUAL:
+      case dotlin::TokenType::GREATER:
+      case dotlin::TokenType::GREATER_EQUAL:
+        // Relational operators return boolean, require comparable types
+        if (leftType->isCompatibleWith(*rightType)) {
+          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+        } else {
+          std::cout << "Type error: incompatible types for relational operator"
+                    << std::endl;
+          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+        }
+        break;
+      case dotlin::TokenType::AND:
+      case dotlin::TokenType::OR:
+        // Logical operators require boolean types
+        if (leftType->kind == dotlin::TypeKind::BOOL &&
+            rightType->kind == dotlin::TypeKind::BOOL) {
+          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+        } else {
+          std::cout << "Type error: logical operators require boolean operands"
+                    << std::endl;
+          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+        }
+        break;
+      case dotlin::TokenType::ASSIGN:
+        // Assignment: right operand type should be compatible with left
+        if (rightType->isCompatibleWith(*leftType)) {
+          result = rightType; // Assignment returns the assigned value type
+        } else {
+          std::cout << "Type error: incompatible types for assignment"
+                    << std::endl;
+          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+        }
+        break;
+      default:
+        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+        break;
       }
+    }
 
-      void visit(dotlin::LambdaExpr &node) override {
-        (void)node;
+    void visit(dotlin::UnaryExpr &node) override {
+      auto operandType = checker->checkExpression(*node.operand);
+
+      switch (node.op) {
+      case dotlin::TokenType::MINUS:
+        // Unary minus requires numeric type
+        if (operandType->kind == dotlin::TypeKind::INT ||
+            operandType->kind == dotlin::TypeKind::DOUBLE) {
+          result = operandType;
+        } else {
+          std::cout << "Type error: unary minus requires numeric operand"
+                    << std::endl;
+          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+        }
+        break;
+      case dotlin::TokenType::NOT:
+        // Logical NOT requires boolean type
+        if (operandType->kind == dotlin::TypeKind::BOOL) {
+          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
+        } else {
+          std::cout << "Type error: logical NOT requires boolean operand"
+                    << std::endl;
+          result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+        }
+        break;
+      default:
+        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+        break;
+      }
+    }
+
+    void visit(dotlin::CallExpr &node) override {
+      (void)node; /* For now, assume built-in functions have correct types */
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
+
+    void visit(dotlin::MemberAccessExpr &node) override {
+      auto objectType = checker->checkExpression(*node.object);
+      // For now, return unknown for member access
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
+
+    void visit(dotlin::ArrayAccessExpr &node) override {
+      auto arrayType = checker->checkExpression(*node.array);
+      auto indexType = checker->checkExpression(*node.index);
+
+      // Index must be integer
+      if (indexType->kind != dotlin::TypeKind::INT) {
+        std::cout << "Type error: array index must be integer" << std::endl;
+        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+      } else {
+        // Array access returns the element type
+        // For now, return unknown since we don't track element types in the
+        // array
         result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
       }
+    }
 
-      void visit(dotlin::ExpressionStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    void visit(dotlin::ArrayLiteralExpr &node) override {
+      if (node.elements.empty()) {
+        // Empty array - return array of unknown type
+        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::ARRAY);
+      } else {
+        // Check if all elements have the same type
+        auto elementType = checker->checkExpression(*node.elements[0]);
+        for (size_t i = 1; i < node.elements.size(); ++i) {
+          auto currElementType = checker->checkExpression(*node.elements[i]);
+          if (!elementType->isCompatibleWith(*currElementType)) {
+            std::cout << "Type error: array elements must have compatible types"
+                      << std::endl;
+            result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+            return;
+          }
+        }
+        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::ARRAY,
+                                                elementType);
       }
+    }
 
-      void visit(dotlin::VariableDeclStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::LambdaExpr &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
 
-      void visit(dotlin::FunctionDeclStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::ExpressionStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::BlockStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::VariableDeclStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::ReturnStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::FunctionDeclStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::IfStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::BlockStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::WhileStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::ReturnStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::ForStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::IfStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::WhenStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::WhileStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::TryStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::ForStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::ConstructorDeclStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::WhenStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::ClassDeclStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
-    };
+    void visit(dotlin::TryStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-    TypeCheckVisitor visitor(this);
-    expr.accept(visitor);
-    return visitor.result;
-  }
+    void visit(dotlin::ConstructorDeclStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-  std::shared_ptr<dotlin::Type> checkStatement(dotlin::Statement &stmt) {
-    (void)stmt; // Suppress unused parameter warning
-    // Use visitor pattern to check statement types
-    struct TypeCheckVisitor : public dotlin::AstVisitor {
-      std::shared_ptr<dotlin::Type> result;
-      TypeChecker *checker;
+    void visit(dotlin::ClassDeclStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
+  };
 
-      TypeCheckVisitor(TypeChecker *chk) : checker(chk) {}
+  TypeCheckVisitor visitor(this);
+  expr.accept(visitor);
+  return visitor.result;
+}
 
-      void visit(dotlin::ExpressionStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+void TypeChecker::checkStatement(dotlin::Statement &stmt) {
+  (void)stmt; // Suppress unused parameter warning
+  // Use visitor pattern to check statement types
+  struct TypeCheckVisitor : public dotlin::AstVisitor {
+    std::shared_ptr<dotlin::Type> result;
+    TypeChecker *checker;
 
-      void visit(dotlin::VariableDeclStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    TypeCheckVisitor(TypeChecker *chk) : checker(chk) {}
 
-      void visit(dotlin::FunctionDeclStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::ExpressionStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::BlockStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::VariableDeclStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::LiteralExpr &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-      }
+    void visit(dotlin::FunctionDeclStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::IdentifierExpr &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-      }
+    void visit(dotlin::BlockStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::BinaryExpr &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-      }
+    void visit(dotlin::LiteralExpr &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
 
-      void visit(dotlin::UnaryExpr &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-      }
+    void visit(dotlin::IdentifierExpr &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
 
-      void visit(dotlin::CallExpr &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-      }
+    void visit(dotlin::BinaryExpr &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
 
-      void visit(dotlin::MemberAccessExpr &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-      }
+    void visit(dotlin::UnaryExpr &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
 
-      void visit(dotlin::ArrayAccessExpr &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-      }
+    void visit(dotlin::CallExpr &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
 
-      void visit(dotlin::ArrayLiteralExpr &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-      }
+    void visit(dotlin::MemberAccessExpr &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
 
-      void visit(dotlin::LambdaExpr &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-      }
+    void visit(dotlin::ArrayAccessExpr &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
 
-      void visit(dotlin::ReturnStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::ArrayLiteralExpr &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
 
-      void visit(dotlin::IfStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::LambdaExpr &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+    }
 
-      void visit(dotlin::WhileStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::ReturnStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::ForStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::IfStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::WhenStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::WhileStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::TryStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::ForStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::ConstructorDeclStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
+    void visit(dotlin::WhenStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-      void visit(dotlin::ClassDeclStmt &node) override {
-        (void)node;
-        result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
-      }
-    };
+    void visit(dotlin::TryStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
 
-    TypeCheckVisitor visitor(this);
-    stmt.accept(visitor);
-    return visitor.result;
-  }
-};
+    void visit(dotlin::ConstructorDeclStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
+
+    void visit(dotlin::ClassDeclStmt &node) override {
+      (void)node;
+      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::VOID);
+    }
+  };
+
+  TypeCheckVisitor visitor(this);
+  stmt.accept(visitor);
+}
 
 Value Interpreter::executeBlock(const std::vector<Statement::Ptr> &statements,
                                 std::shared_ptr<Environment> parentEnv) {

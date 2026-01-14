@@ -6,6 +6,13 @@ set(SOURCES
   lexer.cpp
   parser.cpp
   interpreter.cpp
+  interpreter/environment.cpp
+  interpreter/utils.cpp
+  interpreter/main.cpp
+  interpreter/evaluator.cpp
+  interpreter/executer.cpp
+  interpreter/typechecker.cpp
+  interpreter/builtins.cpp
 )
 
 # Set sources for the library

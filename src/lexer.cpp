@@ -1,7 +1,7 @@
 // src/lexer.cpp
 #include "dotlin/lexer.h"
 #include <cctype>
-#include <sstream>
+// #include <sstream>
 
 namespace dotlin
 {
