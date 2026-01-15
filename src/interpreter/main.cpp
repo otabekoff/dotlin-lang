@@ -51,11 +51,18 @@ void Interpreter::traceLookup(const std::string &name,
 
 Value Interpreter::interpret(const Program &program) {
   std::vector<std::string> empty_args;
-  return interpret(program, empty_args);
+  return interpret(program, empty_args, sourceName);
 }
 
 Value Interpreter::interpret(const Program &program,
                              const std::vector<std::string> &args) {
+  return interpret(program, args, sourceName);
+}
+
+Value Interpreter::interpret(const Program &program,
+                             const std::vector<std::string> &args,
+                             const std::string &srcName) {
+  sourceName = srcName;
   // Store command-line arguments
   commandLineArgs = args;
 
@@ -164,10 +171,15 @@ Value Interpreter::executeBlock(
 }
 
 Value Interpreter::evaluate(Expression &expr) {
-  EvalVisitor visitor(this);
-  expr.accept(visitor);
-  lastEvaluatedValue = visitor.result;
-  return visitor.result;
+  try {
+    EvalVisitor visitor(this);
+    expr.accept(visitor);
+    lastEvaluatedValue = visitor.result;
+    return visitor.result;
+  } catch (DotlinError &e) {
+    e.setSource(sourceName);
+    throw;
+  }
 }
 
 Value Interpreter::evaluate(Expression::Ptr &exprPtr) {
@@ -178,10 +190,13 @@ Value Interpreter::evaluate(Expression::Ptr &exprPtr) {
 }
 
 void Interpreter::execute(Statement &stmt) {
-  std::cout << "[DEBUG] Executing " << typeid(stmt).name() << " at line "
-            << stmt.line << std::endl;
-  ExecVisitor visitor(this);
-  stmt.accept(visitor);
+  try {
+    ExecVisitor visitor(this);
+    stmt.accept(visitor);
+  } catch (DotlinError &e) {
+    e.setSource(sourceName);
+    throw;
+  }
 }
 
 Value Interpreter::executeFunction(const std::string &name, Statement *body,
@@ -281,6 +296,13 @@ Value interpret(const Program &program) {
 
 Value interpret(const Program &program, const std::vector<std::string> &args) {
   Interpreter interpreter;
+  return interpreter.interpret(program, args);
+}
+
+Value interpret(const Program &program, const std::vector<std::string> &args,
+                const std::string &sourceName) {
+  Interpreter interpreter;
+  interpreter.setSourceName(sourceName);
   return interpreter.interpret(program, args);
 }
 

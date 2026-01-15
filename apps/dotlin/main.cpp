@@ -26,9 +26,10 @@ bool hasExtension(const std::string &filename, const std::string &ext) {
 
 int main(int argc, char *argv[]) {
   std::string source;
+  std::string filepath = "source.lin";
 
   if (argc > 1) {
-    std::string filepath = argv[1];
+    filepath = argv[1];
 
     // Check if the file has .lin extension
     if (!hasExtension(filepath, ".lin")) {
@@ -58,7 +59,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Pass command-line arguments to the interpreter
-    auto result = dotlin::interpret(program, cmdArgs);
+    auto result = dotlin::interpret(program, cmdArgs, filepath);
     std::cout << "Execution result: " << std::endl;
     // Note: result printing depends on the Value variant implementation
   } catch (const dotlin::DotlinError &e) {

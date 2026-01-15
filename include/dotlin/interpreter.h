@@ -37,6 +37,12 @@ public:
     stackTrace = std::move(trace);
   }
 
+  void setSource(std::string s) {
+    if (source == "source.lin" || source == "") {
+      source = std::move(s);
+    }
+  }
+
   std::string fullMessage() const {
     std::string msg = type + " Error at " + source + ":" +
                       std::to_string(line) + ":" + std::to_string(column) +
@@ -386,6 +392,11 @@ public:
   Interpreter();
   Value interpret(const Program &program);
   Value interpret(const Program &program, const std::vector<std::string> &args);
+  Value interpret(const Program &program, const std::vector<std::string> &args,
+                  const std::string &sourceName);
+
+  void setSourceName(const std::string &name) { sourceName = name; }
+  std::string getSourceName() const { return sourceName; }
 
   // Visitor pattern implementation
   void visit(LiteralExpr &node);
@@ -423,6 +434,7 @@ private:
       50;                             // Maximum allowed evaluation depth
   std::vector<std::string> callStack; // Current call stack for tracing
   Value lastEvaluatedValue;
+  std::string sourceName = "source.lin";
   Value evaluate(Expression &expr);
   Value evaluate(Expression::Ptr &exprPtr);
   void execute(Statement &stmt);
@@ -472,6 +484,8 @@ private:
 
 Value interpret(const Program &program);
 Value interpret(const Program &program, const std::vector<std::string> &args);
+Value interpret(const Program &program, const std::vector<std::string> &args,
+                const std::string &sourceName);
 
 // Utility functions
 std::string getTypeOfValue(const Value &value);
