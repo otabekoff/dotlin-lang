@@ -10,7 +10,7 @@
   - [x] Optimize Environment lookups (use hashes or pre-indexed scopes)
 
 - [ ] Phase 16: Advanced Kotlin Features
-  - [ ] Extension Functions (`fun Type.name()`)
+  - [x] Extension Functions (`fun Type.name()`)
   - [ ] Null Safety (`String?`, `?.`, `!!`)
   - [ ] Full Generics Enforcement
 

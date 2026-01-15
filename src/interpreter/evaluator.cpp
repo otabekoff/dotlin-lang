@@ -1267,6 +1267,10 @@ void EvalVisitor::visit(CallExpr &node)
           }
         }
 
+        // Save original environment
+        auto oldEnv = interpreter->environment;
+        auto oldFuncEnv = interpreter->functionEnvironment;
+
         // Switch to extension function environment
         interpreter->environment = extFuncEnv;
         interpreter->functionEnvironment = extFuncEnv;
@@ -1282,18 +1286,18 @@ void EvalVisitor::visit(CallExpr &node)
         {
           if (e.stackTrace.empty())
             e.setStackTrace(interpreter->callStack);
-          interpreter->environment = extFuncEnv->enclosing;
-          interpreter->functionEnvironment = extFuncEnv->enclosing;
+          interpreter->environment = oldEnv;
+          interpreter->functionEnvironment = oldFuncEnv;
           throw;
         }
         catch (...)
         {
-          interpreter->environment = extFuncEnv->enclosing;
-          interpreter->functionEnvironment = extFuncEnv->enclosing;
+          interpreter->environment = oldEnv;
+          interpreter->functionEnvironment = oldFuncEnv;
           throw;
         }
-        interpreter->environment = extFuncEnv->enclosing;
-        interpreter->functionEnvironment = extFuncEnv->enclosing;
+        interpreter->environment = oldEnv;
+        interpreter->functionEnvironment = oldFuncEnv;
 
         result = returnValue;
         return;

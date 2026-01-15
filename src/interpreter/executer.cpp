@@ -64,20 +64,23 @@ void ExecVisitor::visit(FunctionDeclStmt &node)
 void ExecVisitor::visit(ExtensionFunctionDeclStmt &node)
 {
   // For extension functions, we create a special function that can be called on instances of the receiver type
-  // Create a lambda value for the extension function
-  auto lambda = std::make_shared<LambdaValue>(node.parameters, node.body,
+  // Create a lambda value for the extension function, adding the receiver parameter as the first parameter
+  std::vector<FunctionParameter> allParams = node.parameters;
+
+  // Add the receiver parameter as the first parameter with a special name
+  // We'll use a generic name that indicates it's the extension receiver
+  FunctionParameter receiverParam("this"); // Using "this" to represent the receiver
+  allParams.insert(allParams.begin(), receiverParam);
+
+  auto lambda = std::make_shared<LambdaValue>(allParams, node.body,
                                               interpreter->environment);
 
   // The extension function is stored with a special name that combines receiver type and function name
   std::string extensionFuncName = "ext_" + node.receiverType + "_" + node.name;
   interpreter->environment->define(extensionFuncName, Value(lambda));
 
-  // Store function definition for overload resolution
-  std::vector<FunctionParameter> paramsCopy;
-  for (const auto &param : node.parameters)
-  {
-    paramsCopy.push_back(param);
-  }
+  // Store function definition for overload resolution (also includes receiver param)
+  std::vector<FunctionParameter> paramsCopy = allParams; // Include the receiver parameter
 
   auto funcDef = std::make_shared<FunctionDef>(extensionFuncName, std::move(paramsCopy),
                                                std::move(node.body));

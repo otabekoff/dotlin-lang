@@ -1,0 +1,9 @@
+fun Int.square(): Int {
+    println("square called");
+    return this * this
+}
+
+fun main() {
+    val x = 5;
+    println(x.square());
+}
