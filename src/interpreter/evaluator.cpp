@@ -304,6 +304,140 @@ void EvalVisitor::visit(CallExpr &node) {
       }
     }
 
+    // Handle method calls on built-in types (strings, arrays, etc.)
+    if (methodName == "toString" && args.empty()) {
+      result = Value(interpreter->valueToString(objValue));
+      return;
+    } else if (methodName == "size" && args.empty()) {
+      // Handle size property for arrays
+      if (auto *array = std::get_if<ArrayValue>(&objValue)) {
+        result = Value(static_cast<int>(array->elements.size()));
+        return;
+      }
+    } else if (methodName == "substring" && args.size() >= 1) {
+      // Handle substring method calls
+      if (auto *strValue = std::get_if<std::string>(&objValue)) {
+        if (args.size() == 1 && std::holds_alternative<int>(args[0])) {
+          std::string str = *strValue;
+          int start = std::get<int>(args[0]);
+          if (start >= 0 && static_cast<size_t>(start) <= str.length()) {
+            result = Value(str.substr(static_cast<size_t>(start)));
+          } else {
+            result = Value(std::string(""));
+          }
+        } else if (args.size() == 2 && std::holds_alternative<int>(args[0]) &&
+                   std::holds_alternative<int>(args[1])) {
+          std::string str = *strValue;
+          int start = std::get<int>(args[0]);
+          int end = std::get<int>(args[1]);
+          if (start >= 0 && static_cast<size_t>(end) <= str.length() &&
+              start <= end) {
+            result = Value(str.substr(static_cast<size_t>(start),
+                                      static_cast<size_t>(end - start)));
+          } else {
+            result = Value(std::string(""));
+          }
+        }
+      }
+      return;
+    } else if (methodName == "indexOf" && args.size() == 1 &&
+               std::holds_alternative<std::string>(args[0])) {
+      // Handle indexOf method calls
+      if (auto *strValue = std::get_if<std::string>(&objValue)) {
+        std::string str = *strValue;
+        std::string substr = std::get<std::string>(args[0]);
+        size_t pos = str.find(substr);
+        result = Value(static_cast<int>(
+            pos != std::string::npos ? static_cast<int>(pos) : -1));
+      } else {
+        result = Value(-1);
+      }
+      return;
+    } else if (methodName == "startsWith" && args.size() == 1 &&
+               std::holds_alternative<std::string>(args[0])) {
+      // Handle startsWith method calls
+      if (auto *strValue = std::get_if<std::string>(&objValue)) {
+        std::string str = *strValue;
+        std::string prefix = std::get<std::string>(args[0]);
+        result =
+            Value(static_cast<bool>(str.substr(0, prefix.length()) == prefix));
+      } else {
+        result = Value(false);
+      }
+      return;
+    } else if (methodName == "endsWith" && args.size() == 1 &&
+               std::holds_alternative<std::string>(args[0])) {
+      // Handle endsWith method calls
+      if (auto *strValue = std::get_if<std::string>(&objValue)) {
+        std::string str = *strValue;
+        std::string suffix = std::get<std::string>(args[0]);
+        if (str.length() >= suffix.length()) {
+          result =
+              Value(static_cast<bool>(str.substr(str.length() - suffix.length(),
+                                                 suffix.length()) == suffix));
+        } else {
+          result = Value(false);
+        }
+      } else {
+        result = Value(false);
+      }
+      return;
+    } else if (methodName == "toUpperCase" && args.empty()) {
+      // Handle toUpperCase method calls
+      if (auto *strValue = std::get_if<std::string>(&objValue)) {
+        std::string str = *strValue;
+        std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+        result = Value(str);
+      } else {
+        result = Value(std::string(""));
+      }
+      return;
+    } else if (methodName == "toLowerCase" && args.empty()) {
+      // Handle toLowerCase method calls
+      if (auto *strValue = std::get_if<std::string>(&objValue)) {
+        std::string str = *strValue;
+        std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+        result = Value(str);
+      } else {
+        result = Value(std::string(""));
+      }
+      return;
+    } else if (methodName == "trim" && args.empty()) {
+      // Handle trim method calls
+      if (auto *strValue = std::get_if<std::string>(&objValue)) {
+        std::string str = *strValue;
+        size_t start = str.find_first_not_of(" \t\n\r\f\v");
+        if (start == std::string::npos) {
+          result = Value(str);
+        } else {
+          size_t end = str.find_last_not_of(" \t\n\r\f\v");
+          result = Value(str.substr(start, end - start + 1));
+        }
+      } else {
+        result = Value(std::string(""));
+      }
+      return;
+    } else if (methodName == "split" && args.size() == 1 &&
+               std::holds_alternative<std::string>(args[0])) {
+      // Handle split method calls
+      if (auto *strValue = std::get_if<std::string>(&objValue)) {
+        std::string str = *strValue;
+        std::string delim = std::get<std::string>(args[0]);
+        std::vector<Value> parts;
+        size_t pos = 0;
+        size_t delimLen = delim.length();
+        while ((pos = str.find(delim, pos)) != std::string::npos) {
+          parts.push_back(Value(str.substr(0, pos)));
+          pos += delimLen;
+        }
+        parts.push_back(Value(str.substr(pos)));
+        result = Value(ArrayValue(parts));
+      } else {
+        result = Value(ArrayValue());
+      }
+      return;
+    }
+
     // Check if it's the special case of args.size() or args.contentToString()
     std::string objName = "";
     bool isArgsObject = false;
