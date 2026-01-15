@@ -327,76 +327,92 @@ parseLambdaExpression(const std::vector<Token> &tokens, size_t &pos) {
   size_t lambdaCol = tokens[pos].column;
   pos++;
 
+  // Look ahead to see if there is an arrow '->' before a closing brace
+  bool hasArrow = false;
+  size_t lookAhead = pos;
+  int braceCount = 1;
+  while (lookAhead < tokens.size()) {
+    if (tokens[lookAhead].type == TokenType::LBRACE)
+      braceCount++;
+    else if (tokens[lookAhead].type == TokenType::RBRACE) {
+      braceCount--;
+      if (braceCount == 0)
+        break;
+    } else if (braceCount == 1 && tokens[lookAhead].type == TokenType::ARROW) {
+      hasArrow = true;
+      break;
+    }
+    lookAhead++;
+  }
+
   // Parse parameters if present (before arrow)
   std::vector<dotlin::FunctionParameter> parameters;
 
-  // Check if the first token after '{' is an identifier (parameter) or '->' (no
-  // parameters)
-  if (pos < tokens.size() && tokens[pos].type == TokenType::ARROW) {
-    // No parameters, just '->'
-    pos++; // consume '->'
-  } else if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER) {
-    // Parse parameters
-    while (pos < tokens.size()) {
-      if (tokens[pos].type == TokenType::IDENTIFIER) {
-        std::string paramName = tokens[pos].text;
-        pos++;
+  if (hasArrow) {
+    // Check if the first token after '{' is an identifier (parameter) or '->'
+    // (no parameters)
+    if (pos < tokens.size() && tokens[pos].type == TokenType::ARROW) {
+      // No parameters, just '{ -> ... }'
+      pos++; // consume '->'
+    } else {
+      // Parse parameters until the arrow
+      while (pos < tokens.size() && tokens[pos].type != TokenType::ARROW) {
+        if (tokens[pos].type == TokenType::IDENTIFIER) {
+          std::string paramName = tokens[pos].text;
+          pos++;
 
-        // Check for parameter type annotation
-        std::optional<std::shared_ptr<dotlin::Type>> paramType = std::nullopt;
-        if (pos < tokens.size() && tokens[pos].type == TokenType::COLON) {
-          pos++; // consume colon
-          if (pos < tokens.size() &&
-              tokens[pos].type == TokenType::IDENTIFIER) {
-            // Parse parameter type name
-            std::string typeName = tokens[pos].text;
-            pos++; // consume type name
+          // Check for parameter type annotation
+          std::optional<std::shared_ptr<dotlin::Type>> paramType = std::nullopt;
+          if (pos < tokens.size() && tokens[pos].type == TokenType::COLON) {
+            pos++; // consume colon
+            if (pos < tokens.size() &&
+                tokens[pos].type == TokenType::IDENTIFIER) {
+              // Parse parameter type name
+              std::string typeName = tokens[pos].text;
+              pos++; // consume type name
 
-            // Map type name to TypeKind
-            dotlin::TypeKind kind = dotlin::TypeKind::UNKNOWN;
-            if (typeName == "Int")
-              kind = dotlin::TypeKind::INT;
-            else if (typeName == "Double")
-              kind = dotlin::TypeKind::DOUBLE;
-            else if (typeName == "Boolean" || typeName == "Bool")
-              kind = dotlin::TypeKind::BOOL;
-            else if (typeName == "String")
-              kind = dotlin::TypeKind::STRING;
-            else if (typeName == "Array")
-              kind = dotlin::TypeKind::ARRAY;
-            else if (typeName == "Unit" || typeName == "Void")
-              kind = dotlin::TypeKind::VOID;
+              // Map type name to TypeKind
+              dotlin::TypeKind kind = dotlin::TypeKind::UNKNOWN;
+              if (typeName == "Int")
+                kind = dotlin::TypeKind::INT;
+              else if (typeName == "Double")
+                kind = dotlin::TypeKind::DOUBLE;
+              else if (typeName == "Boolean" || typeName == "Bool")
+                kind = dotlin::TypeKind::BOOL;
+              else if (typeName == "String")
+                kind = dotlin::TypeKind::STRING;
+              else if (typeName == "Array")
+                kind = dotlin::TypeKind::ARRAY;
+              else if (typeName == "Unit" || typeName == "Void")
+                kind = dotlin::TypeKind::VOID;
 
-            paramType = std::make_shared<dotlin::Type>(kind);
+              paramType = std::make_shared<dotlin::Type>(kind);
+            }
           }
-        }
 
-        parameters.push_back(dotlin::FunctionParameter(paramName, paramType));
+          parameters.push_back(dotlin::FunctionParameter(paramName, paramType));
 
-        // Check for comma or arrow
-        if (pos < tokens.size() && tokens[pos].type == TokenType::COMMA) {
-          pos++; // consume comma
-          continue;
-        } else if (pos < tokens.size() &&
-                   tokens[pos].type == TokenType::ARROW) {
-          pos++; // consume arrow
-          break;
+          // Check for comma or arrow
+          if (pos < tokens.size() && tokens[pos].type == TokenType::COMMA) {
+            pos++; // consume comma
+          } else if (pos < tokens.size() &&
+                     tokens[pos].type == TokenType::ARROW) {
+            // Arrow is consumed below
+          } else {
+            // Unexpected token, stop parsing parameters
+            break;
+          }
         } else {
-          // Unexpected token
+          // Unexpected token, stop parsing parameters
           break;
         }
-      } else if (pos < tokens.size() && tokens[pos].type == TokenType::ARROW) {
-        pos++; // consume arrow
-        break;
-      } else {
-        // Unexpected token
-        break;
+      }
+
+      // Consume the arrow
+      if (pos < tokens.size() && tokens[pos].type == TokenType::ARROW) {
+        pos++;
       }
     }
-  } else {
-    // Just consume the lambda body without parameters
-    // This is an error case, but we'll handle it by treating everything until
-    // '}' as the body
   }
 
   // Parse the lambda body (everything until closing brace)

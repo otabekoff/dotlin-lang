@@ -98,7 +98,7 @@ void EvalVisitor::visit(IdentifierExpr &node) {
                                           nullptr, interpreter->environment);
         result = Value(builtinLambda);
       } else {
-        result = Value(std::string("undefined"));
+        throw std::runtime_error("Undefined variable: " + node.name);
       }
     }
   }
