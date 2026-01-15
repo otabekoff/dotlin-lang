@@ -1,0 +1,25 @@
+
+fun main() {
+    val numbers = arrayOf(1, 2, 3, 4, 5)
+    
+    println("--- Original ---")
+    println(numbers.contentToString())
+    
+    println("\n--- Map (Double) ---")
+    val doubled = numbers.map({ x -> x * 2 })
+    println(doubled.contentToString())
+    
+    println("\n--- Filter (Even) ---")
+    val evens = numbers.filter({ n -> n % 2 == 0 })
+    println(evens.contentToString())
+    
+    // Test implicit 'it'
+    println("\n--- Filter (Odd with implicit 'it') ---")
+    val odds = numbers.filter({ it % 2 != 0 })
+    println(odds.contentToString())
+    
+    println("\n--- Chaining ---")
+    // Chain map and filter
+    val chained = numbers.map({ x -> x * 10 }).filter({ x -> x > 20 })
+    println(chained.contentToString())
+}

@@ -28,6 +28,20 @@ std::vector<Token> tokenize(const std::string &src) {
              std::isdigit(static_cast<unsigned char>(src[i]))) {
         i++;
       }
+
+      // Check for fractional part
+      if (i < src.length() && src[i] == '.') {
+        // Only consume dot if it is followed by a digit (avoid consuming range
+        // .. or method call .)
+        if (i + 1 < src.length() &&
+            std::isdigit(static_cast<unsigned char>(src[i + 1]))) {
+          i++; // Consume the dot
+          while (i < src.length() &&
+                 std::isdigit(static_cast<unsigned char>(src[i]))) {
+            i++;
+          }
+        }
+      }
       std::string num = src.substr(start, i - start);
       tokens.emplace_back(TokenType::NUMBER, num, line, column);
       column += num.length();

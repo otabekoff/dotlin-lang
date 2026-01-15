@@ -3,8 +3,11 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
-// #include <sstream>
+
+namespace fs = std::filesystem;
 
 using namespace dotlin;
 
@@ -440,6 +443,56 @@ Value Interpreter::executeBuiltinFunction(
       }
     }
     return Value(result);
+  }
+
+  // File I/O functions
+  if (name == "readFile") {
+    if (arguments.size() != 1) {
+      throw std::runtime_error("readFile() expects exactly 1 argument (path)");
+    }
+    Value arg = evaluate(*arguments[0]);
+    if (auto *path = std::get_if<std::string>(&arg)) {
+      std::ifstream file(*path);
+      if (!file.is_open()) {
+        throw std::runtime_error("Could not open file: " + *path);
+      }
+      std::string content((std::istreambuf_iterator<char>(file)),
+                          std::istreambuf_iterator<char>());
+      return Value(content);
+    }
+    throw std::runtime_error("readFile() expects a string path");
+  }
+
+  if (name == "writeFile") {
+    if (arguments.size() != 2) {
+      throw std::runtime_error(
+          "writeFile() expects exactly 2 arguments (path, content)");
+    }
+    Value pathArg = evaluate(*arguments[0]);
+    Value contentArg = evaluate(*arguments[1]);
+
+    if (auto *path = std::get_if<std::string>(&pathArg)) {
+      if (auto *content = std::get_if<std::string>(&contentArg)) {
+        std::ofstream file(*path);
+        if (!file.is_open()) {
+          throw std::runtime_error("Could not write to file: " + *path);
+        }
+        file << *content;
+        return Value(); // Unit
+      }
+    }
+    throw std::runtime_error("writeFile() expects (path, content) strings");
+  }
+
+  if (name == "exists") {
+    if (arguments.size() != 1) {
+      throw std::runtime_error("exists() expects exactly 1 argument (path)");
+    }
+    Value arg = evaluate(*arguments[0]);
+    if (auto *path = std::get_if<std::string>(&arg)) {
+      return Value(fs::exists(*path));
+    }
+    throw std::runtime_error("exists() expects a string path");
   }
 
   throw std::runtime_error("Unknown built-in function: " + name);

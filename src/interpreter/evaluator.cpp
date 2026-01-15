@@ -89,7 +89,8 @@ void EvalVisitor::visit(IdentifierExpr &node) {
           node.name == "random" || node.name == "clock" ||
           node.name == "exit" || node.name == "readLine" ||
           node.name == "toInt" || node.name == "toString" ||
-          node.name == "format") {
+          node.name == "format" || node.name == "readFile" ||
+          node.name == "writeFile" || node.name == "exists") {
         // Return a special lambda that represents a built-in function
         auto builtinLambda =
             std::make_shared<LambdaValue>(std::vector<FunctionParameter>(),
@@ -430,14 +431,6 @@ void EvalVisitor::visit(CallExpr &node) {
         } else {
           throw std::runtime_error("contains method requires 1 argument");
         }
-      } else if (methodName == "clear") {
-        if (args.empty()) {
-          array->elements->clear();
-          result = Value(); // Unit/Void
-          return;
-        } else {
-          throw std::runtime_error("clear method takes no arguments");
-        }
       } else if (methodName == "isEmpty") {
         if (args.empty()) {
           result = Value(array->elements->empty());
@@ -445,6 +438,86 @@ void EvalVisitor::visit(CallExpr &node) {
         } else {
           throw std::runtime_error("isEmpty method takes no arguments");
         }
+      } else if (methodName == "map") {
+        if (args.size() == 1) {
+          Value callback = args[0];
+          if (auto *lambda =
+                  std::get_if<std::shared_ptr<LambdaValue>>(&callback)) {
+            ArrayValue resultArr;
+            for (const auto &element : *array->elements) {
+              auto closure = (*lambda)->closure;
+              auto lambdaEnv = std::make_shared<Environment>(closure);
+              if (!(*lambda)->parameters.empty()) {
+                lambdaEnv->define((*lambda)->parameters[0].name, element);
+              } else {
+                lambdaEnv->define("it", element);
+              }
+              auto prevEnv = interpreter->environment;
+              auto prevFuncEnv = interpreter->functionEnvironment;
+              interpreter->environment = lambdaEnv;
+              interpreter->functionEnvironment = lambdaEnv;
+              Value mappedVal;
+              try {
+                mappedVal = interpreter->executeFunction((*lambda)->body.get(),
+                                                         lambdaEnv);
+              } catch (...) {
+                interpreter->environment = prevEnv;
+                interpreter->functionEnvironment = prevFuncEnv;
+                throw;
+              }
+              interpreter->environment = prevEnv;
+              interpreter->functionEnvironment = prevFuncEnv;
+              resultArr.elements->push_back(mappedVal);
+            }
+            result = Value(resultArr);
+            return;
+          }
+          throw std::runtime_error("map expects a lambda function");
+        }
+        throw std::runtime_error("map expects 1 argument");
+      } else if (methodName == "filter") {
+        if (args.size() == 1) {
+          Value callback = args[0];
+          if (auto *lambda =
+                  std::get_if<std::shared_ptr<LambdaValue>>(&callback)) {
+            ArrayValue resultArr;
+            for (const auto &element : *array->elements) {
+              auto closure = (*lambda)->closure;
+              auto lambdaEnv = std::make_shared<Environment>(closure);
+              if (!(*lambda)->parameters.empty()) {
+                lambdaEnv->define((*lambda)->parameters[0].name, element);
+              } else {
+                lambdaEnv->define("it", element);
+              }
+              auto prevEnv = interpreter->environment;
+              auto prevFuncEnv = interpreter->functionEnvironment;
+              interpreter->environment = lambdaEnv;
+              interpreter->functionEnvironment = lambdaEnv;
+              Value funcResult;
+              try {
+                funcResult = interpreter->executeFunction((*lambda)->body.get(),
+                                                          lambdaEnv);
+              } catch (...) {
+                interpreter->environment = prevEnv;
+                interpreter->functionEnvironment = prevFuncEnv;
+                throw;
+              }
+              interpreter->environment = prevEnv;
+              interpreter->functionEnvironment = prevFuncEnv;
+              bool keep = false;
+              if (auto *b = std::get_if<bool>(&funcResult)) {
+                keep = *b;
+              }
+              if (keep) {
+                resultArr.elements->push_back(element);
+              }
+            }
+            result = Value(resultArr);
+            return;
+          }
+          throw std::runtime_error("filter expects a lambda function");
+        }
+        throw std::runtime_error("filter expects 1 argument");
       }
     } else if (methodName == "substring" && args.size() >= 1) {
       // Handle substring method calls
@@ -585,9 +658,12 @@ void EvalVisitor::visit(CallExpr &node) {
       } else if (auto *doubleValue = std::get_if<double>(&objValue)) {
         // Allow double -> int conversion via toInt()
         result = Value(static_cast<int>(*doubleValue));
+      } else if (auto *intValue = std::get_if<int>(&objValue)) {
+        // Identity conversion
+        result = Value(*intValue);
       } else {
         throw std::runtime_error(
-            "toInt method only supported on String and Double");
+            "toInt method only supported on String, Double, and Int");
       }
       return;
     } else if (methodName == "toDouble" && args.empty()) {

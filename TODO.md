@@ -4,47 +4,54 @@
 - [-] is for partially completed
 - [x] is for completed.
 
-1. Advanced Formatting Functions
-   - [-] Implement printf-style formatting functions ⚠️ MISSING - format() function not implemented
-   - [-] Implement number formatting functions ⚠️ MISSING - toInt(), toDouble() not implemented
+2. Advanced Formatting Functions
+   - [x] Implement printf-style formatting functions ✅ WORKING - format() implemented
+   - [x] Implement number formatting functions ✅ WORKING - toInt(), toDouble() implemented
    - [x] Implement string formatting utilities ✅ WORKING - Basic concatenation works
-2. Enhanced Type System
+3. Additional String Methods
+   - [x] Implement .substring(start, end) ✅ WORKING
+   - [x] Implement .indexOf(char/string) ✅ WORKING
+   - [x] Implement .startsWith(), .endsWith() ✅ WORKING
+   - [x] Implement .toUpperCase(), .toLowerCase() ✅ WORKING
+   - [x] Implement .trim(), .split() ✅ WORKING
+   - [x] Implement .length property ✅ WORKING
+4. Enhanced Type System
    - [x] Implement proper type checking
    - [x] Add explicit type annotations support
    - [x] Implement generics support
    - [x] Add type inference improvements
-3. Control Flow Enhancements
+5. Control Flow Enhancements
    - [x] Implement while loops
    - [x] Implement for loops
    - [x] Implement when expressions (Kotlin equivalent of switch)
    - [x] Add exception handling support
-4. Function System Improvements
+6. Function System Improvements
    - [x] Implement user-defined functions beyond main
    - [x] Add function return type support
    - [x] Implement function overloading
    - [x] Add lambda expressions support
    - [x] Implement closure support for lambda expressions
-5. Class and Object Support
+7. Class and Object Support
    - [x] Implement class declarations
    - [x] Add constructor support
    - [x] Implement inheritance
    - [x] Add property and method support in classes
-6. Standard Library Functions
+8. Standard Library Functions
    - [x] Implement math functions (sin, cos, sqrt, etc.)
-   - [ ] Add file I/O operations
+   - [x] Add file I/O operations
    - [ ] Implement date/time functions
    - [ ] Add collection utilities
-7. Error Handling and Debugging
+9. Error Handling and Debugging
    - [ ] Add comprehensive error messages
    - [ ] Implement stack traces
    - [ ] Add debugging utilities
    - [ ] Improve exception handling
-8. Performance Optimizations
+10. Performance Optimizations
     - [ ] Add expression evaluation optimizations
     - [ ] Implement constant folding
     - [ ] Add dead code elimination
     - [ ] Optimize variable lookups
-9. Language Compatibility
+11. Language Compatibility
     - [ ] Expand Kotlin syntax compatibility
     - [ ] Add more Kotlin-style operators
     - [ ] Implement extension functions

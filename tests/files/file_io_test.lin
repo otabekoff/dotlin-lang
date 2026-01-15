@@ -1,0 +1,39 @@
+
+fun main() {
+    val filename = "test_io.txt"
+    val content = "Hello File I/O!"
+    
+    println("--- File I/O Test ---")
+    
+    if (exists(filename)) {
+        println("File already exists, overwriting...")
+    } else {
+        println("File does not exist, creating...")
+    }
+    
+    try {
+        writeFile(filename, content)
+        println("Written to file: " + filename)
+    } catch (e) {
+        println("Error writing file: " + e)
+    }
+    
+    if (exists(filename)) {
+        try {
+            val readContent = readFile(filename)
+            println("Read from file: " + readContent)
+            
+            if (readContent == content) {
+                println("Verification: SUCCESS")
+            } else {
+                println("Verification: FAILED (Content mismatch)")
+            }
+        } catch (e) {
+            println("Error reading file: " + e)
+        }
+    } else {
+        println("Modification Verification: FAILED (File not found after write)")
+    }
+    
+    // Clean up? We don't have deleteFile yet.
+}
