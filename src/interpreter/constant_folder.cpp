@@ -1,5 +1,5 @@
 #include "dotlin/visitors.h"
-// #include <iostream>
+#include <iostream>
 #include <variant>
 
 using namespace dotlin;
@@ -25,12 +25,18 @@ static LiteralValue valueToLiteralVariant(const Value &v) {
 Expression::Ptr ConstantFolderVisitor::fold(Expression::Ptr expr) {
   if (!expr)
     return nullptr;
+
+  resultExpr = nullptr;
   expr->accept(*this);
+
   if (resultExpr) {
+    std::cout << "FOLDED Expression at L" << expr->line << ":" << expr->column
+              << std::endl;
     Expression::Ptr res = std::move(resultExpr);
     resultExpr = nullptr;
     return res;
   }
+
   return expr;
 }
 
@@ -38,12 +44,18 @@ Expression::Ptr ConstantFolderVisitor::fold(Expression::Ptr expr) {
 Statement::Ptr ConstantFolderVisitor::fold(Statement::Ptr stmt) {
   if (!stmt)
     return nullptr;
+
+  resultStmt = nullptr;
   stmt->accept(*this);
+
   if (resultStmt) {
+    std::cout << "FOLDED Statement at L" << stmt->line << ":" << stmt->column
+              << std::endl;
     Statement::Ptr res = std::move(resultStmt);
     resultStmt = nullptr;
     return res;
   }
+
   return stmt;
 }
 
@@ -58,15 +70,31 @@ void ConstantFolderVisitor::visit(StringInterpolationExpr &node) {
   std::string resultStr = "";
 
   for (auto &part : node.parts) {
+    if (!part)
+      continue;
+
     part = fold(std::move(part));
 
+    if (!part) {
+      allLiterals = false;
+      continue;
+    }
+
     auto lit = dynamic_cast<LiteralExpr *>(part.get());
-    if (lit && std::holds_alternative<std::string>(lit->value)) {
-      resultStr += std::get<std::string>(lit->value);
-    } else if (lit && std::holds_alternative<int>(lit->value)) {
-      resultStr += std::to_string(std::get<int>(lit->value));
-    } else if (lit && std::holds_alternative<double>(lit->value)) {
-      resultStr += std::to_string(std::get<double>(lit->value));
+    if (lit) {
+      if (std::holds_alternative<std::string>(lit->value)) {
+        resultStr += std::get<std::string>(lit->value);
+      } else if (std::holds_alternative<int>(lit->value)) {
+        resultStr += std::to_string(std::get<int>(lit->value));
+      } else if (std::holds_alternative<int64_t>(lit->value)) {
+        resultStr += std::to_string(std::get<int64_t>(lit->value));
+      } else if (std::holds_alternative<double>(lit->value)) {
+        resultStr += std::to_string(std::get<double>(lit->value));
+      } else if (std::holds_alternative<bool>(lit->value)) {
+        resultStr += std::get<bool>(lit->value) ? "true" : "false";
+      } else {
+        allLiterals = false;
+      }
     } else {
       allLiterals = false;
     }
@@ -95,6 +123,11 @@ void ConstantFolderVisitor::visit(LambdaExpr &node) {
 void ConstantFolderVisitor::visit(BinaryExpr &node) {
   node.left = fold(std::move(node.left));
   node.right = fold(std::move(node.right));
+
+  if (!node.left || !node.right) {
+    resultExpr = nullptr;
+    return;
+  }
 
   auto leftLit = dynamic_cast<LiteralExpr *>(node.left.get());
   auto rightLit = dynamic_cast<LiteralExpr *>(node.right.get());
@@ -133,7 +166,66 @@ void ConstantFolderVisitor::visit(BinaryExpr &node) {
           return;
         }
         break;
-      // Comparisons
+      case TokenType::EQUAL:
+        resultExpr = std::make_unique<LiteralExpr>(
+            valueToLiteralVariant(Value(l == r)), node.line, node.column);
+        return;
+      case TokenType::NOT_EQUAL:
+        resultExpr = std::make_unique<LiteralExpr>(
+            valueToLiteralVariant(Value(l != r)), node.line, node.column);
+        return;
+      case TokenType::GREATER:
+        resultExpr = std::make_unique<LiteralExpr>(
+            valueToLiteralVariant(Value(l > r)), node.line, node.column);
+        return;
+      case TokenType::GREATER_EQUAL:
+        resultExpr = std::make_unique<LiteralExpr>(
+            valueToLiteralVariant(Value(l >= r)), node.line, node.column);
+        return;
+      case TokenType::LESS:
+        resultExpr = std::make_unique<LiteralExpr>(
+            valueToLiteralVariant(Value(l < r)), node.line, node.column);
+        return;
+      case TokenType::LESS_EQUAL:
+        resultExpr = std::make_unique<LiteralExpr>(
+            valueToLiteralVariant(Value(l <= r)), node.line, node.column);
+        return;
+      default:
+        break;
+      }
+    }
+    // Long operations
+    else if ((std::holds_alternative<int64_t>(leftLit->value) ||
+              std::holds_alternative<int>(leftLit->value)) &&
+             (std::holds_alternative<int64_t>(rightLit->value) ||
+              std::holds_alternative<int>(rightLit->value))) {
+      int64_t l = std::holds_alternative<int64_t>(leftLit->value)
+                      ? std::get<int64_t>(leftLit->value)
+                      : static_cast<int64_t>(std::get<int>(leftLit->value));
+      int64_t r = std::holds_alternative<int64_t>(rightLit->value)
+                      ? std::get<int64_t>(rightLit->value)
+                      : static_cast<int64_t>(std::get<int>(rightLit->value));
+
+      switch (node.op) {
+      case TokenType::PLUS:
+        resultExpr = std::make_unique<LiteralExpr>(
+            valueToLiteralVariant(Value(l + r)), node.line, node.column);
+        return;
+      case TokenType::MINUS:
+        resultExpr = std::make_unique<LiteralExpr>(
+            valueToLiteralVariant(Value(l - r)), node.line, node.column);
+        return;
+      case TokenType::MULTIPLY:
+        resultExpr = std::make_unique<LiteralExpr>(
+            valueToLiteralVariant(Value(l * r)), node.line, node.column);
+        return;
+      case TokenType::DIVIDE:
+        if (r != 0) {
+          resultExpr = std::make_unique<LiteralExpr>(
+              valueToLiteralVariant(Value(l / r)), node.line, node.column);
+          return;
+        }
+        break;
       case TokenType::EQUAL:
         resultExpr = std::make_unique<LiteralExpr>(
             valueToLiteralVariant(Value(l == r)), node.line, node.column);
@@ -164,15 +256,23 @@ void ConstantFolderVisitor::visit(BinaryExpr &node) {
     }
     // Double operations
     else if ((std::holds_alternative<double>(leftLit->value) ||
-              std::holds_alternative<int>(leftLit->value)) &&
+              std::holds_alternative<int>(leftLit->value) ||
+              std::holds_alternative<int64_t>(leftLit->value)) &&
              (std::holds_alternative<double>(rightLit->value) ||
-              std::holds_alternative<int>(rightLit->value))) {
-      double l = std::holds_alternative<double>(leftLit->value)
-                     ? std::get<double>(leftLit->value)
-                     : static_cast<double>(std::get<int>(leftLit->value));
-      double r = std::holds_alternative<double>(rightLit->value)
-                     ? std::get<double>(rightLit->value)
-                     : static_cast<double>(std::get<int>(rightLit->value));
+              std::holds_alternative<int>(rightLit->value) ||
+              std::holds_alternative<int64_t>(rightLit->value))) {
+      double l =
+          std::holds_alternative<double>(leftLit->value)
+              ? std::get<double>(leftLit->value)
+              : (std::holds_alternative<int64_t>(leftLit->value)
+                     ? static_cast<double>(std::get<int64_t>(leftLit->value))
+                     : static_cast<double>(std::get<int>(leftLit->value)));
+      double r =
+          std::holds_alternative<double>(rightLit->value)
+              ? std::get<double>(rightLit->value)
+              : (std::holds_alternative<int64_t>(rightLit->value)
+                     ? static_cast<double>(std::get<int64_t>(rightLit->value))
+                     : static_cast<double>(std::get<int>(rightLit->value)));
 
       switch (node.op) {
       case TokenType::PLUS:
@@ -194,7 +294,6 @@ void ConstantFolderVisitor::visit(BinaryExpr &node) {
           return;
         }
         break;
-      // Comparisons
       case TokenType::EQUAL:
         resultExpr = std::make_unique<LiteralExpr>(
             valueToLiteralVariant(Value(l == r)), node.line, node.column);
@@ -266,6 +365,10 @@ void ConstantFolderVisitor::visit(BinaryExpr &node) {
 
 void ConstantFolderVisitor::visit(UnaryExpr &node) {
   node.operand = fold(std::move(node.operand));
+  if (!node.operand) {
+    resultExpr = nullptr;
+    return;
+  }
 
   auto lit = dynamic_cast<LiteralExpr *>(node.operand.get());
   if (lit) {
@@ -274,6 +377,11 @@ void ConstantFolderVisitor::visit(UnaryExpr &node) {
         resultExpr = std::make_unique<LiteralExpr>(
             valueToLiteralVariant(Value(-std::get<int>(lit->value))), node.line,
             node.column);
+        return;
+      } else if (std::holds_alternative<int64_t>(lit->value)) {
+        resultExpr = std::make_unique<LiteralExpr>(
+            valueToLiteralVariant(Value(-std::get<int64_t>(lit->value))),
+            node.line, node.column);
         return;
       } else if (std::holds_alternative<double>(lit->value)) {
         resultExpr = std::make_unique<LiteralExpr>(
@@ -296,7 +404,6 @@ void ConstantFolderVisitor::visit(UnaryExpr &node) {
 
 void ConstantFolderVisitor::visit(CallExpr &node) {
   node.callee = fold(std::move(node.callee));
-
   for (auto &arg : node.arguments) {
     arg = fold(std::move(arg));
   }
@@ -321,7 +428,6 @@ void ConstantFolderVisitor::visit(ArrayAccessExpr &node) {
   resultExpr = nullptr;
 }
 
-// Statement visit methods
 void ConstantFolderVisitor::visit(ExpressionStmt &node) {
   node.expression = fold(std::move(node.expression));
   resultStmt = nullptr;
@@ -343,23 +449,27 @@ void ConstantFolderVisitor::visit(FunctionDeclStmt &node) {
 
 void ConstantFolderVisitor::visit(BlockStmt &node) {
   for (auto &stmt : node.statements) {
-    stmt = fold(std::move(stmt));
+    if (stmt) {
+      stmt = fold(std::move(stmt));
+    }
   }
   resultStmt = nullptr;
 }
 
 void ConstantFolderVisitor::visit(IfStmt &node) {
   node.condition = fold(std::move(node.condition));
-
   if (node.thenBranch) {
     node.thenBranch = fold(std::move(node.thenBranch));
   }
-
   if (node.elseBranch.has_value()) {
     node.elseBranch = fold(std::move(node.elseBranch.value()));
   }
 
-  // Constant folding for IF branches (Dead Code Elimination light)
+  if (!node.condition) {
+    resultStmt = nullptr;
+    return;
+  }
+
   auto cLit = dynamic_cast<LiteralExpr *>(node.condition.get());
   if (cLit && std::holds_alternative<bool>(cLit->value)) {
     if (std::get<bool>(cLit->value)) {
@@ -368,7 +478,6 @@ void ConstantFolderVisitor::visit(IfStmt &node) {
       if (node.elseBranch.has_value()) {
         resultStmt = std::move(node.elseBranch.value());
       } else {
-        // Return an empty block instead of null to keep it a statement
         resultStmt = std::make_shared<BlockStmt>(std::vector<Statement::Ptr>(),
                                                  node.line, node.column);
       }
@@ -381,12 +490,15 @@ void ConstantFolderVisitor::visit(IfStmt &node) {
 
 void ConstantFolderVisitor::visit(WhileStmt &node) {
   node.condition = fold(std::move(node.condition));
-
   if (node.body) {
     node.body = fold(std::move(node.body));
   }
 
-  // Constant folding for WHILE(false)
+  if (!node.condition) {
+    resultStmt = nullptr;
+    return;
+  }
+
   auto cLit = dynamic_cast<LiteralExpr *>(node.condition.get());
   if (cLit && std::holds_alternative<bool>(cLit->value) &&
       !std::get<bool>(cLit->value)) {
@@ -419,7 +531,7 @@ void ConstantFolderVisitor::visit(ForStmt &node) {
 }
 
 void ConstantFolderVisitor::visit(WhenStmt &node) {
-  (void)node; // Simplified for now
+  (void)node;
   resultStmt = nullptr;
 }
 
