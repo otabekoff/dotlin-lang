@@ -1201,7 +1201,30 @@ void EvalVisitor::visit(CallExpr &node)
 
     // Check for extension functions on primitive types
     std::string objTypeName = getTypeOfValue(objValue);
-    std::string extensionFuncName = "ext_" + objTypeName + "_" + methodName;
+    // Map the lowercase type names to the capitalized type names used in extension functions
+    std::string capitalizedTypeName = objTypeName;
+    if (objTypeName == "int")
+      capitalizedTypeName = "Int";
+    else if (objTypeName == "long")
+      capitalizedTypeName = "Long";
+    else if (objTypeName == "double")
+      capitalizedTypeName = "Double";
+    else if (objTypeName == "bool")
+      capitalizedTypeName = "Boolean";
+    else if (objTypeName == "string")
+      capitalizedTypeName = "String";
+    else if (objTypeName == "Array")
+      capitalizedTypeName = "Array";
+    else if (objTypeName == "Object")
+    {
+      // For class instances, we need to get the class name
+      if (auto *instance = std::get_if<std::shared_ptr<ClassInstance>>(&objValue))
+      {
+        capitalizedTypeName = (*instance)->className;
+      }
+    }
+
+    std::string extensionFuncName = "ext_" + capitalizedTypeName + "_" + methodName;
 
     try
     {

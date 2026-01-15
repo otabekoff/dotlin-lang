@@ -338,3 +338,10 @@ void DeadCodeEliminationVisitor::visit(ArrayAccessExpr &node)
     (void)node;
     resultStmt = nullptr;
 }
+
+void DeadCodeEliminationVisitor::visit(ExtensionFunctionDeclStmt &node)
+{
+    if (node.body)
+        node.body = eliminate(std::move(node.body));
+    resultStmt = nullptr;
+}
