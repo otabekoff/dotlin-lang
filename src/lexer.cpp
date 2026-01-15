@@ -47,22 +47,64 @@ std::vector<Token> tokenize(const std::string &src) {
       column += num.length();
     } else if (ch == '"') {
       size_t start = i;
-      i++; // Skip opening quote
-      while (i < src.length() && src[i] != '"') {
-        if (src[i] == '\n') {
-          line++;
-          column = 1;
-        } else {
+      // Check for raw string (triple quotes)
+      if (i + 2 < src.length() && src[i + 1] == '"' && src[i + 2] == '"') {
+        i += 3; // Skip opening """
+        column += 3;
+        while (i + 2 < src.length() &&
+               !(src[i] == '"' && src[i + 1] == '"' && src[i + 2] == '"')) {
+          if (src[i] == '\n') {
+            line++;
+            column = 1;
+          } else {
+            column++;
+          }
+          i++;
+        }
+        if (i + 2 < src.length()) {
+          i += 3; // Skip closing """
+          column += 3;
+        }
+        std::string str = src.substr(start, i - start);
+        tokens.emplace_back(TokenType::STRING, str, line, column - (i - start));
+      } else {
+        i++; // Skip opening quote
+        while (i < src.length() && src[i] != '"') {
+          if (src[i] == '\\' && i + 1 < src.length()) {
+            i += 2; // Skip backslash and following char
+            column += 2;
+            continue;
+          }
+          if (src[i] == '\n') {
+            line++;
+            column = 1;
+          } else {
+            column++;
+          }
+          i++;
+        }
+        if (i < src.length()) {
+          i++; // Skip closing quote
           column++;
         }
-        i++;
+        std::string str = src.substr(start, i - start);
+        tokens.emplace_back(TokenType::STRING, str, line, column - (i - start));
       }
-      if (i < src.length()) {
+    } else if (ch == '\'') {
+      size_t start = i;
+      i++; // Skip opening quote
+      if (i < src.length() && src[i] == '\\') {
+        i += 2; // Skip backslash and escaped char
+      } else if (i < src.length()) {
+        i++; // Skip character
+      }
+
+      if (i < src.length() && src[i] == '\'') {
         i++; // Skip closing quote
       }
-      std::string str = src.substr(start, i - start);
-      tokens.emplace_back(TokenType::STRING, str, line, column);
-      column += str.length();
+      std::string chLit = src.substr(start, i - start);
+      tokens.emplace_back(TokenType::CHAR, chLit, line, column);
+      column += chLit.length();
     } else if (std::isalpha(static_cast<unsigned char>(ch)) || ch == '_') {
       size_t start = i;
       while (
