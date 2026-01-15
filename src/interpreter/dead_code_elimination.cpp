@@ -27,11 +27,11 @@ Statement::Ptr DeadCodeEliminationVisitor::eliminate(Statement::Ptr stmt)
     return stmt;
 }
 
-void DeadCodeEliminationVisitor::visit(BlockStmt &node)
+void DeadCodeEliminationVisitor::visit(BlockStmt& node)
 {
     std::vector<Statement::Ptr> newStatements;
 
-    for (auto &stmt : node.statements)
+    for (auto& stmt : node.statements)
     {
         if (hasReturn)
         {
@@ -47,7 +47,7 @@ void DeadCodeEliminationVisitor::visit(BlockStmt &node)
             newStatements.push_back(eliminatedStmt);
 
             // If this statement caused a return, we don't need to process more
-            if (dynamic_cast<ReturnStmt *>(eliminatedStmt.get()))
+            if (dynamic_cast<ReturnStmt*>(eliminatedStmt.get()))
             {
                 hasReturn = true;
             }
@@ -57,7 +57,7 @@ void DeadCodeEliminationVisitor::visit(BlockStmt &node)
     // If the block ends with a return statement, we can set hasReturn for outer context
     if (!newStatements.empty())
     {
-        if (dynamic_cast<ReturnStmt *>(newStatements.back().get()))
+        if (dynamic_cast<ReturnStmt*>(newStatements.back().get()))
         {
             hasReturn = true;
         }
@@ -67,7 +67,7 @@ void DeadCodeEliminationVisitor::visit(BlockStmt &node)
     resultStmt = std::make_shared<BlockStmt>(std::move(newStatements), node.line, node.column);
 }
 
-void DeadCodeEliminationVisitor::visit(IfStmt &node)
+void DeadCodeEliminationVisitor::visit(IfStmt& node)
 {
     // Eliminate dead code in branches
     auto newThenBranch = eliminate(node.thenBranch);
@@ -88,7 +88,7 @@ void DeadCodeEliminationVisitor::visit(IfStmt &node)
     // Or if the condition is constant and evaluates to true/false and the corresponding branch returns
 }
 
-void DeadCodeEliminationVisitor::visit(WhileStmt &node)
+void DeadCodeEliminationVisitor::visit(WhileStmt& node)
 {
     // While loops don't typically cause returns, but we should eliminate dead code inside
     auto newBody = eliminate(node.body);
@@ -102,7 +102,7 @@ void DeadCodeEliminationVisitor::visit(WhileStmt &node)
     resultStmt = newWhileStmt;
 }
 
-void DeadCodeEliminationVisitor::visit(ReturnStmt &node)
+void DeadCodeEliminationVisitor::visit(ReturnStmt& node)
 {
     // Process the return value if it exists
     if (node.value)
@@ -115,7 +115,7 @@ void DeadCodeEliminationVisitor::visit(ReturnStmt &node)
     resultStmt = std::make_shared<ReturnStmt>(std::move(node.value), node.line, node.column);
 }
 
-void DeadCodeEliminationVisitor::visit(ExpressionStmt &node)
+void DeadCodeEliminationVisitor::visit(ExpressionStmt& node)
 {
     if (hasReturn)
     {
@@ -129,7 +129,7 @@ void DeadCodeEliminationVisitor::visit(ExpressionStmt &node)
     resultStmt = std::make_shared<ExpressionStmt>(std::move(node.expression), node.line, node.column);
 }
 
-void DeadCodeEliminationVisitor::visit(VariableDeclStmt &node)
+void DeadCodeEliminationVisitor::visit(VariableDeclStmt& node)
 {
     if (hasReturn)
     {
@@ -149,7 +149,7 @@ void DeadCodeEliminationVisitor::visit(VariableDeclStmt &node)
         node.column);
 }
 
-void DeadCodeEliminationVisitor::visit(FunctionDeclStmt &node)
+void DeadCodeEliminationVisitor::visit(FunctionDeclStmt& node)
 {
     // Function declarations are processed at global level, not eliminated as dead code
     // But we can eliminate dead code inside the function body
@@ -176,11 +176,11 @@ void DeadCodeEliminationVisitor::visit(FunctionDeclStmt &node)
     }
 }
 
-void DeadCodeEliminationVisitor::visit(ClassDeclStmt &node)
+void DeadCodeEliminationVisitor::visit(ClassDeclStmt& node)
 {
     // For class declarations, we can process members for dead code elimination
     std::vector<Statement::Ptr> newMembers;
-    for (auto &member : node.members)
+    for (auto& member : node.members)
     {
         auto eliminatedMember = eliminate(member);
         if (eliminatedMember)
@@ -197,7 +197,7 @@ void DeadCodeEliminationVisitor::visit(ClassDeclStmt &node)
         node.column);
 }
 
-void DeadCodeEliminationVisitor::visit(ForStmt &node)
+void DeadCodeEliminationVisitor::visit(ForStmt& node)
 {
     // For loops don't typically cause returns, but we should eliminate dead code inside
     auto newBody = eliminate(node.body);
@@ -212,11 +212,11 @@ void DeadCodeEliminationVisitor::visit(ForStmt &node)
     resultStmt = newForStmt;
 }
 
-void DeadCodeEliminationVisitor::visit(WhenStmt &node)
+void DeadCodeEliminationVisitor::visit(WhenStmt& node)
 {
     // Process all branches of the when statement
     std::vector<std::pair<Expression::Ptr, Statement::Ptr>> newBranches;
-    for (auto &branch : node.branches)
+    for (auto& branch : node.branches)
     {
         auto newBranchBody = eliminate(branch.second);
         newBranches.emplace_back(std::move(branch.first), std::move(newBranchBody));
@@ -238,7 +238,7 @@ void DeadCodeEliminationVisitor::visit(WhenStmt &node)
     resultStmt = newWhenStmt;
 }
 
-void DeadCodeEliminationVisitor::visit(TryStmt &node)
+void DeadCodeEliminationVisitor::visit(TryStmt& node)
 {
     // Process the try block, catch block, and finally block
     auto newTryBlock = eliminate(node.tryBlock);
@@ -262,7 +262,7 @@ void DeadCodeEliminationVisitor::visit(TryStmt &node)
     resultStmt = newTryStmt;
 }
 
-void DeadCodeEliminationVisitor::visit(ConstructorDeclStmt &node)
+void DeadCodeEliminationVisitor::visit(ConstructorDeclStmt& node)
 {
     // Process constructor body for dead code elimination
     Statement::Ptr newBody = nullptr;
@@ -279,67 +279,67 @@ void DeadCodeEliminationVisitor::visit(ConstructorDeclStmt &node)
 }
 
 // Expression visits (needed for completeness but don't eliminate expressions themselves)
-void DeadCodeEliminationVisitor::visit(LiteralExpr &node)
+void DeadCodeEliminationVisitor::visit(LiteralExpr& node)
 {
     (void)node;
     resultStmt = nullptr;
 }
 
-void DeadCodeEliminationVisitor::visit(StringInterpolationExpr &node)
+void DeadCodeEliminationVisitor::visit(StringInterpolationExpr& node)
 {
     (void)node;
     resultStmt = nullptr;
 }
 
-void DeadCodeEliminationVisitor::visit(IdentifierExpr &node)
+void DeadCodeEliminationVisitor::visit(IdentifierExpr& node)
 {
     (void)node;
     resultStmt = nullptr;
 }
 
-void DeadCodeEliminationVisitor::visit(LambdaExpr &node)
+void DeadCodeEliminationVisitor::visit(LambdaExpr& node)
 {
     (void)node;
     resultStmt = nullptr;
 }
 
-void DeadCodeEliminationVisitor::visit(BinaryExpr &node)
+void DeadCodeEliminationVisitor::visit(BinaryExpr& node)
 {
     (void)node;
     resultStmt = nullptr;
 }
 
-void DeadCodeEliminationVisitor::visit(UnaryExpr &node)
+void DeadCodeEliminationVisitor::visit(UnaryExpr& node)
 {
     (void)node;
     resultStmt = nullptr;
 }
 
-void DeadCodeEliminationVisitor::visit(CallExpr &node)
+void DeadCodeEliminationVisitor::visit(CallExpr& node)
 {
     (void)node;
     resultStmt = nullptr;
 }
 
-void DeadCodeEliminationVisitor::visit(MemberAccessExpr &node)
+void DeadCodeEliminationVisitor::visit(MemberAccessExpr& node)
 {
     (void)node;
     resultStmt = nullptr;
 }
 
-void DeadCodeEliminationVisitor::visit(ArrayLiteralExpr &node)
+void DeadCodeEliminationVisitor::visit(ArrayLiteralExpr& node)
 {
     (void)node;
     resultStmt = nullptr;
 }
 
-void DeadCodeEliminationVisitor::visit(ArrayAccessExpr &node)
+void DeadCodeEliminationVisitor::visit(ArrayAccessExpr& node)
 {
     (void)node;
     resultStmt = nullptr;
 }
 
-void DeadCodeEliminationVisitor::visit(ExtensionFunctionDeclStmt &node)
+void DeadCodeEliminationVisitor::visit(ExtensionFunctionDeclStmt& node)
 {
     if (node.body)
         node.body = eliminate(std::move(node.body));
