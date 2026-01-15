@@ -16,20 +16,7 @@ using namespace dotlin;
 
 // Expression evaluation visitor implementations
 void EvalVisitor::visit(LiteralExpr &node) {
-  std::visit(
-      [this](auto &&arg) {
-        using T = std::decay_t<decltype(arg)>;
-        if constexpr (std::is_same_v<T, int>) {
-          result = Value(arg);
-        } else if constexpr (std::is_same_v<T, double>) {
-          result = Value(arg);
-        } else if constexpr (std::is_same_v<T, bool>) {
-          result = Value(arg);
-        } else if constexpr (std::is_same_v<T, std::string>) {
-          result = Value(arg);
-        }
-      },
-      node.value);
+  std::visit([this](auto &&arg) { result = Value(arg); }, node.value);
 }
 
 void EvalVisitor::visit(StringInterpolationExpr &node) {
@@ -91,7 +78,9 @@ void EvalVisitor::visit(IdentifierExpr &node) {
           node.name == "exit" || node.name == "readLine" ||
           node.name == "toInt" || node.name == "toString" ||
           node.name == "format" || node.name == "readFile" ||
-          node.name == "writeFile" || node.name == "exists") {
+          node.name == "writeFile" || node.name == "exists" ||
+          node.name == "now" || node.name == "currentTimeMillis" ||
+          node.name == "sleep") {
         // Return a special lambda that represents a built-in function
         auto builtinLambda =
             std::make_shared<LambdaValue>(std::vector<FunctionParameter>(),
@@ -144,22 +133,33 @@ void EvalVisitor::visit(BinaryExpr &node) {
 
   auto handleArithmetic = [&](TokenType opType, auto op) -> bool {
     if (node.op == opType) {
-      if (auto *lInt = std::get_if<int>(&left)) {
-        if (auto *rInt = std::get_if<int>(&right)) {
-          result = Value(op(*lInt, *rInt));
-          return true;
-        } else if (auto *rDouble = std::get_if<double>(&right)) {
-          result = Value(op(static_cast<double>(*lInt), *rDouble));
-          return true;
-        }
-      } else if (auto *lDouble = std::get_if<double>(&left)) {
-        if (auto *rInt = std::get_if<int>(&right)) {
-          result = Value(op(*lDouble, static_cast<double>(*rInt)));
-          return true;
-        } else if (auto *rDouble = std::get_if<double>(&right)) {
-          result = Value(op(*lDouble, *rDouble));
-          return true;
-        }
+      if (std::holds_alternative<double>(left) ||
+          std::holds_alternative<double>(right)) {
+        double l = std::holds_alternative<double>(left)
+                       ? std::get<double>(left)
+                       : (std::holds_alternative<int64_t>(left)
+                              ? static_cast<double>(std::get<int64_t>(left))
+                              : static_cast<double>(std::get<int>(left)));
+        double r = std::holds_alternative<double>(right)
+                       ? std::get<double>(right)
+                       : (std::holds_alternative<int64_t>(right)
+                              ? static_cast<double>(std::get<int64_t>(right))
+                              : static_cast<double>(std::get<int>(right)));
+        result = Value(op(l, r));
+        return true;
+      } else if (std::holds_alternative<int64_t>(left) ||
+                 std::holds_alternative<int64_t>(right)) {
+        int64_t l = std::holds_alternative<int64_t>(left)
+                          ? std::get<int64_t>(left)
+                          : static_cast<int64_t>(std::get<int>(left));
+        int64_t r = std::holds_alternative<int64_t>(right)
+                          ? std::get<int64_t>(right)
+                          : static_cast<int64_t>(std::get<int>(right));
+        result = Value(op(l, r));
+        return true;
+      } else {
+        result = Value(op(std::get<int>(left), std::get<int>(right)));
+        return true;
       }
     }
     return false;
@@ -171,22 +171,34 @@ void EvalVisitor::visit(BinaryExpr &node) {
     return;
 
   if (node.op == TokenType::PLUS) {
-    if (auto *leftInt = std::get_if<int>(&left)) {
-      if (auto *rightInt = std::get_if<int>(&right)) {
-        result = Value(*leftInt + *rightInt);
-        return;
-      } else if (auto *rightDouble = std::get_if<double>(&right)) {
-        result = Value(static_cast<double>(*leftInt) + *rightDouble);
-        return;
-      }
-    } else if (auto *leftDouble = std::get_if<double>(&left)) {
-      if (auto *rightInt = std::get_if<int>(&right)) {
-        result = Value(*leftDouble + static_cast<double>(*rightInt));
-        return;
-      } else if (auto *rightDouble = std::get_if<double>(&right)) {
-        result = Value(*leftDouble + *rightDouble);
-        return;
-      }
+    if (std::holds_alternative<double>(left) ||
+        std::holds_alternative<double>(right)) {
+      double l = std::holds_alternative<double>(left)
+                     ? std::get<double>(left)
+                     : (std::holds_alternative<int64_t>(left)
+                            ? static_cast<double>(std::get<int64_t>(left))
+                            : static_cast<double>(std::get<int>(left)));
+      double r = std::holds_alternative<double>(right)
+                     ? std::get<double>(right)
+                     : (std::holds_alternative<int64_t>(right)
+                            ? static_cast<double>(std::get<int64_t>(right))
+                            : static_cast<double>(std::get<int>(right)));
+      result = Value(l + r);
+      return;
+    } else if (std::holds_alternative<int64_t>(left) ||
+               std::holds_alternative<int64_t>(right)) {
+      int64_t l = std::holds_alternative<int64_t>(left)
+                        ? std::get<int64_t>(left)
+                        : static_cast<int64_t>(std::get<int>(left));
+      int64_t r = std::holds_alternative<int64_t>(right)
+                        ? std::get<int64_t>(right)
+                        : static_cast<int64_t>(std::get<int>(right));
+      result = Value(l + r);
+      return;
+    } else if (std::holds_alternative<int>(left) &&
+               std::holds_alternative<int>(right)) {
+      result = Value(std::get<int>(left) + std::get<int>(right));
+      return;
     }
 
     // Handle string concatenation
@@ -211,28 +223,51 @@ void EvalVisitor::visit(BinaryExpr &node) {
       throw std::runtime_error("Division by zero");
     }
 
-    if (auto *lInt = std::get_if<int>(&left)) {
-      if (auto *rInt = std::get_if<int>(&right)) {
-        result = Value(*lInt / *rInt);
-        return;
-      } else if (auto *rDouble = std::get_if<double>(&right)) {
-        result = Value(static_cast<double>(*lInt) / *rDouble);
-        return;
-      }
-    } else if (auto *lDouble = std::get_if<double>(&left)) {
-      if (auto *rInt = std::get_if<int>(&right)) {
-        result = Value(*lDouble / static_cast<double>(*rInt));
-        return;
-      } else if (auto *rDouble = std::get_if<double>(&right)) {
-        result = Value(*lDouble / *rDouble);
-        return;
-      }
+    if (std::holds_alternative<double>(left) ||
+        std::holds_alternative<double>(right)) {
+      double l = std::holds_alternative<double>(left)
+                     ? std::get<double>(left)
+                     : (std::holds_alternative<int64_t>(left)
+                            ? static_cast<double>(std::get<int64_t>(left))
+                            : static_cast<double>(std::get<int>(left)));
+      double r = std::holds_alternative<double>(right)
+                     ? std::get<double>(right)
+                     : (std::holds_alternative<int64_t>(right)
+                            ? static_cast<double>(std::get<int64_t>(right))
+                            : static_cast<double>(std::get<int>(right)));
+      result = Value(l / r);
+      return;
+    } else if (std::holds_alternative<int64_t>(left) ||
+               std::holds_alternative<int64_t>(right)) {
+      int64_t l = std::holds_alternative<int64_t>(left)
+                        ? std::get<int64_t>(left)
+                        : static_cast<int64_t>(std::get<int>(left));
+      int64_t r = std::holds_alternative<int64_t>(right)
+                        ? std::get<int64_t>(right)
+                        : static_cast<int64_t>(std::get<int>(right));
+      result = Value(l / r);
+      return;
+    } else {
+      result = Value(std::get<int>(left) / std::get<int>(right));
+      return;
     }
     throw std::runtime_error("Invalid operands for / operator");
   }
 
   if (node.op == TokenType::MODULO) {
-    if (auto *lInt = std::get_if<int>(&left)) {
+    if (std::holds_alternative<int64_t>(left) ||
+        std::holds_alternative<int64_t>(right)) {
+      int64_t l = std::holds_alternative<int64_t>(left)
+                        ? std::get<int64_t>(left)
+                        : static_cast<int64_t>(std::get<int>(left));
+      int64_t r = std::holds_alternative<int64_t>(right)
+                        ? std::get<int64_t>(right)
+                        : static_cast<int64_t>(std::get<int>(right));
+      if (r == 0)
+        throw std::runtime_error("Modulo by zero");
+      result = Value(l % r);
+      return;
+    } else if (auto *lInt = std::get_if<int>(&left)) {
       if (auto *rInt = std::get_if<int>(&right)) {
         if (*rInt == 0)
           throw std::runtime_error("Modulo by zero");
@@ -252,6 +287,9 @@ void EvalVisitor::visit(BinaryExpr &node) {
       if (auto *lInt = std::get_if<int>(&left)) {
         lVal = static_cast<double>(*lInt);
         hasL = true;
+      } else if (auto *lLong = std::get_if<int64_t>(&left)) {
+        lVal = static_cast<double>(*lLong);
+        hasL = true;
       } else if (auto *lDouble = std::get_if<double>(&left)) {
         lVal = *lDouble;
         hasL = true;
@@ -259,6 +297,9 @@ void EvalVisitor::visit(BinaryExpr &node) {
 
       if (auto *rInt = std::get_if<int>(&right)) {
         rVal = static_cast<double>(*rInt);
+        hasR = true;
+      } else if (auto *rLong = std::get_if<int64_t>(&right)) {
+        rVal = static_cast<double>(*rLong);
         hasR = true;
       } else if (auto *rDouble = std::get_if<double>(&right)) {
         rVal = *rDouble;

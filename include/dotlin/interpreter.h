@@ -20,10 +20,13 @@ struct Environment;
 struct Type;
 struct ClassDefinition;
 
+#include <cstdint>
+
 // Runtime value representation
-using Value = std::variant<
-    int, double, bool, std::string, ArrayValue, std::shared_ptr<LambdaValue>,
-    std::shared_ptr<struct ClassInstance>, std::shared_ptr<ClassDefinition>>;
+using Value = std::variant<int, int64_t, double, bool, std::string, ArrayValue,
+                           std::shared_ptr<LambdaValue>,
+                           std::shared_ptr<struct ClassInstance>,
+                           std::shared_ptr<ClassDefinition>>;
 
 // Class instance structure
 struct ClassInstance {

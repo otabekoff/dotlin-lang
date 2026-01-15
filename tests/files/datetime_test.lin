@@ -1,0 +1,23 @@
+fun main() {
+    println("--- Date/Time Test ---")
+    
+    val t1 = currentTimeMillis()
+    println("Current Time Millis: " + t1.toString())
+    
+    val date = now()
+    println("Current ISO Date: " + date)
+    
+    println("Sleeping for 500ms...")
+    val start = currentTimeMillis()
+    sleep(500)
+    val end = currentTimeMillis()
+    val diff = end - start
+    
+    println("Actually slept for: " + diff.toString() + "ms")
+    
+    if (diff >= 450) {
+        println("Sleep verification: SUCCESS")
+    } else {
+        println("Sleep verification: FAILED (Too short: " + diff.toString() + ")")
+    }
+}

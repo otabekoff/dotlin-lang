@@ -29,22 +29,22 @@
    - [x] Implement math functions (sin, cos, sqrt, etc.)
    - [x] Add file I/O operations
    - [ ] Implement date/time functions
-   - [ ] Add collection utilities
+   - [x] Add collection utilities
 6. Error Handling and Debugging
    - [ ] Add comprehensive error messages
    - [ ] Implement stack traces
    - [ ] Add debugging utilities
    - [ ] Improve exception handling
 7. Performance Optimizations
-    - [ ] Add expression evaluation optimizations
-    - [ ] Implement constant folding
-    - [ ] Add dead code elimination
-    - [ ] Optimize variable lookups
+   - [ ] Add expression evaluation optimizations
+   - [ ] Implement constant folding
+   - [ ] Add dead code elimination
+   - [ ] Optimize variable lookups
 8. Language Compatibility
-    - [ ] Expand Kotlin syntax compatibility
-    - [ ] Add more Kotlin-style operators
-    - [ ] Implement extension functions
-    - [ ] Add null safety features
+   - [ ] Expand Kotlin syntax compatibility
+   - [ ] Add more Kotlin-style operators
+   - [ ] Implement extension functions
+   - [ ] Add null safety features
 
 ---
 

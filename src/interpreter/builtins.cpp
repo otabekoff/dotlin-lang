@@ -5,7 +5,10 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
+#include <thread>
 
 namespace fs = std::filesystem;
 
@@ -380,16 +383,39 @@ Value Interpreter::executeBuiltinFunction(
     throw std::runtime_error("exit() expects an integer");
   }
 
-  if (name == "clock") {
+  if (name == "clock" || name == "currentTimeMillis") {
     if (arguments.size() != 0) {
-      throw std::runtime_error("clock() expects no arguments");
+      throw std::runtime_error(name + "() expects no arguments");
     }
     // Return current time in milliseconds
     auto now = std::chrono::system_clock::now();
     auto duration = now.time_since_epoch();
     auto millis =
         std::chrono::duration_cast<std::chrono::milliseconds>(duration);
-    return Value(static_cast<int>(millis.count()));
+    return Value(static_cast<int64_t>(millis.count()));
+  }
+
+  if (name == "now") {
+    if (arguments.size() != 0) {
+      throw std::runtime_error("now() expects no arguments");
+    }
+    auto now = std::chrono::system_clock::now();
+    auto in_time_t = std::chrono::system_clock::to_time_t(now);
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%dT%H:%M:%S");
+    return Value(ss.str());
+  }
+
+  if (name == "sleep") {
+    if (arguments.size() != 1) {
+      throw std::runtime_error("sleep() expects 1 argument (ms)");
+    }
+    Value msValue = evaluate(*arguments[0]);
+    if (auto *ms = std::get_if<int>(&msValue)) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(*ms));
+      return Value(); // Unit
+    }
+    throw std::runtime_error("sleep() expects an integer (milliseconds)");
   }
 
   if (name == "format") {

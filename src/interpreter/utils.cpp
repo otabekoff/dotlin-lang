@@ -5,55 +5,64 @@
 namespace dotlin {
 
 std::string getTypeOfValue(const Value &value) {
-  if (std::holds_alternative<int>(value)) {
-    return "int";
-  } else if (std::holds_alternative<double>(value)) {
-    return "double";
-  } else if (std::holds_alternative<bool>(value)) {
-    return "bool";
-  } else if (std::holds_alternative<std::string>(value)) {
-    return "string";
-  } else if (std::holds_alternative<ArrayValue>(value)) {
-    return "Array";
-  } else if (std::holds_alternative<std::shared_ptr<LambdaValue>>(value)) {
-    return "Lambda";
-  } else if (std::holds_alternative<std::shared_ptr<ClassInstance>>(value)) {
-    return "Object";
-  } else if (std::holds_alternative<std::shared_ptr<ClassDefinition>>(value)) {
-    return "Class";
-  }
-  return "unknown";
+  return std::visit(
+      [](auto &&arg) -> std::string {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, int>)
+          return "int";
+        else if constexpr (std::is_same_v<T, int64_t>)
+          return "long";
+        else if constexpr (std::is_same_v<T, double>)
+          return "double";
+        else if constexpr (std::is_same_v<T, bool>)
+          return "bool";
+        else if constexpr (std::is_same_v<T, std::string>)
+          return "string";
+        else if constexpr (std::is_same_v<T, ArrayValue>)
+          return "Array";
+        else if constexpr (std::is_same_v<T, std::shared_ptr<LambdaValue>>)
+          return "Lambda";
+        else if constexpr (std::is_same_v<T, std::shared_ptr<ClassInstance>>)
+          return "Object";
+        else if constexpr (std::is_same_v<T, std::shared_ptr<ClassDefinition>>)
+          return "Class";
+        else
+          return "unknown";
+      },
+      value);
 }
 
 std::string valueToString(const Value &value) {
-  if (std::holds_alternative<int>(value)) {
-    return std::to_string(std::get<int>(value));
-  } else if (std::holds_alternative<double>(value)) {
-    return std::to_string(std::get<double>(value));
-  } else if (std::holds_alternative<bool>(value)) {
-    return std::get<bool>(value) ? "true" : "false";
-  } else if (std::holds_alternative<std::string>(value)) {
-    return std::get<std::string>(value);
-  } else if (std::holds_alternative<ArrayValue>(value)) {
-    auto array = std::get<ArrayValue>(value);
-    std::string result = "[";
-    for (size_t i = 0; i < array.elements->size(); ++i) {
-      if (i > 0)
-        result += ", ";
-      result += valueToString((*array.elements)[i]);
-    }
-    result += "]";
-    return result;
-  } else if (std::holds_alternative<std::shared_ptr<LambdaValue>>(value)) {
-    return "<lambda>";
-  } else if (std::holds_alternative<std::shared_ptr<ClassInstance>>(value)) {
-    auto instance = std::get<std::shared_ptr<ClassInstance>>(value);
-    return instance->className + " instance";
-  } else if (std::holds_alternative<std::shared_ptr<ClassDefinition>>(value)) {
-    auto classDef = std::get<std::shared_ptr<ClassDefinition>>(value);
-    return classDef->name + " class";
-  }
-  return "null";
+  return std::visit(
+      [](auto &&arg) -> std::string {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_integral_v<T> && !std::is_same_v<T, bool>)
+          return std::to_string(arg);
+        else if constexpr (std::is_floating_point_v<T>)
+          return std::to_string(arg);
+        else if constexpr (std::is_same_v<T, bool>)
+          return arg ? "true" : "false";
+        else if constexpr (std::is_same_v<T, std::string>)
+          return arg;
+        else if constexpr (std::is_same_v<T, ArrayValue>) {
+          std::string result = "[";
+          for (size_t i = 0; i < arg.elements->size(); ++i) {
+            if (i > 0)
+              result += ", ";
+            result += valueToString((*arg.elements)[i]);
+          }
+          result += "]";
+          return result;
+        } else if constexpr (std::is_same_v<T, std::shared_ptr<LambdaValue>>)
+          return "<lambda>";
+        else if constexpr (std::is_same_v<T, std::shared_ptr<ClassInstance>>)
+          return arg->className + " instance";
+        else if constexpr (std::is_same_v<T, std::shared_ptr<ClassDefinition>>)
+          return arg->name + " class";
+        else
+          return "null";
+      },
+      value);
 }
 
 std::string typeToString(const std::shared_ptr<Type> &type) {
