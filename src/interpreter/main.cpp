@@ -152,18 +152,53 @@ Value Interpreter::executeFunction(Statement *body,
   return lastEvaluatedValue;
 }
 
+std::string getTypeOfValue(const Value &value);
+std::string typeToString(const std::shared_ptr<Type> &type);
+
 std::shared_ptr<FunctionDef>
 Interpreter::findBestFunctionOverload(const std::string &name,
-                                      const std::vector<Value> & /*args*/) {
+                                      const std::vector<Value> &args) {
   auto it = Interpreter::functionDefinitions.find(name);
   if (it == Interpreter::functionDefinitions.end()) {
     return nullptr;
   }
 
-  // For now, just return the first function found with the given name
-  // In a full implementation, we'd implement proper overload resolution
-  if (!it->second.empty()) {
-    return it->second[0];
+  // Look for a matching function (overload resolution)
+  for (const auto &func : it->second) {
+    if (func->parameters.size() == args.size()) {
+      bool typesMatch = true;
+      for (size_t i = 0; i < func->parameters.size(); ++i) {
+        if (func->parameters[i].typeAnnotation &&
+            (*func->parameters[i].typeAnnotation)->kind != TypeKind::UNKNOWN) {
+          std::string expected =
+              typeToString(*func->parameters[i].typeAnnotation);
+          std::string actual = ::dotlin::getTypeOfValue(args[i]);
+
+          auto normalize = [](const std::string &s) {
+            if (s == "Int")
+              return std::string("int");
+            if (s == "Long")
+              return std::string("long");
+            if (s == "Double")
+              return std::string("double");
+            if (s == "String")
+              return std::string("string");
+            if (s == "Boolean")
+              return std::string("bool");
+            return s;
+          };
+
+          if (normalize(expected) != actual) {
+            typesMatch = false;
+            break;
+          }
+        }
+      }
+
+      if (typesMatch) {
+        return func;
+      }
+    }
   }
 
   return nullptr;

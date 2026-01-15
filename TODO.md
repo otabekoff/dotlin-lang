@@ -57,3 +57,5 @@
 ## Update the docs files.
 
 Do cd /home/otabek/Projects/langs/cpp/dotlin/build && make and fix the errors.
+
+--- Document each code.

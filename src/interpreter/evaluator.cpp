@@ -13,6 +13,10 @@ std::string valueToString(const Value &value);
 }
 
 using namespace dotlin;
+class Interpreter;
+std::string getTypeOfValue(const Value &value);
+std::string typeToString(const std::shared_ptr<Type> &type);
+std::string valueToString(const Value &value);
 
 // Expression evaluation visitor implementations
 void EvalVisitor::visit(LiteralExpr &node) {
@@ -150,11 +154,11 @@ void EvalVisitor::visit(BinaryExpr &node) {
       } else if (std::holds_alternative<int64_t>(left) ||
                  std::holds_alternative<int64_t>(right)) {
         int64_t l = std::holds_alternative<int64_t>(left)
-                          ? std::get<int64_t>(left)
-                          : static_cast<int64_t>(std::get<int>(left));
+                        ? std::get<int64_t>(left)
+                        : static_cast<int64_t>(std::get<int>(left));
         int64_t r = std::holds_alternative<int64_t>(right)
-                          ? std::get<int64_t>(right)
-                          : static_cast<int64_t>(std::get<int>(right));
+                        ? std::get<int64_t>(right)
+                        : static_cast<int64_t>(std::get<int>(right));
         result = Value(op(l, r));
         return true;
       } else {
@@ -188,11 +192,11 @@ void EvalVisitor::visit(BinaryExpr &node) {
     } else if (std::holds_alternative<int64_t>(left) ||
                std::holds_alternative<int64_t>(right)) {
       int64_t l = std::holds_alternative<int64_t>(left)
-                        ? std::get<int64_t>(left)
-                        : static_cast<int64_t>(std::get<int>(left));
+                      ? std::get<int64_t>(left)
+                      : static_cast<int64_t>(std::get<int>(left));
       int64_t r = std::holds_alternative<int64_t>(right)
-                        ? std::get<int64_t>(right)
-                        : static_cast<int64_t>(std::get<int>(right));
+                      ? std::get<int64_t>(right)
+                      : static_cast<int64_t>(std::get<int>(right));
       result = Value(l + r);
       return;
     } else if (std::holds_alternative<int>(left) &&
@@ -240,11 +244,11 @@ void EvalVisitor::visit(BinaryExpr &node) {
     } else if (std::holds_alternative<int64_t>(left) ||
                std::holds_alternative<int64_t>(right)) {
       int64_t l = std::holds_alternative<int64_t>(left)
-                        ? std::get<int64_t>(left)
-                        : static_cast<int64_t>(std::get<int>(left));
+                      ? std::get<int64_t>(left)
+                      : static_cast<int64_t>(std::get<int>(left));
       int64_t r = std::holds_alternative<int64_t>(right)
-                        ? std::get<int64_t>(right)
-                        : static_cast<int64_t>(std::get<int>(right));
+                      ? std::get<int64_t>(right)
+                      : static_cast<int64_t>(std::get<int>(right));
       result = Value(l / r);
       return;
     } else {
@@ -258,11 +262,11 @@ void EvalVisitor::visit(BinaryExpr &node) {
     if (std::holds_alternative<int64_t>(left) ||
         std::holds_alternative<int64_t>(right)) {
       int64_t l = std::holds_alternative<int64_t>(left)
-                        ? std::get<int64_t>(left)
-                        : static_cast<int64_t>(std::get<int>(left));
+                      ? std::get<int64_t>(left)
+                      : static_cast<int64_t>(std::get<int>(left));
       int64_t r = std::holds_alternative<int64_t>(right)
-                        ? std::get<int64_t>(right)
-                        : static_cast<int64_t>(std::get<int>(right));
+                      ? std::get<int64_t>(right)
+                      : static_cast<int64_t>(std::get<int>(right));
       if (r == 0)
         throw std::runtime_error("Modulo by zero");
       result = Value(l % r);
@@ -945,61 +949,85 @@ void EvalVisitor::visit(CallExpr &node) {
 
     // Execute matching constructor
     if (!(*classDef)->constructors.empty()) {
+      // Evaluate all arguments once
+      std::vector<Value> argValues;
+      for (const auto &arg : node.arguments) {
+        argValues.push_back(interpreter->evaluate(*arg));
+      }
+
       // Look for a matching constructor (overload resolution)
-      // For now, just find the first one with matching argument count
-      // TODO: Implement full overload resolution
-      bool constructorFound = false;
+      std::shared_ptr<FunctionDef> bestMatch = nullptr;
       for (const auto &ctor : (*classDef)->constructors) {
-        if (ctor->parameters.size() == node.arguments.size()) {
-          // Found a compatible constructor
-          constructorFound = true;
-
-          // Create constructor environment (extending same instance scope?
-          // Or new scope with instance set as 'this'?)
-          // Constructors need access to 'this' (instance) and parameters.
-          // They should probably run IN the instance environment (closure =
-          // instanceEnv?) or a new env with 'this' defined.
-
-          auto ctorEnv =
-              std::make_shared<Environment>(interpreter->environment);
-          ctorEnv->define("this", Value(instance)); // Define 'this'
-
-          // Bind parameters
+        if (ctor->parameters.size() == argValues.size()) {
+          bool typesMatch = true;
           for (size_t i = 0; i < ctor->parameters.size(); ++i) {
-            Value argValue = interpreter->evaluate(*node.arguments[i]);
-            ctorEnv->define(ctor->parameters[i].name, argValue);
+            if (ctor->parameters[i].typeAnnotation &&
+                (*ctor->parameters[i].typeAnnotation)->kind !=
+                    TypeKind::UNKNOWN) {
+              std::string expected =
+                  typeToString(*ctor->parameters[i].typeAnnotation);
+              std::string actual = getTypeOfValue(argValues[i]);
+
+              // Map Dotlin type names to getTypeOfValue names if needed
+              // e.g., "Int" vs "int", "Long" vs "long"
+              auto normalize = [](const std::string &s) {
+                if (s == "Int")
+                  return std::string("int");
+                if (s == "Long")
+                  return std::string("long");
+                if (s == "Double")
+                  return std::string("double");
+                if (s == "String")
+                  return std::string("string");
+                if (s == "Boolean")
+                  return std::string("bool");
+                return s;
+              };
+
+              if (normalize(expected) != actual) {
+                typesMatch = false;
+                break;
+              }
+            }
           }
 
-          // Execute constructor body
-          // We need to temporarily set environment?
-          auto prevFuncEnv = interpreter->functionEnvironment;
-          interpreter->environment = ctorEnv;
-          interpreter->functionEnvironment = ctorEnv;
-
-          try {
-            interpreter->executeFunction(ctor->body.get(), ctorEnv);
-          } catch (...) {
-            interpreter->environment = oldEnv;
-            interpreter->functionEnvironment = prevFuncEnv;
-            throw;
+          if (typesMatch) {
+            bestMatch = ctor;
+            break;
           }
-          interpreter->environment = oldEnv;
-          interpreter->functionEnvironment = prevFuncEnv;
-
-          // After constructor runs, update instance fields again in case they
-          // were modified via 'this' Is 'this' reference to same instance? yes.
-          // If ctorEnv modified 'this' fields via member access, 'instance' is
-          // already updated (shared_ptr). But if it modified variables in
-          // ctorEnv that shadow fields? No, assignments to 'this.field' update
-          // instance.
-          break;
         }
       }
-      if (!constructorFound) {
+
+      if (bestMatch) {
+        auto ctorEnv = std::make_shared<Environment>(interpreter->environment);
+        ctorEnv->define("this", Value(instance));
+
+        // Bind parameters
+        for (size_t i = 0; i < bestMatch->parameters.size(); ++i) {
+          ctorEnv->define(bestMatch->parameters[i].name, argValues[i]);
+        }
+
+        auto prevFuncEnv = interpreter->functionEnvironment;
+        interpreter->environment = ctorEnv;
+        interpreter->functionEnvironment = ctorEnv;
+
+        try {
+          interpreter->executeFunction(bestMatch->body.get(), ctorEnv);
+        } catch (...) {
+          interpreter->environment = oldEnv;
+          interpreter->functionEnvironment = prevFuncEnv;
+          throw;
+        }
+        interpreter->environment = oldEnv;
+        interpreter->functionEnvironment = prevFuncEnv;
+      } else {
         throw std::runtime_error("No matching constructor found for class " +
-                                 (*classDef)->name);
+                                 (*classDef)->name + " with " +
+                                 std::to_string(argValues.size()) +
+                                 " arguments and matching types");
       }
     } else if (!node.arguments.empty()) {
+
       throw std::runtime_error(
           "Class " + (*classDef)->name +
           " has no constructors but arguments were provided");
@@ -1054,53 +1082,44 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
       result = it->second;
       return;
     }
+    throw std::runtime_error("Property '" + node.property +
+                             "' not found in class " + (*instance)->className);
+  }
 
-    // Check if the object is a string and has string properties/methods
-    if (auto *strValue = std::get_if<std::string>(&objValue)) {
-      if (node.property == "length") {
-        result = Value(static_cast<int>(strValue->length()));
-        return;
-      } else if (node.property == "substring") {
-        throw std::runtime_error("Substring method requires arguments");
-      } else if (node.property == "indexOf") {
-        throw std::runtime_error("IndexOf method requires arguments");
-      } else if (node.property == "startsWith") {
-        throw std::runtime_error("StartsWith method requires arguments");
-      } else if (node.property == "endsWith") {
-        throw std::runtime_error("EndsWith method requires arguments");
-      } else if (node.property == "toUpperCase") {
-        throw std::runtime_error("ToUpper method requires arguments");
-      } else if (node.property == "toLowerCase") {
-        throw std::runtime_error("ToLower method requires arguments");
-      } else if (node.property == "trim") {
-        std::string trimmedStr = *strValue;
-        size_t start = trimmedStr.find_first_not_of(" \t\n\r\f\v");
-        if (start == std::string::npos) {
-          result = Value(trimmedStr);
-        } else {
-          size_t end = trimmedStr.find_last_not_of(" \t\n\r\f\v");
-          result = Value(trimmedStr.substr(start, end - start + 1));
-        }
-        return;
-      } else if (node.property == "split") {
-        throw std::runtime_error("Split method requires arguments");
-      } else if (node.property == "contentToString") {
-        std::string content = "[";
-        for (size_t i = 0; i < strValue->length(); ++i) {
-          if (i > 0) {
-            content += ", ";
-          }
-          content += valueToString(objValue);
-        }
-        content += "]";
-        result = Value(content);
-        return;
+  // Check if the object is a string and has string properties/methods
+  if (auto *strValue = std::get_if<std::string>(&objValue)) {
+    if (node.property == "length") {
+      result = Value(static_cast<int>(strValue->length()));
+      return;
+    } else if (node.property == "trim") {
+      std::string trimmedStr = *strValue;
+      size_t start = trimmedStr.find_first_not_of(" \t\n\r\f\v");
+      if (start == std::string::npos) {
+        result = Value(trimmedStr);
+      } else {
+        size_t end = trimmedStr.find_last_not_of(" \t\n\r\f\v");
+        result = Value(trimmedStr.substr(start, end - start + 1));
       }
-    } else {
-      // For now, just throw an error for unimplemented string properties
-      throw std::runtime_error("String property '" + node.property +
-                               "' not implemented yet");
+      return;
+    } else if (node.property == "substring" || node.property == "indexOf" ||
+               node.property == "startsWith" || node.property == "endsWith" ||
+               node.property == "toUpperCase" ||
+               node.property == "toLowerCase" || node.property == "split") {
+      throw std::runtime_error("Method '" + node.property +
+                               "' must be called with ()");
+    } else if (node.property == "contentToString") {
+      std::string content = "[";
+      for (size_t i = 0; i < strValue->length(); ++i) {
+        if (i > 0)
+          content += ", ";
+        content += std::string(1, (*strValue)[i]); // Just the char for now
+      }
+      content += "]";
+      result = Value(content);
+      return;
     }
+    throw std::runtime_error("String property '" + node.property +
+                             "' not implemented");
   }
 
   // Check if the object is an array
@@ -1112,9 +1131,8 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
     if (node.property == "contentToString") {
       std::string content = "[";
       for (size_t i = 0; i < array->elements->size(); ++i) {
-        if (i > 0) {
+        if (i > 0)
           content += ", ";
-        }
         content += valueToString((*array->elements)[i]);
       }
       content += "]";
@@ -1122,8 +1140,12 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
       return;
     }
 
-    throw std::runtime_error("Invalid member access");
+    throw std::runtime_error("Array does not have property '" + node.property +
+                             "'");
   }
+
+  throw std::runtime_error("Cannot access member '" + node.property +
+                           "' on type " + getTypeOfValue(objValue));
 }
 
 void EvalVisitor::visit(ArrayLiteralExpr &node) {
