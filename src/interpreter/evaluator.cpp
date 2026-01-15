@@ -7,16 +7,14 @@
 #include <iostream>
 #include <stdexcept>
 
-// Forward declaration of valueToString
 namespace dotlin {
-std::string valueToString(const Value &value);
-}
-
-using namespace dotlin;
 class Interpreter;
 std::string getTypeOfValue(const Value &value);
 std::string typeToString(const std::shared_ptr<Type> &type);
 std::string valueToString(const Value &value);
+} // namespace dotlin
+
+using namespace dotlin;
 
 // Expression evaluation visitor implementations
 void EvalVisitor::visit(LiteralExpr &node) {
