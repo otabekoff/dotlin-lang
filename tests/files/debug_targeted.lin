@@ -1,0 +1,11 @@
+fun main() {
+    println("=== Targeted Debug Test ===")
+    
+    val str = "Hello World"
+    
+    println("Test 1: " + str.indexOf("World").toString())
+    println("Test 2: " + str.startsWith("Hello").toString())
+    println("Test 3: " + str.endsWith("World").toString())
+    
+    println("=== Targeted Test Complete ===")
+}

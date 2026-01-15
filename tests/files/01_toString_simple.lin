@@ -1,0 +1,11 @@
+fun main() {
+    println("=== Simple ToString Test ===")
+    
+    val num = 42
+    println("Number: " + num.toString())
+    
+    val bool = true
+    println("Boolean: " + bool.toString())
+    
+    println("=== Simple Test Complete ===")
+}

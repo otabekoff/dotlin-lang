@@ -1,0 +1,14 @@
+fun main() {
+    println("=== Case Conversion Test ===")
+    
+    val str = "Hello World"
+    val empty = ""
+    
+    println("Original: " + str)
+    println("ToUpperCase: " + str.toUpperCase().toString())
+    println("ToLowerCase: " + str.toLowerCase().toString())
+    println("Empty Upper: '" + empty.toUpperCase().toString() + "'")
+    println("Empty Lower: '" + empty.toLowerCase().toString() + "'")
+    
+    println("=== Case Conversion Complete ===")
+}

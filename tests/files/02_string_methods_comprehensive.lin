@@ -1,0 +1,60 @@
+fun main() {
+    println("=== String Methods Test ===")
+    
+    // Test string initialization
+    val str = "Hello World"
+    println("Original: " + str)
+    
+    // Test length property
+    println("Length: " + str.length.toString())
+    
+    // Test substring methods
+    println("Substring(6): " + str.substring(6).toString())
+    println("Substring(0, 5): " + str.substring(0, 5).toString())
+    println("Substring(-1): " + str.substring(-1).toString())
+    println("Substring(0, 20): " + str.substring(0, 20).toString())
+    
+    // Test indexOf method
+    println("IndexOf('World'): " + str.indexOf("World").toString())
+    println("IndexOf('xyz'): " + str.indexOf("xyz").toString())
+    println("IndexOf(''): " + str.indexOf("").toString())
+    
+    // Test startsWith method
+    println("StartsWith('Hello'): " + str.startsWith("Hello").toString())
+    println("StartsWith('World'): " + str.startsWith("World").toString())
+    println("StartsWith(''): " + str.startsWith("").toString())
+    
+    // Test endsWith method
+    println("EndsWith('World'): " + str.endsWith("World").toString())
+    println("EndsWith('Hello'): " + str.endsWith("Hello").toString())
+    println("EndsWith(''): " + str.endsWith("").toString())
+    
+    // Test toUpperCase method
+    println("ToUpperCase: " + str.toUpperCase().toString())
+    println("ToUpperCase(empty): " + "".toUpperCase().toString())
+    
+    // Test toLowerCase method
+    println("ToLowerCase: " + str.toLowerCase().toString())
+    println("ToLowerCase(empty): " + "".toLowerCase().toString())
+    
+    // Test trim method
+    val paddedStr = "   Hello World   "
+    println("Original padded: '" + paddedStr + "'")
+    println("Trimmed: '" + paddedStr.trim().toString() + "'")
+    println("Trim(empty): '" + "".trim().toString() + "'")
+    println("Trim(only spaces): '" + "     ".trim().toString() + "'")
+    
+    // Test split method
+    println("Split by space: " + str.split(" ").contentToString())
+    println("Split by comma: " + "a,b,c".split(",").contentToString())
+    println("Split by empty: " + str.split("").contentToString())
+    println("Split not found: " + "xyz".split(",").contentToString())
+    println("Split(empty string): " + "".split(",").contentToString())
+    
+    // Test toString method
+    println("ToString on string: " + str.toString())
+    println("ToString on number: " + 42.toString())
+    println("ToString on boolean: " + true.toString())
+    
+    println("=== String Methods Complete ===")
+}

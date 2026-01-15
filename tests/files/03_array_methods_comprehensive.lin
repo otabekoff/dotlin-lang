@@ -1,0 +1,27 @@
+fun main() {
+    println("=== Array Methods Test ===")
+    
+    // Test arrayOf function
+    val numbers = arrayOf(1, 2, 3, 4, 5)
+    println("Created array: " + numbers.contentToString())
+    
+    // Test size property
+    println("Array size: " + numbers.size.toString())
+    
+    // Test empty array
+    val empty = arrayOf()
+    println("Empty array: " + empty.contentToString())
+    println("Empty size: " + empty.size.toString())
+    
+    // Test single element array
+    val single = arrayOf(42)
+    println("Single element: " + single.contentToString())
+    println("Single size: " + single.size.toString())
+    
+    // Test mixed types
+    val mixed = arrayOf("hello", 42, true)
+    println("Mixed types: " + mixed.contentToString())
+    println("Mixed size: " + mixed.size.toString())
+    
+    println("=== Array Methods Complete ===")
+}

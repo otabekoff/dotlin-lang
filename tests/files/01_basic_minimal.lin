@@ -1,0 +1,7 @@
+fun main() { 
+    println("=== Basic Minimal Test ===")
+    val x = 10
+    val y = 20
+    println("x + y = " + (x + y).toString())
+    println("=== Basic Minimal Complete ===")
+}

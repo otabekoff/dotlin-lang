@@ -1,0 +1,12 @@
+fun main() {
+    println("=== Debug String Methods ===")
+    
+    val str = "Hello World"
+    println("Step 1: String created")
+    
+    println("Step 2: " + str.length.toString())
+    println("Step 3: " + str.substring(6).toString())
+    println("Step 4: " + str.substring(0, 5).toString())
+    
+    println("=== Debug Complete ===")
+}

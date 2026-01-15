@@ -428,14 +428,16 @@ void EvalVisitor::visit(CallExpr &node) {
         std::vector<Value> parts;
         size_t pos = 0;
         size_t delimLen = delim.length();
-        while ((pos = str.find(delim, pos)) != std::string::npos) {
-          parts.push_back(Value(str.substr(0, pos)));
+        std::string remaining = str;
+
+        while ((pos = remaining.find(delim, pos)) != std::string::npos) {
+          parts.push_back(Value(remaining.substr(0, pos)));
           pos += delimLen;
+          remaining = remaining.substr(pos);
+          pos = 0;
         }
-        // Add the remaining part (only if pos is valid)
-        if (pos < str.length()) {
-          parts.push_back(Value(str.substr(pos)));
-        }
+        // Add the remaining part
+        parts.push_back(Value(remaining));
         result = Value(ArrayValue(parts));
       } else {
         result = Value(ArrayValue());
@@ -581,164 +583,161 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
       return;
     }
 
-    // Look up the property in the class definition (for methods)
-    for (const auto &method : (*instance)->classDef->methods) {
-      if (method->name == node.property) {
-        // Return a lambda that represents the method
-        auto methodLambda = std::make_shared<LambdaValue>(
-            method->parameters, method->body, interpreter->environment);
-        result = Value(methodLambda);
+    // Check if the object is a string and has string properties/methods
+    if (auto *strValue = std::get_if<std::string>(&objValue)) {
+      if (propertyName == "length") {
+        result = Value(static_cast<int>(strValue->length()));
+        return;
+      } else if (propertyName == "substring") {
+        throw std::runtime_error("Substring method requires arguments");
+      } else if (propertyName == "indexOf") {
+        throw std::runtime_error("IndexOf method requires arguments");
+      } else if (propertyName == "startsWith") {
+        throw std::runtime_error("StartsWith method requires arguments");
+      } else if (propertyName == "endsWith") {
+        throw std::runtime_error("EndsWith method requires arguments");
+      } else if (propertyName == "toUpperCase") {
+        throw std::runtime_error("ToUpper method requires arguments");
+      } else if (propertyName == "toLowerCase") {
+        throw std::runtime_error("ToLower method requires arguments");
+      } else if (propertyName == "trim") {
+        std::string trimmedStr = *strValue;
+        size_t start = trimmedStr.find_first_not_of(" \t\n\r\f\v");
+        if (start == std::string::npos) {
+          result = Value(trimmedStr);
+        } else {
+          size_t end = trimmedStr.find_last_not_of(" \t\n\r\f\v");
+          result = Value(trimmedStr.substr(start, end - start + 1));
+        }
+        return;
+      } else if (propertyName == "split") {
+        throw std::runtime_error("Split method requires arguments");
+      } else if (propertyName == "contentToString") {
+        std::string content = "[";
+        for (size_t i = 0; i < strValue->length(); ++i) {
+          if (i > 0) {
+            content += ", ";
+          }
+          content += valueToString(objValue);
+        }
+        content += "]";
+        result = Value(content);
         return;
       }
+    } else {
+      // For now, just throw an error for unimplemented string properties
+      throw std::runtime_error("String property '" + propertyName +
+                               "' not implemented yet");
     }
-
-    throw std::runtime_error("Property '" + node.property + "' not found");
-  }
-
-  // Check if the object is a string and has string properties/methods
-  if (auto *strValue = std::get_if<std::string>(&objValue)) {
-    if (node.property == "length") {
-      result = Value(static_cast<int>(strValue->length()));
-      return;
-    } else if (node.property == "substring") {
-      throw std::runtime_error("Substring method requires arguments");
-    } else if (node.property == "indexOf") {
-      throw std::runtime_error("IndexOf method requires arguments");
-    } else if (node.property == "startsWith") {
-      throw std::runtime_error("StartsWith method requires arguments");
-    } else if (node.property == "endsWith") {
-      throw std::runtime_error("EndsWith method requires arguments");
-    } else if (node.property == "toUpperCase") {
-      throw std::runtime_error("ToUpper method requires arguments");
-    } else if (node.property == "toLowerCase") {
-      throw std::runtime_error("ToLower method requires arguments");
-    } else if (node.property == "trim") {
-      std::string trimmedStr = *strValue;
-      // Left trim
-      size_t start = trimmedStr.find_first_not_of(" \t\n\r\f\v");
-      if (start == std::string::npos) {
-        result = Value(trimmedStr);
-        return;
-      } else {
-        // Right trim
-        size_t end = trimmedStr.find_last_not_of(" \t\n\r\f\v");
-        result = Value(trimmedStr.substr(start, end - start + 1));
-        return;
-      }
-    } else if (node.property == "split") {
-      throw std::runtime_error("Split method requires arguments");
-    }
-    // For now, just throw an error for unimplemented string properties
-    throw std::runtime_error("String property '" + node.property +
-                             "' not implemented yet");
   }
 
   // Check if the object is an array
   if (auto *array = std::get_if<ArrayValue>(&objValue)) {
-    if (node.property == "size") {
-      result = Value(static_cast<int>(array->elements.size()));
-      return;
-    }
-    if (node.property == "contentToString") {
-      std::string content = "[";
-      for (size_t i = 0; i < array->elements.size(); ++i) {
-        if (i > 0) {
-          content += ", ";
-        }
-        content += valueToString(array->elements[i]);
-      }
-      content += "]";
-      result = Value(content);
-      return;
-    }
-  }
-
-  throw std::runtime_error("Invalid member access");
-}
-
-void EvalVisitor::visit(ArrayLiteralExpr &node) {
-  ArrayValue array;
-  for (const auto &element : node.elements) {
-    array.elements.push_back(interpreter->evaluate(*element));
-  }
-  result = Value(array);
-}
-
-void EvalVisitor::visit(ArrayAccessExpr &node) {
-  Value arrayValue = interpreter->evaluate(*node.array);
-  Value indexValue = interpreter->evaluate(*node.index);
-
-  if (auto *array = std::get_if<ArrayValue>(&arrayValue)) {
-    if (auto *index = std::get_if<int>(&indexValue)) {
-      if (*index >= 0 && *index < static_cast<int>(array->elements.size())) {
-        result = array->elements[static_cast<size_t>(*index)];
+    if (propertyName == "size") {
+      if (node.property == "size") {
+        result = Value(static_cast<int>(array->elements.size()));
         return;
       }
-      throw std::runtime_error("Array index out of bounds");
+      if (node.property == "contentToString") {
+        std::string content = "[";
+        for (size_t i = 0; i < array->elements.size(); ++i) {
+          if (i > 0) {
+            content += ", ";
+          }
+          content += valueToString(array->elements[i]);
+        }
+        content += "]";
+        result = Value(content);
+        return;
+      }
     }
-    throw std::runtime_error("Array index must be an integer");
+
+    throw std::runtime_error("Invalid member access");
   }
 
-  throw std::runtime_error("Invalid array access");
-}
+  void EvalVisitor::visit(ArrayLiteralExpr & node) {
+    ArrayValue array;
+    for (const auto &element : node.elements) {
+      array.elements.push_back(interpreter->evaluate(*element));
+    }
+    result = Value(array);
+  }
 
-// Statement visit methods (needed for complete interface but not used in
-// expression evaluation)
-void EvalVisitor::visit(ExpressionStmt &node) {
-  result = interpreter->evaluate(*node.expression);
-}
+  void EvalVisitor::visit(ArrayAccessExpr & node) {
+    Value arrayValue = interpreter->evaluate(*node.array);
+    Value indexValue = interpreter->evaluate(*node.index);
 
-void EvalVisitor::visit(VariableDeclStmt &node) {
-  (void)node;
-  result = Value();
-}
+    if (auto *array = std::get_if<ArrayValue>(&arrayValue)) {
+      if (auto *index = std::get_if<int>(&indexValue)) {
+        if (*index >= 0 && *index < static_cast<int>(array->elements.size())) {
+          result = array->elements[static_cast<size_t>(*index)];
+          return;
+        }
+        throw std::runtime_error("Array index out of bounds");
+      }
+      throw std::runtime_error("Array index must be an integer");
+    }
 
-void EvalVisitor::visit(FunctionDeclStmt &node) {
-  (void)node;
-  result = Value();
-}
+    throw std::runtime_error("Invalid array access");
+  }
 
-void EvalVisitor::visit(BlockStmt &node) {
-  (void)node;
-  result = Value();
-}
+  // Statement visit methods (needed for complete interface but not used in
+  // expression evaluation)
+  void EvalVisitor::visit(ExpressionStmt & node) {
+    result = interpreter->evaluate(*node.expression);
+  }
 
-void EvalVisitor::visit(IfStmt &node) {
-  (void)node;
-  result = Value();
-}
+  void EvalVisitor::visit(VariableDeclStmt & node) {
+    (void)node;
+    result = Value();
+  }
 
-void EvalVisitor::visit(ReturnStmt &node) {
-  (void)node;
-  result = Value();
-}
+  void EvalVisitor::visit(FunctionDeclStmt & node) {
+    (void)node;
+    result = Value();
+  }
 
-void EvalVisitor::visit(ClassDeclStmt &node) {
-  (void)node;
-  result = Value();
-}
+  void EvalVisitor::visit(BlockStmt & node) {
+    (void)node;
+    result = Value();
+  }
 
-void EvalVisitor::visit(ForStmt &node) {
-  (void)node;
-  result = Value();
-}
+  void EvalVisitor::visit(IfStmt & node) {
+    (void)node;
+    result = Value();
+  }
 
-void EvalVisitor::visit(WhenStmt &node) {
-  (void)node;
-  result = Value();
-}
+  void EvalVisitor::visit(ReturnStmt & node) {
+    (void)node;
+    result = Value();
+  }
 
-void EvalVisitor::visit(TryStmt &node) {
-  (void)node;
-  result = Value();
-}
+  void EvalVisitor::visit(ClassDeclStmt & node) {
+    (void)node;
+    result = Value();
+  }
 
-void EvalVisitor::visit(ConstructorDeclStmt &node) {
-  (void)node;
-  result = Value();
-}
+  void EvalVisitor::visit(ForStmt & node) {
+    (void)node;
+    result = Value();
+  }
 
-void EvalVisitor::visit(WhileStmt &node) {
-  (void)node;
-  result = Value();
-}
+  void EvalVisitor::visit(WhenStmt & node) {
+    (void)node;
+    result = Value();
+  }
+
+  void EvalVisitor::visit(TryStmt & node) {
+    (void)node;
+    result = Value();
+  }
+
+  void EvalVisitor::visit(ConstructorDeclStmt & node) {
+    (void)node;
+    result = Value();
+  }
+
+  void EvalVisitor::visit(WhileStmt & node) {
+    (void)node;
+    result = Value();
+  }

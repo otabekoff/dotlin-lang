@@ -1,0 +1,11 @@
+fun main() {
+    println("=== Debug Split Method ===")
+    
+    val str = "Hello World"
+    println("Original: " + str)
+    
+    val parts = str.split(" ")
+    println("Split result: " + parts.contentToString())
+    
+    println("=== Debug Split Complete ===")
+}

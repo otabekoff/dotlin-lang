@@ -1,0 +1,17 @@
+fun main() {
+    println("=== Integration Test ===")
+    
+    // Test 1: Basic string operations
+    val str = "Hello"
+    println("Test 1: " + str.toUpperCase())
+    
+    // Test 2: Array operations
+    val arr = arrayOf(1, 2)
+    println("Test 2: " + arr.size.toString())
+    
+    // Test 3: Mixed operations
+    val result = str + " " + arr.contentToString()
+    println("Test 3: " + result)
+    
+    println("=== Integration Complete ===")
+}

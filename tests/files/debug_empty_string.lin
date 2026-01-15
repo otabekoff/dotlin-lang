@@ -1,0 +1,11 @@
+fun main() {
+    println("=== Debug Empty String ===")
+    
+    val emptyStr = ""
+    println("Empty string length: " + emptyStr.length.toString())
+    println("Empty string toUpper: " + emptyStr.toUpperCase().toString())
+    println("Empty string toLower: " + emptyStr.toLowerCase().toString())
+    println("Empty string trim: '" + emptyStr.trim().toString() + "'")
+    
+    println("=== Debug Empty Complete ===")
+}

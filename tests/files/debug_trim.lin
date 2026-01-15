@@ -1,0 +1,14 @@
+fun main() {
+    println("=== Trim Test ===")
+    
+    val padded = "   Hello World   "
+    val spaces = "     "
+    val empty = ""
+    
+    println("Original: '" + padded + "'")
+    println("Trimmed: '" + padded.trim().toString() + "'")
+    println("Spaces only: '" + spaces.trim().toString() + "'")
+    println("Empty trim: '" + empty.trim().toString() + "'")
+    
+    println("=== Trim Test Complete ===")
+}

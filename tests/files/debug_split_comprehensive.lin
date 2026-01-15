@@ -1,0 +1,13 @@
+fun main() {
+    println("=== Split Test ===")
+    
+    val str = "a,b,c"
+    val empty = ""
+    val noDelim = "xyz"
+    
+    println("Split comma: " + str.split(",").contentToString())
+    println("Split empty: " + empty.split(",").contentToString())
+    println("Split not found: " + noDelim.split(",").contentToString())
+    
+    println("=== Split Test Complete ===")
+}
