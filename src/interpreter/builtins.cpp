@@ -93,7 +93,7 @@ Value Interpreter::executeBuiltinFunction(
       return Value(static_cast<int>(str->length()));
     }
     if (auto *array = std::get_if<ArrayValue>(&arg)) {
-      return Value(static_cast<int>(array->elements.size()));
+      return Value(static_cast<int>(array->elements->size()));
     }
     throw std::runtime_error("length() expects a string or array");
   }
@@ -154,7 +154,7 @@ Value Interpreter::executeBuiltinFunction(
   if (name == "arrayOf") {
     ArrayValue array;
     for (const auto &arg : arguments) {
-      array.elements.push_back(evaluate(*arg));
+      array.elements->push_back(evaluate(*arg));
     }
     return Value(array);
   }
@@ -167,10 +167,10 @@ Value Interpreter::executeBuiltinFunction(
     Value element = evaluate(*arguments[1]);
 
     if (auto *arrayVal = std::get_if<ArrayValue>(&array)) {
-      for (size_t i = 0; i < arrayVal->elements.size(); ++i) {
+      for (size_t i = 0; i < arrayVal->elements->size(); ++i) {
         // Simple equality check for now
-        if (arrayVal->elements[i].index() == element.index()) {
-          if (arrayVal->elements[i] == element) {
+        if ((*arrayVal->elements)[i].index() == element.index()) {
+          if ((*arrayVal->elements)[i] == element) {
             return Value(static_cast<int>(i));
           }
         }

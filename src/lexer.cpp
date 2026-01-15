@@ -199,7 +199,35 @@ std::vector<Token> tokenize(const std::string &src) {
         }
         break;
       case '/':
-        if (i + 1 < src.length() && src[i + 1] == '=') {
+        // Check for comments first
+        if (i + 1 < src.length() && src[i + 1] == '/') {
+          // Single-line comment: skip until end of line
+          i += 2; // Skip '//'
+          while (i < src.length() && src[i] != '\n') {
+            i++;
+          }
+          // Don't increment i here - the whitespace handler will process '\n'
+          continue; // Skip adding token, continue to next iteration
+        } else if (i + 1 < src.length() && src[i + 1] == '*') {
+          // Multi-line comment: skip until '*/'
+          i += 2; // Skip '/*'
+          column += 2;
+          while (i + 1 < src.length() &&
+                 !(src[i] == '*' && src[i + 1] == '/')) {
+            if (src[i] == '\n') {
+              line++;
+              column = 1;
+            } else {
+              column++;
+            }
+            i++;
+          }
+          if (i + 1 < src.length()) {
+            i += 2; // Skip '*/'
+            column += 2;
+          }
+          continue; // Skip adding token, continue to next iteration
+        } else if (i + 1 < src.length() && src[i + 1] == '=') {
           text = "/=";
           type = TokenType::DIVIDE_ASSIGN;
           i++; // Skip next character

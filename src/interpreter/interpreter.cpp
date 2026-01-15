@@ -19,10 +19,10 @@ std::string Interpreter::valueToString(const Value &value) {
   } else if (std::holds_alternative<ArrayValue>(value)) {
     auto array = std::get<ArrayValue>(value);
     std::string result = "[";
-    for (size_t i = 0; i < array.elements.size(); ++i) {
+    for (size_t i = 0; i < array.elements->size(); ++i) {
       if (i > 0)
         result += ", ";
-      result += valueToString(array.elements[i]);
+      result += valueToString((*array.elements)[i]);
     }
     result += "]";
     return result;

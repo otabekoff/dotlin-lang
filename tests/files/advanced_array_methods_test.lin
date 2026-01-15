@@ -1,0 +1,12 @@
+var a = arrayOf(1, 2, 3)
+println("Initial: " + a.contentToString())
+
+a.add(4)
+println("After add(4): " + a.contentToString())
+
+a.set(0, 100)
+println("Val at 0: " + a.get(0))
+println("After set(0, 100): " + a.contentToString())
+
+a.removeAt(1)
+println("After removeAt(1): " + a.contentToString())

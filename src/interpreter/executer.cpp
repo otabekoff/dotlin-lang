@@ -117,7 +117,7 @@ void ExecVisitor::visit(ForStmt &node) {
     auto loopScope = std::make_shared<Environment>(interpreter->environment);
 
     // Iterate through array elements
-    for (const auto &element : arrayValue->elements) {
+    for (const auto &element : *arrayValue->elements) {
       // Set the loop variable in the new scope
       loopScope->define(node.variable, element);
 

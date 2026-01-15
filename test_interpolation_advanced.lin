@@ -1,0 +1,6 @@
+fun main() {
+    val arr = arrayOf(1, 2, 3)
+    println("Size: ${arr.size}")
+    println("Element: ${arr[0]}")
+    println("Name: ${name}")
+}

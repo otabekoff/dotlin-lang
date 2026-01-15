@@ -1,10 +1,11 @@
 #include "dotlin/interpreter.h"
 #include "dotlin/parser.h"
 #include "dotlin/visitors.h"
+#include <algorithm>
+#include <cmath>
+#include <iostream>
 // #include <algorithm>
 // #include <cmath>
-#include <algorithm>
-#include <iostream>
 #include <stdexcept>
 
 // Forward declaration of valueToString
@@ -47,7 +48,7 @@ void EvalVisitor::visit(IdentifierExpr &node) {
     // Return the command-line arguments array
     ArrayValue argsArray;
     for (const auto &arg : interpreter->commandLineArgs) {
-      argsArray.elements.push_back(Value(arg));
+      argsArray.elements->push_back(Value(arg));
     }
     result = Value(argsArray);
     return;
@@ -308,25 +309,56 @@ void EvalVisitor::visit(CallExpr &node) {
     if (methodName == "toString" && args.empty()) {
       result = Value(interpreter->valueToString(objValue));
       return;
-    } else if (methodName == "size" && args.empty()) {
-      // Handle size property for arrays
-      if (auto *array = std::get_if<ArrayValue>(&objValue)) {
-        result = Value(static_cast<int>(array->elements.size()));
+    } else if (auto *array = std::get_if<ArrayValue>(&objValue)) {
+      if (methodName == "size" && args.empty()) {
+        result = Value(static_cast<int>(array->elements->size()));
         return;
-      }
-    } else if (methodName == "contentToString" && args.empty()) {
-      // Handle contentToString for arrays
-      if (auto *array = std::get_if<ArrayValue>(&objValue)) {
+      } else if (methodName == "contentToString" && args.empty()) {
         std::string content = "[";
-        for (size_t i = 0; i < array->elements.size(); ++i) {
+        for (size_t i = 0; i < array->elements->size(); ++i) {
           if (i > 0) {
             content += ", ";
           }
-          content += interpreter->valueToString(array->elements[i]);
+          content += interpreter->valueToString((*array->elements)[i]);
         }
         content += "]";
         result = Value(content);
         return;
+      } else if (methodName == "add") {
+        if (args.size() == 1) {
+          array->push_back(args[0]);
+          result = Value(true);
+          return;
+        } else {
+          throw std::runtime_error("add method requires 1 argument");
+        }
+      } else if (methodName == "get") {
+        if (args.size() == 1 && std::holds_alternative<int>(args[0])) {
+          int index = std::get<int>(args[0]);
+          result = array->get(static_cast<size_t>(index));
+          return;
+        } else {
+          throw std::runtime_error("get method requires 1 integer argument");
+        }
+      } else if (methodName == "set") {
+        if (args.size() == 2 && std::holds_alternative<int>(args[0])) {
+          int index = std::get<int>(args[0]);
+          array->set(static_cast<size_t>(index), args[1]);
+          result = args[1]; // Return the assigned value
+          return;
+        } else {
+          throw std::runtime_error("set method requires index and value");
+        }
+      } else if (methodName == "removeAt") {
+        if (args.size() == 1 && std::holds_alternative<int>(args[0])) {
+          int index = std::get<int>(args[0]);
+          array->removeAt(static_cast<size_t>(index));
+          result = Value(true);
+          return;
+        } else {
+          throw std::runtime_error(
+              "removeAt method requires 1 integer argument");
+        }
       }
     } else if (methodName == "substring" && args.size() >= 1) {
       // Handle substring method calls
@@ -566,17 +598,17 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
     if (identifier->name == "args") {
       if (node.property == "size") {
         if (auto *argsArray = std::get_if<ArrayValue>(&objValue)) {
-          result = Value(static_cast<int>(argsArray->elements.size()));
+          result = Value(static_cast<int>(argsArray->elements->size()));
           return;
         }
       } else if (node.property == "contentToString") {
         if (auto *argsArray = std::get_if<ArrayValue>(&objValue)) {
           std::string content = "[";
-          for (size_t i = 0; i < argsArray->elements.size(); ++i) {
+          for (size_t i = 0; i < argsArray->elements->size(); ++i) {
             if (i > 0) {
               content += ", ";
             }
-            content += valueToString(argsArray->elements[i]);
+            content += valueToString((*argsArray->elements)[i]);
           }
           content += "]";
           result = Value(content);
@@ -646,16 +678,16 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
   // Check if the object is an array
   if (auto *array = std::get_if<ArrayValue>(&objValue)) {
     if (node.property == "size") {
-      result = Value(static_cast<int>(array->elements.size()));
+      result = Value(static_cast<int>(array->elements->size()));
       return;
     }
     if (node.property == "contentToString") {
       std::string content = "[";
-      for (size_t i = 0; i < array->elements.size(); ++i) {
+      for (size_t i = 0; i < array->elements->size(); ++i) {
         if (i > 0) {
           content += ", ";
         }
-        content += valueToString(array->elements[i]);
+        content += valueToString((*array->elements)[i]);
       }
       content += "]";
       result = Value(content);
@@ -669,7 +701,7 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
 void EvalVisitor::visit(ArrayLiteralExpr &node) {
   ArrayValue array;
   for (const auto &element : node.elements) {
-    array.elements.push_back(interpreter->evaluate(*element));
+    array.elements->push_back(interpreter->evaluate(*element));
   }
   result = Value(array);
 }
@@ -680,8 +712,8 @@ void EvalVisitor::visit(ArrayAccessExpr &node) {
 
   if (auto *array = std::get_if<ArrayValue>(&arrayValue)) {
     if (auto *index = std::get_if<int>(&indexValue)) {
-      if (*index >= 0 && *index < static_cast<int>(array->elements.size())) {
-        result = array->elements[static_cast<size_t>(*index)];
+      if (*index >= 0 && *index < static_cast<int>(array->elements->size())) {
+        result = (*array->elements)[static_cast<size_t>(*index)];
         return;
       }
       throw std::runtime_error("Array index out of bounds");
@@ -738,7 +770,7 @@ void EvalVisitor::visit(ForStmt &node) {
     auto loopScope = std::make_shared<Environment>(interpreter->environment);
 
     // Iterate through array elements
-    for (const auto &element : arrayValue->elements) {
+    for (const auto &element : *arrayValue->elements) {
       // Set the loop variable in the new scope
       loopScope->define(node.variable, element);
 

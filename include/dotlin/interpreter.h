@@ -101,21 +101,31 @@ struct LambdaValue {
 enum class ArrayElementType { INT, DOUBLE, BOOL, STRING, MIXED, UNKNOWN };
 
 // Array value structure
+// Array value structure
 struct ArrayValue {
-  std::vector<Value> elements;
+  std::shared_ptr<std::vector<Value>> elements;
   ArrayElementType elementType;
 
-  ArrayValue() : elements(), elementType(ArrayElementType::UNKNOWN) {}
+  ArrayValue()
+      : elements(std::make_shared<std::vector<Value>>()),
+        elementType(ArrayElementType::UNKNOWN) {}
+
   ArrayValue(const std::vector<Value> &els)
-      : elements(els), elementType(determineElementType(els)) {}
+      : elements(std::make_shared<std::vector<Value>>(els)),
+        elementType(determineElementType(els)) {}
+
   ArrayValue(std::vector<Value> &&els)
-      : elements(std::move(els)), elementType(determineElementType(elements)) {}
+      : elements(std::make_shared<std::vector<Value>>(std::move(els))),
+        elementType(determineElementType(*elements)) {}
 
   // Constructor with explicit element type
   ArrayValue(const std::vector<Value> &els, ArrayElementType elemType)
-      : elements(els), elementType(elemType) {}
+      : elements(std::make_shared<std::vector<Value>>(els)),
+        elementType(elemType) {}
+
   ArrayValue(std::vector<Value> &&els, ArrayElementType elemType)
-      : elements(std::move(els)), elementType(elemType) {}
+      : elements(std::make_shared<std::vector<Value>>(std::move(els))),
+        elementType(elemType) {}
 
   // Determine the element type based on the elements in the array
   static ArrayElementType
@@ -147,48 +157,80 @@ struct ArrayValue {
   }
 
   // Get the size of the array
-  size_t size() const { return elements.size(); }
+  size_t size() const { return elements->size(); }
 
   // Check if the array is empty
-  bool empty() const { return elements.empty(); }
+  bool empty() const { return elements->empty(); }
 
   // Get element at index
   Value get(size_t index) const {
-    if (index < elements.size())
-      return elements[index];
+    if (index < elements->size())
+      return (*elements)[index];
     else
       throw std::runtime_error("Array index out of bounds");
   }
 
   // Set element at index
   void set(size_t index, const Value &value) {
-    if (index < elements.size())
-      elements[index] = value;
+    if (index < elements->size())
+      (*elements)[index] = value;
     else
       throw std::runtime_error("Array index out of bounds");
   }
 
   // Add element to the end
   void push_back(const Value &value) {
-    elements.push_back(value);
+    elements->push_back(value);
     // Update type if needed
-    if (elements.size() == 1) {
+    if (elements->size() == 1) {
       elementType = getValueType(value);
     } else if (getValueType(value) != elementType) {
       elementType = ArrayElementType::MIXED;
     }
   }
 
+  // Insert element at position
+  void insert(size_t index, const Value &value) {
+    if (index <= elements->size()) {
+      elements->insert(elements->begin() + index, value);
+      // Update type if needed
+      if (elements->size() == 1) {
+        elementType = getValueType(value);
+      } else if (getValueType(value) != elementType) {
+        elementType = ArrayElementType::MIXED;
+      }
+    } else {
+      throw std::runtime_error("Array index out of bounds");
+    }
+  }
+
+  // Remove element at index
+  void removeAt(size_t index) {
+    if (index < elements->size()) {
+      elements->erase(elements->begin() + index);
+      // Recalculate type if empty
+      if (elements->empty()) {
+        elementType = ArrayElementType::UNKNOWN;
+      } else if (elementType == ArrayElementType::MIXED) {
+        // Maybe type is uniform now, but keeping mixed is safe/easier
+        // Ideally we'd re-scan but that's O(N)
+        elementType = determineElementType(*elements);
+      }
+    } else {
+      throw std::runtime_error("Array index out of bounds");
+    }
+  }
+
   // Remove last element
   void pop_back() {
-    if (!elements.empty()) {
-      elements.pop_back();
+    if (!elements->empty()) {
+      elements->pop_back();
       // Update type if needed
-      if (elements.empty()) {
+      if (elements->empty()) {
         elementType = ArrayElementType::UNKNOWN;
       } else {
         // Recalculate type
-        elementType = determineElementType(elements);
+        elementType = determineElementType(*elements);
       }
     }
   }
@@ -208,7 +250,7 @@ inline ArrayValue makeTypedArray(const std::vector<Value> &elements,
 // Helper function to convert ArrayValue to vector
 inline std::vector<Value> getArray(const Value &value) {
   if (std::holds_alternative<ArrayValue>(value)) {
-    return std::get<ArrayValue>(value).elements;
+    return *(std::get<ArrayValue>(value).elements);
   }
   return std::vector<Value>();
 }
@@ -231,8 +273,8 @@ inline bool operator==(const Value &lhs, const Value &rhs) {
     return std::get<std::string>(lhs) == std::get<std::string>(rhs);
   } else if (std::holds_alternative<ArrayValue>(lhs)) {
     // Compare array elements
-    const auto &lhsArr = std::get<ArrayValue>(lhs).elements;
-    const auto &rhsArr = std::get<ArrayValue>(rhs).elements;
+    const auto &lhsArr = *(std::get<ArrayValue>(lhs).elements);
+    const auto &rhsArr = *(std::get<ArrayValue>(rhs).elements);
     if (lhsArr.size() != rhsArr.size()) {
       return false;
     }

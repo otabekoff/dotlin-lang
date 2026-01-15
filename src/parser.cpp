@@ -1271,6 +1271,35 @@ parseStringInterpolation(const std::string &strValue, size_t line,
         // Member access operator
         exprTokens.emplace_back(TokenType::DOT, ".", line, column);
         exprPos++;
+      } else if (ch == '[') {
+        // Array access operator
+        exprTokens.emplace_back(TokenType::LBRACKET, "[", line, column);
+        exprPos++;
+      } else if (ch == ']') {
+        // Array access operator
+        exprTokens.emplace_back(TokenType::RBRACKET, "]", line, column);
+        exprPos++;
+      } else if (ch == '(') {
+        // Function call
+        exprTokens.emplace_back(TokenType::LPAREN, "(", line, column);
+        exprPos++;
+      } else if (ch == ')') {
+        // Function call
+        exprTokens.emplace_back(TokenType::RPAREN, ")", line, column);
+        exprPos++;
+      } else if (ch == ',') {
+        // Argument separator
+        exprTokens.emplace_back(TokenType::COMMA, ",", line, column);
+        exprPos++;
+      } else if (std::isdigit(ch)) {
+        // Number
+        size_t start = exprPos;
+        while (exprPos < expressionStr.length() &&
+               std::isdigit(expressionStr[exprPos])) {
+          exprPos++;
+        }
+        std::string num = expressionStr.substr(start, exprPos - start);
+        exprTokens.emplace_back(TokenType::NUMBER, num, line, column);
       } else if (std::isspace(ch)) {
         // Skip whitespace
         exprPos++;
