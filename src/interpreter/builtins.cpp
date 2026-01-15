@@ -23,6 +23,16 @@ bool valuesEqual(const Value &v1, const Value &v2);
 Value Interpreter::executeBuiltinFunction(
     const std::string &name,
     const std::vector<std::shared_ptr<Expression>> &arguments) {
+  // Debugging functions
+  if (name == "printStackTrace") {
+    std::cout << "Stack Trace:";
+    for (const auto &frame : callStack) {
+      std::cout << "\n  at " << frame;
+    }
+    std::cout << std::endl;
+    return Value();
+  }
+
   // I/O functions
   if (name == "println") {
     if (arguments.empty()) {

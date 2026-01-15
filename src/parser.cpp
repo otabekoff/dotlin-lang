@@ -1403,52 +1403,8 @@ parseStringInterpolation(const std::string &strValue, size_t line,
       std::string expressionStr = strValue.substr(
           interpolationStart + 2, interpolationEnd - interpolationStart - 2);
 
-      // Tokenize and parse (existing logic)
-      std::vector<Token> exprTokens;
-      size_t exprPos = 0;
-      while (exprPos < expressionStr.length()) {
-        char ch = expressionStr[exprPos];
-        if (std::isalpha(ch) || ch == '_') {
-          size_t start = exprPos;
-          while (exprPos < expressionStr.length() &&
-                 (std::isalnum(expressionStr[exprPos]) ||
-                  expressionStr[exprPos] == '_')) {
-            exprPos++;
-          }
-          std::string ident = expressionStr.substr(start, exprPos - start);
-          exprTokens.emplace_back(TokenType::IDENTIFIER, ident, line, column);
-        } else if (ch == '.') {
-          exprTokens.emplace_back(TokenType::DOT, ".", line, column);
-          exprPos++;
-        } else if (ch == '[') {
-          exprTokens.emplace_back(TokenType::LBRACKET, "[", line, column);
-          exprPos++;
-        } else if (ch == ']') {
-          exprTokens.emplace_back(TokenType::RBRACKET, "]", line, column);
-          exprPos++;
-        } else if (ch == '(') {
-          exprTokens.emplace_back(TokenType::LPAREN, "(", line, column);
-          exprPos++;
-        } else if (ch == ')') {
-          exprTokens.emplace_back(TokenType::RPAREN, ")", line, column);
-          exprPos++;
-        } else if (ch == ',') {
-          exprTokens.emplace_back(TokenType::COMMA, ",", line, column);
-          exprPos++;
-        } else if (std::isdigit(ch)) {
-          size_t start = exprPos;
-          while (exprPos < expressionStr.length() &&
-                 std::isdigit(expressionStr[exprPos])) {
-            exprPos++;
-          }
-          std::string num = expressionStr.substr(start, exprPos - start);
-          exprTokens.emplace_back(TokenType::NUMBER, num, line, column);
-        } else if (std::isspace(ch)) {
-          exprPos++;
-        } else {
-          exprPos++;
-        }
-      }
+      // Tokenize and parse using the actual Lexer
+      std::vector<Token> exprTokens = dotlin::tokenize(expressionStr);
 
       size_t tokenPos = 0;
       try {

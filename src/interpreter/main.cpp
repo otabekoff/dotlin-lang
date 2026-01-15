@@ -80,9 +80,20 @@ Value Interpreter::interpret(const Program &program,
 
       try {
         if (mainDef->body) {
+          callStack.push_back("main");
           execute(*mainDef->body);
+          callStack.pop_back();
         }
+      } catch (DotlinError &e) {
+        if (e.stackTrace.empty()) {
+          e.setStackTrace(callStack);
+        }
+        callStack.pop_back();
+        environment = previousEnv;
+        functionEnvironment = previousFuncEnv;
+        throw;
       } catch (const std::runtime_error &e) {
+        callStack.pop_back();
         environment = previousEnv;
         functionEnvironment = previousFuncEnv;
         std::string msg = e.what();
@@ -126,7 +137,7 @@ void Interpreter::execute(Statement &stmt) {
   stmt.accept(visitor);
 }
 
-Value Interpreter::executeFunction(Statement *body,
+Value Interpreter::executeFunction(const std::string &name, Statement *body,
                                    std::shared_ptr<Environment> funcEnv) {
   if (!body) {
     return Value();
@@ -137,9 +148,19 @@ Value Interpreter::executeFunction(Statement *body,
   // Initialize lastEvaluatedValue to a default (0 / Unit)
   lastEvaluatedValue = Value();
 
+  callStack.push_back(name);
+
   try {
     execute(*body);
+  } catch (DotlinError &e) {
+    if (e.stackTrace.empty()) {
+      e.setStackTrace(callStack);
+    }
+    callStack.pop_back();
+    environment = previousEnv;
+    throw;
   } catch (const std::runtime_error &e) {
+    callStack.pop_back();
     environment = previousEnv;
     std::string msg = e.what();
     if (msg == "RETURN_SIGNAL") {
@@ -148,6 +169,7 @@ Value Interpreter::executeFunction(Statement *body,
     throw;
   }
 
+  callStack.pop_back();
   environment = previousEnv;
   return lastEvaluatedValue;
 }
@@ -271,8 +293,14 @@ Value interpret(const Program &program, const std::vector<std::string> &args) {
 
 // Perform type inference on a program
 void Interpreter::performTypeInference(Program &program) {
+  // Create a type environment for static analysis
+  auto typeEnv = std::make_shared<TypeEnvironment>();
+
+  // Register built-in functions in type environment
+  // ... future work: add built-ins here ...
+
   // Create a type checker instance
-  TypeChecker typeChecker(environment);
+  TypeChecker typeChecker(typeEnv, environment);
 
   // Perform type inference for each statement in program
   for (auto &stmt : program.statements) {

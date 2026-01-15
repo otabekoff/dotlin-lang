@@ -5,46 +5,24 @@
 - [x] is for completed.
 
 1. Enhanced Type System
-   - [x] Implement proper type checking
-   - [x] Add explicit type annotations support
-   - [x] Implement generics support
-   - [x] Add type inference improvements
-2. Control Flow Enhancements
-   - [x] Implement while loops
-   - [x] Implement for loops
-   - [x] Implement when expressions (Kotlin equivalent of switch)
-   - [x] Add exception handling support
-3. Function System Improvements
-   - [x] Implement user-defined functions beyond main
-   - [x] Add function return type support
-   - [x] Implement function overloading
-   - [x] Add lambda expressions support
-   - [x] Implement closure support for lambda expressions
-4. Class and Object Support
-   - [x] Implement class declarations
-   - [x] Add constructor support
-   - [x] Implement inheritance
-   - [x] Add property and method support in classes
-5. Standard Library Functions
-   - [x] Implement math functions (sin, cos, sqrt, etc.)
-   - [x] Add file I/O operations
-   - [ ] Implement date/time functions
-   - [x] Add collection utilities
-6. Error Handling and Debugging
-   - [ ] Add comprehensive error messages
-   - [ ] Implement stack traces
-   - [ ] Add debugging utilities
-   - [ ] Improve exception handling
-7. Performance Optimizations
-   - [ ] Add expression evaluation optimizations
-   - [ ] Implement constant folding
-   - [ ] Add dead code elimination
-   - [ ] Optimize variable lookups
-8. Language Compatibility
-   - [ ] Expand Kotlin syntax compatibility
-   - [ ] Add more Kotlin-style operators
-   - [ ] Implement extension functions
-   - [ ] Add null safety features
+   - [-] Implement proper type checking ⚠️ (Basic implementation exists; many cases still stubbed in `typechecker.cpp`)
+   - [-] Implement generics support ⚠️ (AST support exists, but runtime enforcement is limited)
+   - [-] Add type inference improvements ⚠️ (Initial structure exists, but highly incomplete in `TypeChecker`)
+2. Error Handling and Debugging
+   - [ ] Add comprehensive error messages ❌ (Currently uses basic runtime_error strings)
+   - [ ] Implement stack traces ❌ (Not yet implemented)
+   - [ ] Add debugging utilities ❌ (Not yet implemented)
+   - [-] Improve exception handling ⚠️ (Basic try-catch exists, but lacks multiple catch blocks/type filtering)
+3. Performance Optimizations
+   - [ ] Add expression evaluation optimizations ❌ (Not yet started)
+   - [ ] Implement constant folding ❌ (Not yet started)
+   - [ ] Add dead code elimination ❌ (Not yet started)
+   - [ ] Optimize variable lookups ❌ (Currently uses O(N) environment chain lookup)
+4. Language Compatibility
+   - [-] Expand Kotlin syntax compatibility ⚠️ (Core syntax is Kotlin-like, but many nuances missing)
+   - [-] Add more Kotlin-style operators ⚠️ (Range and interpolation added; others like `as?`, `is!` missing)
+   - [ ] Implement extension functions ❌ (Not yet started)
+   - [ ] Add null safety features ❌ (Reference types are currently nullable but without safety checks)
 
 ---
 

@@ -1,0 +1,14 @@
+src/interpreter/typechecker.cpp:34:      // In a full implementation, we'd look up the variable's type
+src/interpreter/typechecker.cpp:47:  // In a full implementation, we'd analyze the lambda body and parameters
+src/interpreter/typechecker.cpp:56:  // In a full implementation, we'd determine the result type based on operation
+src/interpreter/typechecker.cpp:92:// Add the missing statement visitor implementations to TypeCheckVisitor
+src/interpreter/typechecker.cpp:285:// Add the missing StmtTypeCheckVisitor implementations for expressions
+src/interpreter/executer.cpp:14:// Statement execution visitor implementations
+src/interpreter/executer.cpp:106:// Statement execution visitor implementations
+src/interpreter/evaluator.cpp:20:// Expression evaluation visitor implementations
+src/interpreter/evaluator.cpp:1073:        content += std::string(1, (*strValue)[i]); // Just the char for now
+src/parser.cpp:56:// Parser implementation for Dotlin
+include/dotlin/parser.h:1:// Parser for Dotlin - Kotlin-like language implementation in C++
+include/dotlin/lexer.h:1:// Lexer for Dotlin - Kotlin-like language implementation in C++
+include/dotlin/interpreter.h:1:// Interpreter for Dotlin - Kotlin-like language implementation in C++
+include/dotlin/interpreter.h:346:  // Visitor pattern implementation

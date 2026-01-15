@@ -1,0 +1,670 @@
+src/interpreter/typechecker.cpp:4:// #include <stdexcept>
+src/interpreter/typechecker.cpp:8:// TypeChecker constructor
+src/interpreter/typechecker.cpp:11:// Type checking visitor for expressions - Implementation
+src/interpreter/typechecker.cpp:14:  // Determine type from literal value
+src/interpreter/typechecker.cpp:29:  // Look up the identifier in the current environment
+src/interpreter/typechecker.cpp:33:      // For now, we'll just return UNKNOWN type
+src/interpreter/typechecker.cpp:34:      // In a full implementation, we'd look up the variable's type
+src/interpreter/typechecker.cpp:46:  // For now, just return UNKNOWN type for lambdas
+src/interpreter/typechecker.cpp:47:  // In a full implementation, we'd analyze the lambda body and parameters
+src/interpreter/typechecker.cpp:55:  // For now, just return UNKNOWN type
+src/interpreter/typechecker.cpp:56:  // In a full implementation, we'd determine the result type based on operation
+src/interpreter/typechecker.cpp:92:// Add the missing statement visitor implementations to TypeCheckVisitor
+src/interpreter/typechecker.cpp:153:// Statement type checking visitor - Implementation
+src/interpreter/typechecker.cpp:159:  // Variable declaration - just check the initializer type
+src/interpreter/typechecker.cpp:167:  // Store the variable type in the environment
+src/interpreter/typechecker.cpp:169:    // For now, we'll just skip this
+src/interpreter/typechecker.cpp:176:  // For now, just skip function declarations
+src/interpreter/typechecker.cpp:180:  // Check each statement in the block
+src/interpreter/typechecker.cpp:189:  // Check condition
+src/interpreter/typechecker.cpp:194:  // Check then branch
+src/interpreter/typechecker.cpp:199:  // Check else branch if present
+src/interpreter/typechecker.cpp:206:  // Check condition
+src/interpreter/typechecker.cpp:211:  // Check body
+src/interpreter/typechecker.cpp:218:  // Check return value if present
+src/interpreter/typechecker.cpp:226:  // For now, just skip class declarations
+src/interpreter/typechecker.cpp:230:  // Check iterable
+src/interpreter/typechecker.cpp:235:  // Check body
+src/interpreter/typechecker.cpp:242:  // Check subject
+src/interpreter/typechecker.cpp:247:  // Check each branch
+src/interpreter/typechecker.cpp:257:  // Check else branch if present
+src/interpreter/typechecker.cpp:264:  // Check try block
+src/interpreter/typechecker.cpp:269:  // Check catch block if present
+src/interpreter/typechecker.cpp:274:  // Check finally block if present
+src/interpreter/typechecker.cpp:282:  // For now, just skip constructor declarations
+src/interpreter/typechecker.cpp:285:// Add the missing StmtTypeCheckVisitor implementations for expressions
+src/interpreter/typechecker.cpp:287:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:291:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:295:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:299:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:303:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:307:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:311:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:315:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:319:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:323:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:324:} // namespace dotlin
+src/interpreter/environment.cpp:38:} // namespace dotlin
+src/interpreter/executer.cpp:7:// Forward declaration of valueToString
+src/interpreter/executer.cpp:14:// Statement execution visitor implementations
+src/interpreter/executer.cpp:16:  // Execute the expression for its side effects
+src/interpreter/executer.cpp:34:  // Create a lambda value for the function
+src/interpreter/executer.cpp:39:  // Store function definition for overload resolution and main function
+src/interpreter/executer.cpp:40:  // detection
+src/interpreter/executer.cpp:50:  // Handle main function detection
+src/interpreter/executer.cpp:58:  // Create a new environment for the block
+src/interpreter/executer.cpp:81:  // Execute the while loop
+src/interpreter/executer.cpp:102:  // Throw a signal exception to stop execution and return the value
+src/interpreter/executer.cpp:106:// Statement execution visitor implementations
+src/interpreter/executer.cpp:108:  // Create a class definition
+src/interpreter/executer.cpp:111:  // Resolve superclass if present
+src/interpreter/executer.cpp:128:  // Process class members
+src/interpreter/executer.cpp:131:      // Create function definition
+src/interpreter/executer.cpp:140:      // Store variable declaration for instantiation
+src/interpreter/executer.cpp:141:      // We need to cast back to shared_ptr, but member is correct type
+src/interpreter/executer.cpp:142:      // Hack: we cast the raw pointer to the derived type and make a shared
+src/interpreter/executer.cpp:143:      // copy or just ref? Since 'members' is vector of shared_ptr<Statement>,
+src/interpreter/executer.cpp:144:      // we can use static_pointer_cast
+src/interpreter/executer.cpp:147:      (void)varDecl; // Silence unused variable warning
+src/interpreter/executer.cpp:149:      // Also add to fields metadata (optional, mainly for type checking if we
+src/interpreter/executer.cpp:150:      // had it here) classDef->fields.push_back({varDecl->name,
+src/interpreter/executer.cpp:151:      // varDecl->typeAnnotation.value_or(nullptr)});
+src/interpreter/executer.cpp:154:      // Create constructor function definition
+src/interpreter/executer.cpp:159:      // Use "init" as internal name for constructors
+src/interpreter/executer.cpp:166:  // Store the class definition in the global environment
+src/interpreter/executer.cpp:171:  // Evaluate the iterable expression
+src/interpreter/executer.cpp:174:  // Check if it's an array
+src/interpreter/executer.cpp:176:    // Create a new scope for the loop variable
+src/interpreter/executer.cpp:179:    // Iterate through array elements
+src/interpreter/executer.cpp:181:      // Set the loop variable in the new scope
+src/interpreter/executer.cpp:184:      // Temporarily switch to loop scope
+src/interpreter/executer.cpp:189:        // Execute the loop body
+src/interpreter/executer.cpp:192:        // Restore environment on exception
+src/interpreter/executer.cpp:197:      // Restore environment
+src/interpreter/executer.cpp:206:  // Evaluate the subject expression
+src/interpreter/executer.cpp:209:  // Check each branch
+src/interpreter/executer.cpp:213:    // Check if condition matches subject
+src/interpreter/executer.cpp:226:      // Execute the matching branch
+src/interpreter/executer.cpp:232:  // Check for else branch
+src/interpreter/executer.cpp:242:    // Create a new scope for the catch block
+src/interpreter/executer.cpp:245:    // Define the exception variable (remove "Runtime Error: " prefix if present
+src/interpreter/executer.cpp:246:    // for cleaner access)
+src/interpreter/executer.cpp:250:    // Execute catch block in the new scope
+src/interpreter/executer.cpp:262:  // Execute finally block if present
+src/interpreter/executer.cpp:270:  // This visitor is reached only if a constructor is defined outside a class,
+src/interpreter/executer.cpp:271:  // which should be a parser error properly, or we just ignore it here.
+src/interpreter/executer.cpp:274:// Expression visit methods (needed for complete interface but not used in
+src/interpreter/executer.cpp:275:// statement execution)
+src/interpreter/executer.cpp:278:  // Not used in statement execution
+src/interpreter/executer.cpp:283:  // Not used in statement execution
+src/interpreter/executer.cpp:288:  // Not used in statement execution
+src/interpreter/executer.cpp:293:  // Not used in statement execution
+src/interpreter/executer.cpp:298:  // Not used in statement execution
+src/interpreter/executer.cpp:303:  // Not used in statement execution
+src/interpreter/executer.cpp:308:  // Not used in statement execution
+src/interpreter/executer.cpp:313:  // Not used in statement execution
+src/interpreter/executer.cpp:318:  // Not used in statement execution
+src/interpreter/executer.cpp:323:  // Not used in statement execution
+src/interpreter/builtins.cpp:21:} // namespace dotlin
+src/interpreter/builtins.cpp:26:  // I/O functions
+src/interpreter/builtins.cpp:58:  // Mathematical functions
+src/interpreter/builtins.cpp:203:  // String functions
+src/interpreter/builtins.cpp:270:  // Array functions
+src/interpreter/builtins.cpp:292:      return Value(-1); // Not found
+src/interpreter/builtins.cpp:297:  // Type checking functions
+src/interpreter/builtins.cpp:330:  // Conversion functions
+src/interpreter/builtins.cpp:357:  // I/O functions
+src/interpreter/builtins.cpp:377:  // System functions
+src/interpreter/builtins.cpp:393:    // Return current time in milliseconds
+src/interpreter/builtins.cpp:419:      return Value(); // Unit
+src/interpreter/builtins.cpp:477:  // File I/O functions
+src/interpreter/builtins.cpp:510:        return Value(); // Unit
+src/interpreter/main.cpp:4:// #include <chrono>
+src/interpreter/main.cpp:5:// #include <iostream>
+src/interpreter/main.cpp:13:// Define the static member
+src/interpreter/main.cpp:29:  // Store command-line arguments
+src/interpreter/main.cpp:32:  // First, execute all statements to register functions and declare variables
+src/interpreter/main.cpp:90:          return Value(msg.substr(7)); // Remove "RETURN:" prefix
+src/interpreter/main.cpp:114:  return Value(); // Return default Value
+src/interpreter/main.cpp:137:  // Initialize lastEvaluatedValue to a default (0 / Unit)
+src/interpreter/main.cpp:166:  // Look for a matching function (overload resolution)
+src/interpreter/main.cpp:207:// Type checking methods
+src/interpreter/main.cpp:221:  // Visit child expressions recursively
+src/interpreter/main.cpp:257:  // For identifier expressions, we can get type from environment
+src/interpreter/main.cpp:258:  // but don't need to recurse further
+src/interpreter/main.cpp:261:// Global interpret function
+src/interpreter/main.cpp:272:// Perform type inference on a program
+src/interpreter/main.cpp:274:  // Create a type checker instance
+src/interpreter/main.cpp:277:  // Perform type inference for each statement in program
+src/interpreter/main.cpp:283:// Perform type inference on a statement
+src/interpreter/main.cpp:286:  // For variable declarations, infer type from initializer if no
+src/interpreter/main.cpp:287:  // explicit type annotation is provided
+src/interpreter/main.cpp:291:      // Infer the type from the initializer expression
+src/interpreter/main.cpp:295:      // Store the inferred type in the variable declaration
+src/interpreter/main.cpp:302:    // Recursively perform type inference on statements in block
+src/interpreter/main.cpp:307:    // Perform type inference on condition and branches
+src/interpreter/main.cpp:319:    // Perform type inference on condition and body
+src/interpreter/main.cpp:327:    // Perform type inference on iterable and body
+src/interpreter/main.cpp:335:  // Add more statement types as needed
+src/interpreter/main.cpp:338:} // namespace dotlin
+src/interpreter/interpreter.cpp:2:// #include <iostream>
+src/interpreter/interpreter.cpp:3:// #include <stdexcept>
+src/interpreter/interpreter.cpp:18:} // namespace dotlin
+src/interpreter/evaluator.cpp:5:// #include <cmath>
+src/interpreter/evaluator.cpp:16:} // namespace dotlin
+src/interpreter/evaluator.cpp:20:// Expression evaluation visitor implementations
+src/interpreter/evaluator.cpp:35:  // Check if this is a special identifier like "args"
+src/interpreter/evaluator.cpp:37:    // Return the command-line arguments array
+src/interpreter/evaluator.cpp:45:  // Special handling for "this" keyword
+src/interpreter/evaluator.cpp:53:  // Look up the value in the environment
+src/interpreter/evaluator.cpp:58:      // Try to look up in 'this' context if available
+src/interpreter/evaluator.cpp:70:        // 'this' not defined or not an instance, ignore
+src/interpreter/evaluator.cpp:73:      // Check if this is a built-in function
+src/interpreter/evaluator.cpp:87:        // Return a special lambda that represents a built-in function
+src/interpreter/evaluator.cpp:100:  // Create a lambda value
+src/interpreter/evaluator.cpp:108:    // Handle assignment
+src/interpreter/evaluator.cpp:115:    // Handle member access assignment (e.g., this.name = value)
+src/interpreter/evaluator.cpp:123:        // Assign to the field
+src/interpreter/evaluator.cpp:133:  // Handle other binary operations
+src/interpreter/evaluator.cpp:207:    // Handle string concatenation
+src/interpreter/evaluator.cpp:284:  // Handle comparison operations
+src/interpreter/evaluator.cpp:375:  // Check if this is a method call on a class instance or built-in type
+src/interpreter/evaluator.cpp:381:    // Handle method calls like obj.method()
+src/interpreter/evaluator.cpp:385:    // Evaluate arguments first (needed for string methods)
+src/interpreter/evaluator.cpp:393:    // Handle method calls on built-in types (strings, arrays, etc.)
+src/interpreter/evaluator.cpp:432:          result = args[1]; // Return the assigned value
+src/interpreter/evaluator.cpp:505:          result = Value(); // Unit/Void
+src/interpreter/evaluator.cpp:600:      // Handle substring method calls
+src/interpreter/evaluator.cpp:627:      // Handle indexOf method calls
+src/interpreter/evaluator.cpp:640:      // Handle startsWith method calls
+src/interpreter/evaluator.cpp:652:      // Handle endsWith method calls
+src/interpreter/evaluator.cpp:668:      // Handle toUpperCase method calls
+src/interpreter/evaluator.cpp:678:      // Handle toLowerCase method calls
+src/interpreter/evaluator.cpp:688:      // Handle trim method calls
+src/interpreter/evaluator.cpp:704:      // Handle split method calls
+src/interpreter/evaluator.cpp:719:        // Add the remaining part
+src/interpreter/evaluator.cpp:727:      // Handle toInt method calls on String
+src/interpreter/evaluator.cpp:736:        // Allow double -> int conversion via toInt()
+src/interpreter/evaluator.cpp:739:        // Identity/downcast conversion
+src/interpreter/evaluator.cpp:747:      // Handle toDouble method calls on String
+src/interpreter/evaluator.cpp:756:        // Allow long -> double conversion via toDouble()
+src/interpreter/evaluator.cpp:765:    // Check if the object is a class instance
+src/interpreter/evaluator.cpp:768:      // Look up the method in the class definition or superclasses
+src/interpreter/evaluator.cpp:774:            // Found the method, execute it
+src/interpreter/evaluator.cpp:779:            // Bind method parameters to arguments
+src/interpreter/evaluator.cpp:789:            // Switch to method environment
+src/interpreter/evaluator.cpp:793:            // Execute method body
+src/interpreter/evaluator.cpp:810:        // Move to superclass
+src/interpreter/evaluator.cpp:820:  // Handle regular function calls
+src/interpreter/evaluator.cpp:823:    // Check if this is a built-in function
+src/interpreter/evaluator.cpp:825:      // This is a built-in function - get the function name
+src/interpreter/evaluator.cpp:832:      // Convert unique_ptr to shared_ptr for built-in function call
+src/interpreter/evaluator.cpp:842:    // Create new environment for the function
+src/interpreter/evaluator.cpp:845:    // Bind parameters to arguments
+src/interpreter/evaluator.cpp:851:        // Default parameter value
+src/interpreter/evaluator.cpp:856:    // Switch to function environment
+src/interpreter/evaluator.cpp:860:    // Execute function body
+src/interpreter/evaluator.cpp:869:    // Create a class instance
+src/interpreter/evaluator.cpp:873:    // Create a temporary environment to execute field initializers
+src/interpreter/evaluator.cpp:874:    // We use the current environment as enclosing to allow access to
+src/interpreter/evaluator.cpp:875:    // globals/etc? Actually field initializers might refer to globals.
+src/interpreter/evaluator.cpp:878:    // Collect class hierarchy directly to a vector (Base -> Derived)
+src/interpreter/evaluator.cpp:886:    // Execute field declarations in order
+src/interpreter/evaluator.cpp:905:    // Copy initialized variables to instance fields
+src/interpreter/evaluator.cpp:908:    // Execute matching constructor
+src/interpreter/evaluator.cpp:910:      // Evaluate all arguments once
+src/interpreter/evaluator.cpp:916:      // Look for a matching constructor (overload resolution)
+src/interpreter/evaluator.cpp:929:              // Map Dotlin type names to getTypeOfValue names if needed
+src/interpreter/evaluator.cpp:930:              // e.g., "Int" vs "int", "Long" vs "long"
+src/interpreter/evaluator.cpp:963:        // Bind parameters
+src/interpreter/evaluator.cpp:1009:  // Check if the object is an identifier "args" and the property is "size"
+src/interpreter/evaluator.cpp:1010:  // or "contentToString"
+src/interpreter/evaluator.cpp:1035:  // Check if the object is a class instance
+src/interpreter/evaluator.cpp:1037:    // Look up the property in the instance's fields
+src/interpreter/evaluator.cpp:1047:  // Check if the object is a string and has string properties/methods
+src/interpreter/evaluator.cpp:1073:        content += std::string(1, (*strValue)[i]); // Just the char for now
+src/interpreter/evaluator.cpp:1083:  // Check if the object is an array
+src/interpreter/evaluator.cpp:1135:// Statement visit methods (needed for complete interface but not used in
+src/interpreter/evaluator.cpp:1136:// expression evaluation)
+src/interpreter/evaluator.cpp:1172:  // Evaluate the iterable expression
+src/interpreter/evaluator.cpp:1175:  // Check if it's an array
+src/interpreter/evaluator.cpp:1177:    // Create a new scope for the loop variable
+src/interpreter/evaluator.cpp:1180:    // Iterate through array elements
+src/interpreter/evaluator.cpp:1182:      // Set the loop variable in the new scope
+src/interpreter/evaluator.cpp:1185:      // Temporarily switch to loop scope
+src/interpreter/evaluator.cpp:1190:        // Execute the loop body
+src/interpreter/evaluator.cpp:1193:        // Restore environment on exception
+src/interpreter/evaluator.cpp:1198:      // Restore environment
+src/interpreter/evaluator.cpp:1209:  // Evaluate the subject expression
+src/interpreter/evaluator.cpp:1212:  // Check each branch
+src/interpreter/evaluator.cpp:1216:    // Check if condition matches subject
+src/interpreter/evaluator.cpp:1229:      // Execute the matching branch
+src/interpreter/evaluator.cpp:1236:  // Check for else branch
+src/interpreter/utils.cpp:91:    // Special case: int vs int64_t comparison
+src/interpreter/utils.cpp:100:    // int/long vs double
+src/interpreter/utils.cpp:140:} // namespace dotlin
+src/version.cpp:5:} // namespace dotlin
+src/lexer.cpp:1:// src/lexer.cpp
+src/lexer.cpp:4:// #include <sstream>
+src/lexer.cpp:32:      // Check for fractional part
+src/lexer.cpp:34:        // Only consume dot if it is followed by a digit (avoid consuming range
+src/lexer.cpp:35:        // .. or method call .)
+src/lexer.cpp:38:          i++; // Consume the dot
+src/lexer.cpp:50:      // Check for raw string (triple quotes)
+src/lexer.cpp:52:        i += 3; // Skip opening """
+src/lexer.cpp:65:          i += 3; // Skip closing """
+src/lexer.cpp:71:        i++; // Skip opening quote
+src/lexer.cpp:74:            i += 2; // Skip backslash and following char
+src/lexer.cpp:87:          i++; // Skip closing quote
+src/lexer.cpp:95:      i++; // Skip opening quote
+src/lexer.cpp:97:        i += 2; // Skip backslash and escaped char
+src/lexer.cpp:99:        i++; // Skip character
+src/lexer.cpp:103:        i++; // Skip closing quote
+src/lexer.cpp:118:      // Check if it's a keyword
+src/lexer.cpp:196:      // Handle operators and delimiters
+src/lexer.cpp:206:          i++; // Skip next character
+src/lexer.cpp:211:          i++; // Skip next character
+src/lexer.cpp:221:          i++; // Skip next character
+src/lexer.cpp:226:          i++; // Skip next character
+src/lexer.cpp:231:          i++; // Skip next character
+src/lexer.cpp:241:          i++; // Skip next character
+src/lexer.cpp:251:          i++; // Skip next character
+src/lexer.cpp:258:        // Check for comments first
+src/lexer.cpp:260:          // Single-line comment: skip until end of line
+src/lexer.cpp:261:          i += 2; // Skip '//'
+src/lexer.cpp:265:          // Don't increment i here - the whitespace handler will process '\n'
+src/lexer.cpp:266:          continue; // Skip adding token, continue to next iteration
+src/lexer.cpp:268:          // Multi-line comment: skip until '*/'
+src/lexer.cpp:269:          i += 2; // Skip '/*'
+src/lexer.cpp:282:            i += 2; // Skip '*/'
+src/lexer.cpp:285:          continue; // Skip adding token, continue to next iteration
+src/lexer.cpp:289:          i++; // Skip next character
+src/lexer.cpp:299:          i++; // Skip next character
+src/lexer.cpp:309:          i++; // Skip next character
+src/lexer.cpp:319:          i++; // Skip next character
+src/lexer.cpp:329:          i++; // Skip next character
+src/lexer.cpp:339:          i++; // Skip next character
+src/lexer.cpp:349:          i++; // Skip next character
+src/lexer.cpp:381:            i += 2; // Skip next two characters
+src/lexer.cpp:386:            i++; // Skip next character
+src/lexer.cpp:403:          i++; // Skip next character
+src/lexer.cpp:406:          type = TokenType::UNKNOWN; // Or '?' token if needed
+src/lexer.cpp:413:          i++; // Skip next character
+src/lexer.cpp:424:      // Additional defensive checks
+src/lexer.cpp:426:        // Reset to UNKNOWN if PLUS_ASSIGN token doesn't have correct text
+src/lexer.cpp:452:      // Defensive check: ensure we're not creating an EOF token with non-empty
+src/lexer.cpp:453:      // text
+src/lexer.cpp:455:        // This shouldn't happen - EOF tokens should have empty text
+src/lexer.cpp:456:        // Reset to UNKNOWN to avoid confusion
+src/lexer.cpp:460:      // Additional check: if text is empty for tokens that should have text,
+src/lexer.cpp:461:      // mark as unknown
+src/lexer.cpp:474:  // Filter out invalid tokens (workaround for potential lexer bugs)
+src/lexer.cpp:477:    // Skip tokens that have empty text but are not EOF
+src/lexer.cpp:479:      continue; // Skip this invalid token
+src/lexer.cpp:481:    // Add valid tokens to filtered list
+src/lexer.cpp:488:} // namespace dotlin
+src/parser.cpp:1:// src/parser.cpp
+src/parser.cpp:4:// #include <iostream>
+src/parser.cpp:5:// #include <stdexcept>
+src/parser.cpp:9:// Forward declarations
+src/parser.cpp:56:// Parser implementation for Dotlin
+src/parser.cpp:66:      // If we couldn't parse a statement, advance the position to avoid
+src/parser.cpp:67:      // infinite loop
+src/parser.cpp:110:  pos++; // consume val/var token
+src/parser.cpp:113:    // Error handling would go here
+src/parser.cpp:118:  pos++; // consume identifier
+src/parser.cpp:120:  // Check for type annotation (after identifier, before assignment)
+src/parser.cpp:123:    pos++; // consume colon
+src/parser.cpp:125:      // Parse type name
+src/parser.cpp:127:      pos++; // consume type name
+src/parser.cpp:129:      // Map type name to TypeKind
+src/parser.cpp:144:        // Check for generic type parameter in angle brackets
+src/parser.cpp:146:          pos++; // consume '<'
+src/parser.cpp:150:            pos++; // consume generic type name
+src/parser.cpp:152:            // Map generic type name to TypeKind
+src/parser.cpp:170:            // Check for closing '>'
+src/parser.cpp:172:              pos++; // consume '>'
+src/parser.cpp:190:    pos++; // consume assignment token
+src/parser.cpp:197:  // Use the last token we consumed for position info, or default to 1,1
+src/parser.cpp:213:  // Check for assignment operator
+src/parser.cpp:216:    pos++; // consume assignment token
+src/parser.cpp:217:    auto right = parseAssignmentExpression(tokens, pos); // right-associative
+src/parser.cpp:240:    pos++; // consume operator
+src/parser.cpp:259:    pos++; // consume operator
+src/parser.cpp:279:    pos++; // consume operator
+src/parser.cpp:297:  // Handle postfix operations like function calls and member access
+src/parser.cpp:300:      // Function call
+src/parser.cpp:301:      pos++; // consume '('
+src/parser.cpp:304:      // Parse arguments
+src/parser.cpp:311:        // Check for comma
+src/parser.cpp:313:          pos++; // consume comma
+src/parser.cpp:316:          // Expected comma or closing paren
+src/parser.cpp:324:        pos++; // consume ')'
+src/parser.cpp:331:      // Member access
+src/parser.cpp:332:      pos++; // consume '.'
+src/parser.cpp:344:      // Array access
+src/parser.cpp:345:      pos++; // consume '['
+src/parser.cpp:349:        pos++; // consume ']'
+src/parser.cpp:367:  // Consume the opening brace
+src/parser.cpp:372:  // Look ahead to see if there is an arrow '->' before a closing brace
+src/parser.cpp:390:  // Parse parameters if present (before arrow)
+src/parser.cpp:394:    // Check if the first token after '{' is an identifier (parameter) or '->'
+src/parser.cpp:395:    // (no parameters)
+src/parser.cpp:397:      // No parameters, just '{ -> ... }'
+src/parser.cpp:398:      pos++; // consume '->'
+src/parser.cpp:400:      // Parse parameters until the arrow
+src/parser.cpp:406:          // Check for parameter type annotation
+src/parser.cpp:409:            pos++; // consume colon
+src/parser.cpp:412:              // Parse parameter type name
+src/parser.cpp:414:              pos++; // consume type name
+src/parser.cpp:416:              // Map type name to TypeKind
+src/parser.cpp:437:          // Check for comma or arrow
+src/parser.cpp:439:            pos++; // consume comma
+src/parser.cpp:442:            // Arrow is consumed below
+src/parser.cpp:444:            // Unexpected token, stop parsing parameters
+src/parser.cpp:448:          // Unexpected token, stop parsing parameters
+src/parser.cpp:453:      // Consume the arrow
+src/parser.cpp:460:  // Parse the lambda body (everything until closing brace)
+src/parser.cpp:461:  // For now, we'll create a simple block with expressions/statements
+src/parser.cpp:464:  // Parse statements until we hit the closing brace
+src/parser.cpp:466:    // Try to parse an expression statement
+src/parser.cpp:469:      // Add the expression as a statement
+src/parser.cpp:474:      // Skip semicolon if present
+src/parser.cpp:481:    // If we couldn't parse an expression, try parsing other statements
+src/parser.cpp:482:    // For now, we'll just break if we encounter a closing brace or EOF
+src/parser.cpp:488:    // Skip unrecognized token to avoid infinite loop
+src/parser.cpp:492:  // Create a block statement for the body
+src/parser.cpp:496:  // Consume the closing brace
+src/parser.cpp:498:    pos++; // consume '}'
+src/parser.cpp:513:    // Parse as int or double
+src/parser.cpp:516:    if (*end == 0) { // successfully parsed
+src/parser.cpp:518:        pos++; // consume the token
+src/parser.cpp:522:        pos++; // consume the token
+src/parser.cpp:529:                                         token.column); // fallback
+src/parser.cpp:543:    // Check if this string contains interpolation by looking for ${ or $
+src/parser.cpp:544:    // pattern but ignoring escaped sequences (only for non-raw strings)
+src/parser.cpp:547:    // Check for ${
+src/parser.cpp:557:    // Check for $ (if not already found)
+src/parser.cpp:562:          // Check if it's followed by an identifier start
+src/parser.cpp:575:      // Parse string interpolation
+src/parser.cpp:610:    // Check if this is a lambda expression
+src/parser.cpp:611:    // Lambda syntax: { param1, param2 -> body }
+src/parser.cpp:615:    pos++; // consume '('
+src/parser.cpp:618:      pos++; // consume ')'
+src/parser.cpp:623:    pos++; // consume '['
+src/parser.cpp:626:    // Parse array elements separated by commas
+src/parser.cpp:631:        pos++; // consume comma
+src/parser.cpp:638:    // Expect closing bracket
+src/parser.cpp:640:      pos++; // consume ']'
+src/parser.cpp:643:    // Use the last token we consumed for position info, or default to 1,1
+src/parser.cpp:656:  // Skip the fun token
+src/parser.cpp:661:  // Expect function name
+src/parser.cpp:662:  std::string name = "anonymous"; // default name
+src/parser.cpp:669:  // Expect opening parenthesis for parameters
+src/parser.cpp:672:    pos++; // consume '('
+src/parser.cpp:674:    // Parse parameters
+src/parser.cpp:680:        // Check for parameter type annotation
+src/parser.cpp:683:          pos++; // consume colon
+src/parser.cpp:686:            // Parse parameter type name
+src/parser.cpp:688:            pos++; // consume type name
+src/parser.cpp:690:            // Map type name to TypeKind
+src/parser.cpp:707:            // Unsupported/complex type annotation (e.g. function type). Treat
+src/parser.cpp:708:            // as unknown.
+src/parser.cpp:713:          // Skip remaining tokens of complex type annotations until ',' or ')'
+src/parser.cpp:714:          // at top-level.
+src/parser.cpp:739:        // Expect comma or closing parenthesis
+src/parser.cpp:741:          pos++; // consume comma
+src/parser.cpp:744:        // Skip unexpected token
+src/parser.cpp:750:      pos++; // consume ')'
+src/parser.cpp:754:  // Check for return type annotation
+src/parser.cpp:757:    pos++; // consume colon
+src/parser.cpp:759:      // Parse return type name
+src/parser.cpp:761:      pos++; // consume type name
+src/parser.cpp:763:      // Map type name to TypeKind
+src/parser.cpp:782:  // Expect opening brace for function body
+src/parser.cpp:785:    // Parse block statement as function body
+src/parser.cpp:789:      pos = temp_pos; // update position if block was successfully parsed
+src/parser.cpp:793:  // Use the last token we consumed for position info, or default to 1,1
+src/parser.cpp:802:  // Skip the if token
+src/parser.cpp:807:  // Parse the condition in parentheses
+src/parser.cpp:810:    pos++; // consume '('
+src/parser.cpp:813:      pos++; // consume ')'
+src/parser.cpp:817:  // Parse the then branch (could be a block or single statement)
+src/parser.cpp:825:  // Check for else branch
+src/parser.cpp:828:    pos++; // consume 'else'
+src/parser.cpp:836:  // Use the last token we consumed for position info, or default to 1,1
+src/parser.cpp:845:  // Skip the return token
+src/parser.cpp:850:  // Parse the return expression (if present)
+src/parser.cpp:858:  // Use the last token we consumed for position info, or default to 1,1
+src/parser.cpp:866:  // Skip the opening brace
+src/parser.cpp:871:  // Parse statements until closing brace
+src/parser.cpp:882:    pos++; // consume closing brace
+src/parser.cpp:885:  // Use the last token we consumed for position info, or default to 1,1
+src/parser.cpp:893:  // Parse an expression and wrap it in a statement
+src/parser.cpp:896:    // Wrap the expression in an ExpressionStmt
+src/parser.cpp:897:    // Use the last token we consumed for position info, or default to 1,1
+src/parser.cpp:904:    pos++; // consume one token to avoid infinite loop
+src/parser.cpp:911:  // Skip the 'while' token
+src/parser.cpp:916:  // Expect opening parenthesis for condition
+src/parser.cpp:918:    pos++; // consume '('
+src/parser.cpp:920:    // Error: expected '(' after while
+src/parser.cpp:924:  // Parse the condition expression
+src/parser.cpp:927:  // Expect closing parenthesis
+src/parser.cpp:929:    pos++; // consume ')'
+src/parser.cpp:931:    // Error: expected ')' after while condition
+src/parser.cpp:935:  // Parse the body of the while loop
+src/parser.cpp:938:    // Block statement
+src/parser.cpp:941:    // Single statement
+src/parser.cpp:945:  // Use the last token we consumed for position info, or default to 1,1
+src/parser.cpp:954:  // Skip the 'for' token
+src/parser.cpp:959:  // Expect opening parenthesis
+src/parser.cpp:961:    pos++; // consume '('
+src/parser.cpp:963:    // Error: expected '(' after for
+src/parser.cpp:968:  // Parse the variable name
+src/parser.cpp:972:    pos += 2; // consume variable name and 'in'
+src/parser.cpp:974:    // Error: expected 'identifier in' after '('
+src/parser.cpp:978:  // Parse the iterable expression
+src/parser.cpp:981:  // Expect closing parenthesis
+src/parser.cpp:983:    pos++; // consume ')'
+src/parser.cpp:985:    // Error: expected ')' after for clause
+src/parser.cpp:989:  // Parse the body of the for loop
+src/parser.cpp:992:    // Block statement
+src/parser.cpp:995:    // Single statement
+src/parser.cpp:999:  // Use the last token we consumed for position info, or default to 1,1
+src/parser.cpp:1008:  // Skip the 'try' token
+src/parser.cpp:1015:  // Parse the try block (must be a block statement)
+src/parser.cpp:1020:    // Error: try block must be a block statement
+src/parser.cpp:1024:  // Expect 'catch' keyword
+src/parser.cpp:1026:    pos++; // consume 'catch'
+src/parser.cpp:1028:    // Error: expected catch after try
+src/parser.cpp:1032:  // Expect opening parenthesis for exception variable
+src/parser.cpp:1035:    pos++; // consume '('
+src/parser.cpp:1039:      pos++; // consume identifier
+src/parser.cpp:1041:      // Error: expected identifier in catch clause
+src/parser.cpp:1046:      pos++; // consume ')'
+src/parser.cpp:1048:      // Error: expected ')' after exception variable
+src/parser.cpp:1052:    // Error: expected '(' after catch
+src/parser.cpp:1056:  // Parse the catch block (must be a block statement)
+src/parser.cpp:1061:    // Error: catch block must be a block statement
+src/parser.cpp:1065:  // Check for optional finally block
+src/parser.cpp:1068:    pos++; // consume 'finally'
+src/parser.cpp:1073:      // Error: finally block must be a block statement
+src/parser.cpp:1078:  // Use the last token we consumed for position info, or default to 1,1
+src/parser.cpp:1088:  // Skip the 'when' token
+src/parser.cpp:1093:  // Expect opening parenthesis
+src/parser.cpp:1095:    pos++; // consume '('
+src/parser.cpp:1097:    // Error: expected '(' after when
+src/parser.cpp:1101:  // Parse the subject expression
+src/parser.cpp:1104:  // Expect closing parenthesis
+src/parser.cpp:1106:    pos++; // consume ')'
+src/parser.cpp:1108:    // Error: expected ')' after when subject
+src/parser.cpp:1112:  // Expect opening brace for branches
+src/parser.cpp:1114:    pos++; // consume '{'
+src/parser.cpp:1116:    // Error: expected '{' after when clause
+src/parser.cpp:1120:  // Parse branches
+src/parser.cpp:1125:    // Check for 'else' branch
+src/parser.cpp:1127:      pos++; // consume 'else'
+src/parser.cpp:1130:        pos++; // consume '->'
+src/parser.cpp:1132:        // Parse the else branch statement
+src/parser.cpp:1142:      break; // else should be the last branch
+src/parser.cpp:1144:      // Parse pattern -> statement
+src/parser.cpp:1148:        pos++; // consume '->'
+src/parser.cpp:1150:        // Parse the statement for this branch
+src/parser.cpp:1161:        // Error: expected '->' after pattern
+src/parser.cpp:1166:    // Skip potential semicolons or commas between branches
+src/parser.cpp:1173:  // Expect closing brace
+src/parser.cpp:1175:    pos++; // consume '}'
+src/parser.cpp:1177:    // Error: expected '}' after when branches
+src/parser.cpp:1181:  // Use the last token we consumed for position info, or default to 1,1
+src/parser.cpp:1190:  // Skip the 'class' token
+src/parser.cpp:1195:  // Expect class name
+src/parser.cpp:1196:  std::string className = "Anonymous"; // default name
+src/parser.cpp:1202:  // Check for inheritance (class Parent : SuperClass)
+src/parser.cpp:1205:    pos++; // consume ':'
+src/parser.cpp:1208:      pos++; // consume superclass name
+src/parser.cpp:1212:  // Expect opening brace for class body
+src/parser.cpp:1215:    pos++; // consume '{'
+src/parser.cpp:1217:    // Parse class members (fields, methods, constructors) until closing brace
+src/parser.cpp:1220:      // Check if this is a constructor
+src/parser.cpp:1222:        pos++; // consume 'constructor' token
+src/parser.cpp:1224:        // Expect opening parenthesis for constructor parameters
+src/parser.cpp:1227:          pos++; // consume '('
+src/parser.cpp:1229:          // Parse constructor parameters
+src/parser.cpp:1235:              // Check for parameter type annotation
+src/parser.cpp:1239:                pos++; // consume colon
+src/parser.cpp:1242:                  // Parse parameter type name
+src/parser.cpp:1244:                  pos++; // consume type name
+src/parser.cpp:1246:                  // Map type name to TypeKind
+src/parser.cpp:1268:              // Expect comma or closing parenthesis
+src/parser.cpp:1270:                pos++; // consume comma
+src/parser.cpp:1273:              // Skip unexpected token
+src/parser.cpp:1279:            pos++; // consume ')'
+src/parser.cpp:1283:        // Expect opening brace for constructor body
+src/parser.cpp:1286:          // Parse block statement as constructor body
+src/parser.cpp:1290:            pos = temp_pos; // update position if block was successfully parsed
+src/parser.cpp:1294:        // Create constructor declaration statement
+src/parser.cpp:1300:        // Parse other members (methods, fields)
+src/parser.cpp:1305:          // Skip token to avoid infinite loop
+src/parser.cpp:1311:    // Consume closing brace
+src/parser.cpp:1317:  // Use the last token we consumed for position info, or default to 1,1
+src/parser.cpp:1331:    // Find the next candidate for interpolation: either ${ or $
+src/parser.cpp:1338:    // Filter out escaped ones if not raw
+src/parser.cpp:1349:      // No more interpolations
+src/parser.cpp:1362:        // Special case: $ followed immediately by { is brace style
+src/parser.cpp:1374:      // No more valid interpolations, add rest as a string literal
+src/parser.cpp:1383:    // Add string part before interpolation
+src/parser.cpp:1392:      // Find the closing brace
+src/parser.cpp:1395:        // Unclosed interpolation, treat as literal
+src/parser.cpp:1402:      // Extract the expression inside ${}
+src/parser.cpp:1406:      // Tokenize and parse using the actual Lexer
+src/parser.cpp:1426:      // Simple $variable style
+src/parser.cpp:1441:        // Not a variable, treat $ as literal
+src/parser.cpp:1452:} // namespace dotlin
+include/dotlin/parser.h:1:// Parser for Dotlin - Kotlin-like language implementation in C++
+include/dotlin/parser.h:13:// Type system - moved to top to be available for expressions
+include/dotlin/parser.h:18:  std::shared_ptr<Type> elementType; // For arrays
+include/dotlin/parser.h:20:      genericTypes; // For generic type parameters
+include/dotlin/parser.h:31:      // For generic types, check if generic parameters are compatible
+include/dotlin/parser.h:47:      return true; // int can be promoted to double
+include/dotlin/parser.h:49:      return true; // double can be demoted to int
+include/dotlin/parser.h:54:      return true; // Arrays with unknown element types are compatible
+include/dotlin/parser.h:60:// Forward declarations for AST nodes
+include/dotlin/parser.h:85:// Base class for all AST nodes
+include/dotlin/parser.h:95:// Expression base class
+include/dotlin/parser.h:104:// Statement base class
+include/dotlin/parser.h:111:// AST Node Types
+include/dotlin/parser.h:159:  std::optional<std::string> genericType; // For generic types like Array<Int>
+include/dotlin/parser.h:172:  bool isVal; // true for val, false for var
+include/dotlin/parser.h:257:// Parser helper functions
+include/dotlin/parser.h:292:// Forward declarations for visitor pattern
+include/dotlin/parser.h:316:// Visitor pattern for AST traversal
+include/dotlin/parser.h:344:// Concrete expression types
+include/dotlin/parser.h:356:      parts; // Alternating string literals and expressions
+include/dotlin/parser.h:464:// Concrete statement types
+include/dotlin/parser.h:474:  bool isVal; // true for val, false for var
+include/dotlin/parser.h:501:    // Convert string parameters to FunctionParameter with no type annotation
+include/dotlin/parser.h:585:      className; // Name of the class this constructor belongs to
+include/dotlin/parser.h:603:  std::vector<Statement::Ptr> members; // Properties and methods
+include/dotlin/parser.h:636:// Parser helper functions
+include/dotlin/parser.h:676:} // namespace dotlin
+include/dotlin/lexer.h:1:// Lexer for Dotlin - Kotlin-like language implementation in C++
+include/dotlin/lexer.h:3:// #include <optional>
+include/dotlin/lexer.h:5:// #include <variant>
+include/dotlin/lexer.h:11:  // Keywords
+include/dotlin/lexer.h:49:  // Literals
+include/dotlin/lexer.h:55:  // Operators
+include/dotlin/lexer.h:82:  // Delimiters
+include/dotlin/lexer.h:95:  // Special
+include/dotlin/lexer.h:99:  DOLLAR_LBRACE, // ${
+include/dotlin/lexer.h:115:} // namespace dotlin
+include/dotlin/visitors.h:7:// Expression evaluation visitor
+include/dotlin/visitors.h:25:  // Statement visit methods (needed for complete interface)
+include/dotlin/visitors.h:40:// Statement execution visitor
+include/dotlin/visitors.h:59:  // Expression visit methods (needed for complete interface)
+include/dotlin/visitors.h:72:// Type checking visitor for expressions
+include/dotlin/visitors.h:90:  // Statement visit methods (needed for complete interface)
+include/dotlin/visitors.h:105:// Type checking visitor for statements
+include/dotlin/visitors.h:124:  // Expression visit methods (needed for complete interface)
+include/dotlin/visitors.h:137:} // namespace dotlin
+include/dotlin/interpreter.h:1:// Interpreter for Dotlin - Kotlin-like language implementation in C++
+include/dotlin/interpreter.h:4:// #include <any>
+include/dotlin/interpreter.h:5:// #include <functional>
+include/dotlin/interpreter.h:15:// Forward declarations
+include/dotlin/interpreter.h:43:// Runtime value representation
+include/dotlin/interpreter.h:49:// Class instance structure
+include/dotlin/interpreter.h:60:// Class definition structure
+include/dotlin/interpreter.h:65:      fieldDecls; // To store field initializers
+include/dotlin/interpreter.h:74:// Structure to represent a function definition
+include/dotlin/interpreter.h:79:  size_t paramHash; // Hash based on parameter types for overload resolution
+include/dotlin/interpreter.h:86:  // Calculate a hash based on parameter types for overload resolution
+include/dotlin/interpreter.h:94:        // Use a special value for untyped parameters
+include/dotlin/interpreter.h:103:// Forward declaration for LambdaExpr
+include/dotlin/interpreter.h:106:// Structure to represent a lambda expression value
+include/dotlin/interpreter.h:112:      *original_node; // Reference to original lambda expression in AST
+include/dotlin/interpreter.h:125:// Array element type enumeration
+include/dotlin/interpreter.h:128:// Array value structure
+include/dotlin/interpreter.h:129:// Array value structure
+include/dotlin/interpreter.h:146:  // Constructor with explicit element type
+include/dotlin/interpreter.h:155:  // Determine the element type based on the elements in the array
+include/dotlin/interpreter.h:170:  // Get the type of a value
+include/dotlin/interpreter.h:184:  // Get the size of the array
+include/dotlin/interpreter.h:187:  // Check if the array is empty
+include/dotlin/interpreter.h:190:  // Get element at index
+include/dotlin/interpreter.h:198:  // Set element at index
+include/dotlin/interpreter.h:206:  // Add element to the end
+include/dotlin/interpreter.h:209:    // Update type if needed
+include/dotlin/interpreter.h:217:  // Insert element at position
+include/dotlin/interpreter.h:222:      // Update type if needed
+include/dotlin/interpreter.h:233:  // Remove element at index
+include/dotlin/interpreter.h:237:      // Recalculate type if empty
+include/dotlin/interpreter.h:241:        // Maybe type is uniform now, but keeping mixed is safe/easier
+include/dotlin/interpreter.h:242:        // Ideally we'd re-scan but that's O(N)
+include/dotlin/interpreter.h:250:  // Remove last element
+include/dotlin/interpreter.h:254:      // Update type if needed
+include/dotlin/interpreter.h:258:        // Recalculate type
+include/dotlin/interpreter.h:265:// Helper function to create array value
+include/dotlin/interpreter.h:270:// Helper function to create typed array value
+include/dotlin/interpreter.h:276:// Helper function to convert ArrayValue to vector
+include/dotlin/interpreter.h:284:// Equality operator for Value type
+include/dotlin/interpreter.h:286:  // Compare types first
+include/dotlin/interpreter.h:291:  // Compare values based on type
+include/dotlin/interpreter.h:301:    // Compare array elements
+include/dotlin/interpreter.h:315:  // Default case for unknown types
+include/dotlin/interpreter.h:319:// Environment for variable bindings
+include/dotlin/interpreter.h:323:  bool is_block_scope = false; // Flag to identify block vs function scope
+include/dotlin/interpreter.h:334:// Interpreter class
+include/dotlin/interpreter.h:346:  // Visitor pattern implementation
+include/dotlin/interpreter.h:372:      functionEnvironment; // Keep track of the function-level environment
+include/dotlin/interpreter.h:374:  Statement::Ptr mainFunctionStmt; // Store reference to main function if found
+include/dotlin/interpreter.h:375:  std::vector<std::string> commandLineArgs; // Store command-line arguments
+include/dotlin/interpreter.h:377:      0; // Track evaluation depth to prevent infinite recursion
+include/dotlin/interpreter.h:379:      50; // Maximum allowed evaluation depth
+include/dotlin/interpreter.h:390:  // Type inference methods
+include/dotlin/interpreter.h:397:  // Helper method for function overloading
+include/dotlin/interpreter.h:402:  // Built-in function execution
+include/dotlin/interpreter.h:407:  // Function execution
+include/dotlin/interpreter.h:410:  // Static map to store function definitions for overload resolution
+include/dotlin/interpreter.h:418:// TypeChecker class for type checking
+include/dotlin/interpreter.h:425:  // Helper method to get type of a value
+include/dotlin/interpreter.h:428:  // Helper method to convert type to string
+include/dotlin/interpreter.h:435:} // namespace dotlin

@@ -83,14 +83,15 @@ void EvalVisitor::visit(IdentifierExpr &node) {
           node.name == "format" || node.name == "readFile" ||
           node.name == "writeFile" || node.name == "exists" ||
           node.name == "now" || node.name == "currentTimeMillis" ||
-          node.name == "sleep") {
+          node.name == "sleep" || node.name == "printStackTrace") {
         // Return a special lambda that represents a built-in function
         auto builtinLambda =
             std::make_shared<LambdaValue>(std::vector<FunctionParameter>(),
                                           nullptr, interpreter->environment);
         result = Value(builtinLambda);
       } else {
-        throw std::runtime_error("Undefined variable: " + node.name);
+        throw DotlinError("Runtime", "Undefined variable: " + node.name,
+                          node.line, node.column);
       }
     }
   }
@@ -211,7 +212,11 @@ void EvalVisitor::visit(BinaryExpr &node) {
                      interpreter->valueToString(right));
       return;
     }
-    throw std::runtime_error("Invalid operands for + operator");
+    throw DotlinError(
+        "Runtime",
+        "Invalid operands for + operator: " + getTypeOfValue(left) + " and " +
+            getTypeOfValue(right),
+        node.line, node.column);
   }
 
   if (node.op == TokenType::DIVIDE) {
@@ -223,7 +228,7 @@ void EvalVisitor::visit(BinaryExpr &node) {
       return false;
     };
     if (isZero(right)) {
-      throw std::runtime_error("Division by zero");
+      throw DotlinError("Runtime", "Division by zero", node.line, node.column);
     }
 
     if (std::holds_alternative<double>(left) ||
@@ -254,7 +259,11 @@ void EvalVisitor::visit(BinaryExpr &node) {
       result = Value(std::get<int>(left) / std::get<int>(right));
       return;
     }
-    throw std::runtime_error("Invalid operands for / operator");
+    throw DotlinError(
+        "Runtime",
+        "Invalid operands for / operator: " + getTypeOfValue(left) + " and " +
+            getTypeOfValue(right),
+        node.line, node.column);
   }
 
   if (node.op == TokenType::MODULO) {
@@ -267,18 +276,23 @@ void EvalVisitor::visit(BinaryExpr &node) {
                       ? std::get<int64_t>(right)
                       : static_cast<int64_t>(std::get<int>(right));
       if (r == 0)
-        throw std::runtime_error("Modulo by zero");
+        throw DotlinError("Runtime", "Modulo by zero", node.line, node.column);
       result = Value(l % r);
       return;
     } else if (auto *lInt = std::get_if<int>(&left)) {
       if (auto *rInt = std::get_if<int>(&right)) {
         if (*rInt == 0)
-          throw std::runtime_error("Modulo by zero");
+          throw DotlinError("Runtime", "Modulo by zero", node.line,
+                            node.column);
         result = Value(*lInt % *rInt);
         return;
       }
     }
-    throw std::runtime_error("Invalid operands for % operator");
+    throw DotlinError(
+        "Runtime",
+        "Invalid operands for % operator: " + getTypeOfValue(left) + " and " +
+            getTypeOfValue(right),
+        node.line, node.column);
   }
 
   // Handle comparison operations
@@ -354,7 +368,10 @@ void EvalVisitor::visit(UnaryExpr &node) {
       result = Value(-*intValue);
       return;
     }
-    throw std::runtime_error("Invalid operand for unary minus");
+    throw DotlinError("Runtime",
+                      "Invalid operand for unary minus: " +
+                          getTypeOfValue(operand),
+                      node.line, node.column);
   }
 
   if (node.op == TokenType::NOT) {
@@ -362,7 +379,10 @@ void EvalVisitor::visit(UnaryExpr &node) {
       result = Value(!*boolValue);
       return;
     }
-    throw std::runtime_error("Invalid operand for logical not");
+    throw DotlinError("Runtime",
+                      "Invalid operand for logical not: " +
+                          getTypeOfValue(operand),
+                      node.line, node.column);
   }
 
   throw std::runtime_error("Unknown unary operator");
@@ -458,13 +478,10 @@ void EvalVisitor::visit(CallExpr &node) {
           Value elementToRemove = args[0];
           bool found = false;
           for (size_t i = 0; i < array->elements->size(); ++i) {
-            // Basic equality check
-            if ((*array->elements)[i].index() == elementToRemove.index()) {
-              if ((*array->elements)[i] == elementToRemove) {
-                array->removeAt(i);
-                found = true;
-                break;
-              }
+            if (valuesEqual((*array->elements)[i], elementToRemove)) {
+              array->removeAt(i);
+              found = true;
+              break;
             }
           }
           result = Value(found);
@@ -472,16 +489,29 @@ void EvalVisitor::visit(CallExpr &node) {
         } else {
           throw std::runtime_error("remove method requires 1 argument");
         }
+      } else if (methodName == "indexOf") {
+        if (args.size() == 1) {
+          Value elementToFind = args[0];
+          int foundIndex = -1;
+          for (size_t i = 0; i < array->elements->size(); ++i) {
+            if (valuesEqual((*array->elements)[i], elementToFind)) {
+              foundIndex = static_cast<int>(i);
+              break;
+            }
+          }
+          result = Value(foundIndex);
+          return;
+        } else {
+          throw std::runtime_error("indexOf method requires 1 argument");
+        }
       } else if (methodName == "contains") {
         if (args.size() == 1) {
           Value elementToFind = args[0];
           bool found = false;
           for (const auto &element : *array->elements) {
-            if (element.index() == elementToFind.index()) {
-              if (element == elementToFind) {
-                found = true;
-                break;
-              }
+            if (valuesEqual(element, elementToFind)) {
+              found = true;
+              break;
             }
           }
           result = Value(found);
@@ -524,8 +554,14 @@ void EvalVisitor::visit(CallExpr &node) {
               interpreter->functionEnvironment = lambdaEnv;
               Value mappedVal;
               try {
-                mappedVal = interpreter->executeFunction((*lambda)->body.get(),
-                                                         lambdaEnv);
+                mappedVal = interpreter->executeFunction(
+                    "lambda@map", (*lambda)->body.get(), lambdaEnv);
+              } catch (DotlinError &e) {
+                if (e.stackTrace.empty())
+                  e.setStackTrace(interpreter->callStack);
+                interpreter->environment = prevEnv;
+                interpreter->functionEnvironment = prevFuncEnv;
+                throw;
               } catch (...) {
                 interpreter->environment = prevEnv;
                 interpreter->functionEnvironment = prevFuncEnv;
@@ -561,8 +597,14 @@ void EvalVisitor::visit(CallExpr &node) {
               interpreter->functionEnvironment = lambdaEnv;
               Value funcResult;
               try {
-                funcResult = interpreter->executeFunction((*lambda)->body.get(),
-                                                          lambdaEnv);
+                funcResult = interpreter->executeFunction(
+                    "lambda@filter", (*lambda)->body.get(), lambdaEnv);
+              } catch (DotlinError &e) {
+                if (e.stackTrace.empty())
+                  e.setStackTrace(interpreter->callStack);
+                interpreter->environment = prevEnv;
+                interpreter->functionEnvironment = prevFuncEnv;
+                throw;
               } catch (...) {
                 interpreter->environment = prevEnv;
                 interpreter->functionEnvironment = prevFuncEnv;
@@ -725,12 +767,12 @@ void EvalVisitor::visit(CallExpr &node) {
       } else if (auto *doubleValue = std::get_if<double>(&objValue)) {
         // Allow double -> int conversion via toInt()
         result = Value(static_cast<int>(*doubleValue));
-      } else if (auto *intValue = std::get_if<int>(&objValue)) {
-        // Identity conversion
-        result = Value(*intValue);
+      } else if (auto *longValue = std::get_if<int64_t>(&objValue)) {
+        // Identity/downcast conversion
+        result = Value(static_cast<int>(*longValue));
       } else {
         throw std::runtime_error(
-            "toInt method only supported on String, Double, and Int");
+            "toInt method only supported on String, Double, Int, and Long");
       }
       return;
     } else if (methodName == "toDouble" && args.empty()) {
@@ -742,12 +784,12 @@ void EvalVisitor::visit(CallExpr &node) {
           throw std::runtime_error("Invalid number format for toDouble: " +
                                    *strValue);
         }
-      } else if (auto *intValue = std::get_if<int>(&objValue)) {
-        // Allow int -> double conversion via toDouble()
-        result = Value(static_cast<double>(*intValue));
+      } else if (auto *longValue = std::get_if<int64_t>(&objValue)) {
+        // Allow long -> double conversion via toDouble()
+        result = Value(static_cast<double>(*longValue));
       } else {
         throw std::runtime_error(
-            "toDouble method only supported on String and Int");
+            "toDouble method only supported on String, Int, and Long");
       }
       return;
     }
@@ -783,8 +825,15 @@ void EvalVisitor::visit(CallExpr &node) {
             // Execute method body
             Value returnValue;
             try {
-              returnValue =
-                  interpreter->executeFunction(method->body.get(), methodEnv);
+              returnValue = interpreter->executeFunction(
+                  (*instance)->className + "." + methodName, method->body.get(),
+                  methodEnv);
+            } catch (DotlinError &e) {
+              if (e.stackTrace.empty())
+                e.setStackTrace(interpreter->callStack);
+              interpreter->environment = methodEnv->enclosing;
+              interpreter->functionEnvironment = methodEnv->enclosing;
+              throw;
             } catch (...) {
               interpreter->environment = methodEnv->enclosing;
               interpreter->functionEnvironment = methodEnv->enclosing;
@@ -848,8 +897,12 @@ void EvalVisitor::visit(CallExpr &node) {
     interpreter->functionEnvironment = funcEnv;
 
     // Execute function body
+    std::string funcName = "lambda";
+    if (auto *id = dynamic_cast<IdentifierExpr *>(node.callee.get())) {
+      funcName = id->name;
+    }
     Value returnValue =
-        interpreter->executeFunction((*lambda)->body.get(), funcEnv);
+        interpreter->executeFunction(funcName, (*lambda)->body.get(), funcEnv);
     interpreter->environment = funcEnv->enclosing;
     interpreter->functionEnvironment = funcEnv->enclosing;
 
@@ -960,8 +1013,9 @@ void EvalVisitor::visit(CallExpr &node) {
         interpreter->functionEnvironment = ctorEnv;
 
         try {
-          interpreter->executeFunction(bestMatch->body.get(), ctorEnv);
-        } catch (...) {
+          interpreter->executeFunction((*classDef)->name + ".<init>",
+                                       bestMatch->body.get(), ctorEnv);
+        } catch (DotlinError &e) {
           interpreter->environment = oldEnv;
           interpreter->functionEnvironment = prevFuncEnv;
           throw;
@@ -983,7 +1037,8 @@ void EvalVisitor::visit(CallExpr &node) {
 
     result = Value(instance);
   } else {
-    throw std::runtime_error("Attempt to call a non-function value");
+    throw DotlinError("Runtime", "Attempt to call a non-function value",
+                      node.line, node.column);
   }
 }
 

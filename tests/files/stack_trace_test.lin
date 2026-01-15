@@ -1,0 +1,17 @@
+fun main() {
+    a()
+}
+
+fun a() {
+    b()
+}
+
+fun b() {
+    println("About to trigger undefined variable error...")
+    causeError()
+}
+
+fun causeError() {
+    println("Inside causeError, referencing x...")
+    val y = x // x is undefined
+}

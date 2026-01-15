@@ -6,7 +6,9 @@
 using namespace dotlin;
 
 // TypeChecker constructor
-TypeChecker::TypeChecker(std::shared_ptr<Environment> env) : environment(env) {}
+TypeChecker::TypeChecker(std::shared_ptr<TypeEnvironment> typeEnv,
+                         std::shared_ptr<Environment> env)
+    : typeEnvironment(typeEnv), environment(env) {}
 
 // Type checking visitor for expressions - Implementation
 void TypeCheckVisitor::visit(LiteralExpr &node) {
@@ -26,14 +28,13 @@ void TypeCheckVisitor::visit(LiteralExpr &node) {
 }
 
 void TypeCheckVisitor::visit(IdentifierExpr &node) {
-  // Look up the identifier in the current environment
-  (void)node;
-  if (checker->environment) {
-    try {
-      // For now, we'll just return UNKNOWN type
-      // In a full implementation, we'd look up the variable's type
-      result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
-    } catch (...) {
+  // Look up the identifier in the current type environment
+  if (checker->typeEnvironment) {
+    auto type = checker->typeEnvironment->get(node.name);
+    if (type) {
+      result = type;
+    } else {
+      // Fallback to UNKNOWN if not found
       result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
     }
   } else {
@@ -52,16 +53,56 @@ void TypeCheckVisitor::visit(BinaryExpr &node) {
   auto leftType = checker->checkExpression(*node.left);
   auto rightType = checker->checkExpression(*node.right);
 
-  // For now, just return UNKNOWN type
-  // In a full implementation, we'd determine the result type based on operation
-  (void)leftType;
-  (void)rightType;
-  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+  // Arithmetic operators
+  if (node.op == TokenType::PLUS || node.op == TokenType::MINUS ||
+      node.op == TokenType::MULTIPLY || node.op == TokenType::DIVIDE ||
+      node.op == TokenType::MODULO) {
+    if (leftType->kind == TypeKind::DOUBLE ||
+        rightType->kind == TypeKind::DOUBLE) {
+      result = std::make_shared<dotlin::Type>(TypeKind::DOUBLE);
+    } else if (leftType->kind == TypeKind::STRING ||
+               rightType->kind == TypeKind::STRING) {
+      if (node.op == TokenType::PLUS) {
+        result = std::make_shared<dotlin::Type>(TypeKind::STRING);
+      } else {
+        result = std::make_shared<dotlin::Type>(TypeKind::UNKNOWN);
+      }
+    } else {
+      result = std::make_shared<dotlin::Type>(TypeKind::INT);
+    }
+    return;
+  }
+
+  // Comparison/Logical operators
+  if (node.op == TokenType::EQUAL || node.op == TokenType::NOT_EQUAL ||
+      node.op == TokenType::LESS || node.op == TokenType::LESS_EQUAL ||
+      node.op == TokenType::GREATER || node.op == TokenType::GREATER_EQUAL ||
+      node.op == TokenType::AND || node.op == TokenType::OR) {
+    result = std::make_shared<dotlin::Type>(TypeKind::BOOL);
+    return;
+  }
+
+  result = std::make_shared<dotlin::Type>(TypeKind::UNKNOWN);
 }
 
 void TypeCheckVisitor::visit(UnaryExpr &node) {
-  (void)node;
-  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+  auto operandType = checker->checkExpression(*node.operand);
+
+  if (node.op == TokenType::MINUS) {
+    if (operandType->kind == TypeKind::DOUBLE) {
+      result = std::make_shared<dotlin::Type>(TypeKind::DOUBLE);
+    } else {
+      result = std::make_shared<dotlin::Type>(TypeKind::INT);
+    }
+    return;
+  }
+
+  if (node.op == TokenType::NOT) {
+    result = std::make_shared<dotlin::Type>(TypeKind::BOOL);
+    return;
+  }
+
+  result = std::make_shared<dotlin::Type>(TypeKind::UNKNOWN);
 }
 
 void TypeCheckVisitor::visit(CallExpr &node) {
@@ -156,18 +197,20 @@ void StmtTypeCheckVisitor::visit(ExpressionStmt &node) {
 }
 
 void StmtTypeCheckVisitor::visit(VariableDeclStmt &node) {
-  // Variable declaration - just check the initializer type
+  // Variable declaration - determine the type
   std::shared_ptr<dotlin::Type> varType;
-  if (node.initializer) {
+
+  if (node.typeAnnotation.has_value() && node.typeAnnotation.value()) {
+    varType = node.typeAnnotation.value();
+  } else if (node.initializer.has_value() && node.initializer.value()) {
     varType = checker->checkExpression(*node.initializer.value());
   } else {
     varType = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
   }
 
   // Store the variable type in the environment
-  if (checker->environment) {
-    // For now, we'll just skip this
-    (void)varType;
+  if (checker->typeEnvironment) {
+    checker->typeEnvironment->define(node.name, varType);
   }
 }
 
@@ -177,12 +220,19 @@ void StmtTypeCheckVisitor::visit(FunctionDeclStmt &node) {
 }
 
 void StmtTypeCheckVisitor::visit(BlockStmt &node) {
+  // Create a new scoped type environment
+  auto previousTypeEnv = checker->typeEnvironment;
+  checker->typeEnvironment = std::make_shared<TypeEnvironment>(previousTypeEnv);
+
   // Check each statement in the block
   for (const auto &stmt : node.statements) {
     if (stmt) {
       checker->checkStatement(*stmt);
     }
   }
+
+  // Restore the previous type environment
+  checker->typeEnvironment = previousTypeEnv;
 }
 
 void StmtTypeCheckVisitor::visit(IfStmt &node) {

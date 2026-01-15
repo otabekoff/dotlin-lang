@@ -20,6 +20,37 @@ struct Environment;
 struct Type;
 struct ClassDefinition;
 
+class DotlinError : public std::runtime_error {
+public:
+  std::string type;
+  size_t line;
+  size_t column;
+  std::string source;
+  std::vector<std::string> stackTrace;
+
+  DotlinError(std::string t, std::string m, size_t l, size_t c,
+              std::string s = "source.lin")
+      : std::runtime_error(std::move(m)), type(std::move(t)), line(l),
+        column(c), source(std::move(s)) {}
+
+  void setStackTrace(std::vector<std::string> trace) {
+    stackTrace = std::move(trace);
+  }
+
+  std::string fullMessage() const {
+    std::string msg = type + " Error at " + source + ":" +
+                      std::to_string(line) + ":" + std::to_string(column) +
+                      ": " + what();
+    if (!stackTrace.empty()) {
+      msg += "\nStack Trace:";
+      for (const auto &frame : stackTrace) {
+        msg += "\n  at " + frame;
+      }
+    }
+    return msg;
+  }
+};
+
 #include <cstdint>
 
 // Runtime value representation
@@ -298,6 +329,30 @@ inline bool operator==(const Value &lhs, const Value &rhs) {
   return false;
 }
 
+// Environment for types during type checking
+struct TypeEnvironment {
+  std::unordered_map<std::string, std::shared_ptr<Type>> types;
+  std::shared_ptr<TypeEnvironment> enclosing = nullptr;
+
+  TypeEnvironment(std::shared_ptr<TypeEnvironment> parent = nullptr)
+      : enclosing(parent) {}
+
+  void define(const std::string &name, std::shared_ptr<Type> type) {
+    types[name] = type;
+  }
+
+  std::shared_ptr<Type> get(const std::string &name) {
+    auto it = types.find(name);
+    if (it != types.end()) {
+      return it->second;
+    }
+    if (enclosing) {
+      return enclosing->get(name);
+    }
+    return nullptr;
+  }
+};
+
 // Environment for variable bindings
 struct Environment {
   std::unordered_map<std::string, Value> values;
@@ -358,8 +413,8 @@ private:
   int evaluationDepth =
       0; // Track evaluation depth to prevent infinite recursion
   static constexpr int MAX_EVALUATION_DEPTH =
-      50; // Maximum allowed evaluation depth
-
+      50;                             // Maximum allowed evaluation depth
+  std::vector<std::string> callStack; // Current call stack for tracing
   Value lastEvaluatedValue;
   Value evaluate(Expression &expr);
   void execute(Statement &stmt);
@@ -387,7 +442,8 @@ private:
       const std::vector<std::shared_ptr<Expression>> &arguments);
 
   // Function execution
-  Value executeFunction(Statement *body, std::shared_ptr<Environment> funcEnv);
+  Value executeFunction(const std::string &name, Statement *body,
+                        std::shared_ptr<Environment> funcEnv);
 
   // Static map to store function definitions for overload resolution
   static std::map<std::string, std::vector<std::shared_ptr<FunctionDef>>>
@@ -400,9 +456,11 @@ Value interpret(const Program &program, const std::vector<std::string> &args);
 // TypeChecker class for type checking
 class TypeChecker {
 public:
-  std::shared_ptr<Environment> environment;
+  std::shared_ptr<TypeEnvironment> typeEnvironment;
+  std::shared_ptr<Environment> environment; // Still needed for some context
 
-  TypeChecker(std::shared_ptr<Environment> env);
+  TypeChecker(std::shared_ptr<TypeEnvironment> typeEnv,
+              std::shared_ptr<Environment> env);
 
   // Helper method to get type of a value
   std::shared_ptr<Type> getTypeOfValue(const Value &value);

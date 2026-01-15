@@ -67,7 +67,8 @@ void ExecVisitor::visit(IfStmt &node) {
   if (auto *boolValue = std::get_if<bool>(&condition)) {
     conditionValue = *boolValue;
   } else {
-    throw std::runtime_error("If condition must evaluate to a boolean");
+    throw DotlinError("Runtime", "If condition must evaluate to a boolean",
+                      node.line, node.column);
   }
 
   if (conditionValue) {
@@ -87,7 +88,8 @@ void ExecVisitor::visit(WhileStmt &node) {
       }
       interpreter->execute(*node.body);
     } else {
-      throw std::runtime_error("While condition must be boolean");
+      throw DotlinError("Runtime", "While condition must be boolean", node.line,
+                        node.column);
     }
   }
 }
@@ -116,12 +118,14 @@ void ExecVisitor::visit(ClassDeclStmt &node) {
               std::get_if<std::shared_ptr<ClassDefinition>>(&superVal)) {
         classDef->superclass = *superDef;
       } else {
-        throw std::runtime_error("Superclass '" + *node.superClass +
-                                 "' is not a class");
+        throw DotlinError(
+            "Runtime", "Superclass '" + *node.superClass + "' is not a class",
+            node.line, node.column);
       }
     } catch (const std::exception &e) {
-      throw std::runtime_error("Superclass '" + *node.superClass +
-                               "' not found");
+      throw DotlinError("Runtime",
+                        "Superclass '" + *node.superClass + "' not found",
+                        node.line, node.column);
     }
   }
 
@@ -198,7 +202,8 @@ void ExecVisitor::visit(ForStmt &node) {
       interpreter->environment = oldEnv;
     }
   } else {
-    throw std::runtime_error("Can only iterate over arrays");
+    throw DotlinError("Runtime", "Can only iterate over arrays", node.line,
+                      node.column);
   }
 }
 
