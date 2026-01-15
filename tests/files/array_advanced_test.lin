@@ -1,0 +1,30 @@
+// Test Advanced Array Methods
+var arr = [10, 20, 30, 40, 50]
+
+println("Initial: " + arr.contentToString())
+
+// Test insert
+arr.insert(2, 25)
+println("After insert(2, 25): " + arr.contentToString())
+
+// Test contains
+println("Contains 25: " + arr.contains(25))
+println("Contains 99: " + arr.contains(99))
+
+// Test remove (by value)
+var removed = arr.remove(40)
+println("Removed 40: " + removed)
+println("After remove(40): " + arr.contentToString())
+println("Remove 99 (not found): " + arr.remove(99))
+
+// Test isEmpty
+println("Is empty: " + arr.isEmpty())
+
+// Test clear
+arr.clear()
+println("After clear(): " + arr.contentToString())
+println("Is empty after clear: " + arr.isEmpty())
+
+// Test insert on empty
+arr.add(1)
+println("After add(1): " + arr.contentToString())

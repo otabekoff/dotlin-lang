@@ -192,7 +192,8 @@ struct ArrayValue {
   // Insert element at position
   void insert(size_t index, const Value &value) {
     if (index <= elements->size()) {
-      elements->insert(elements->begin() + index, value);
+      elements->insert(elements->begin() + static_cast<std::ptrdiff_t>(index),
+                       value);
       // Update type if needed
       if (elements->size() == 1) {
         elementType = getValueType(value);
@@ -207,7 +208,7 @@ struct ArrayValue {
   // Remove element at index
   void removeAt(size_t index) {
     if (index < elements->size()) {
-      elements->erase(elements->begin() + index);
+      elements->erase(elements->begin() + static_cast<std::ptrdiff_t>(index));
       // Recalculate type if empty
       if (elements->empty()) {
         elementType = ArrayElementType::UNKNOWN;

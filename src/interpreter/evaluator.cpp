@@ -2,10 +2,8 @@
 #include "dotlin/parser.h"
 #include "dotlin/visitors.h"
 #include <algorithm>
-#include <cmath>
-#include <iostream>
-// #include <algorithm>
 // #include <cmath>
+#include <iostream>
 #include <stdexcept>
 
 // Forward declaration of valueToString
@@ -358,6 +356,66 @@ void EvalVisitor::visit(CallExpr &node) {
         } else {
           throw std::runtime_error(
               "removeAt method requires 1 integer argument");
+        }
+      } else if (methodName == "insert") {
+        if (args.size() == 2 && std::holds_alternative<int>(args[0])) {
+          int index = std::get<int>(args[0]);
+          array->insert(static_cast<size_t>(index), args[1]);
+          result = Value(true);
+          return;
+        } else {
+          throw std::runtime_error("insert method requires (index, value)");
+        }
+      } else if (methodName == "remove") {
+        if (args.size() == 1) {
+          Value elementToRemove = args[0];
+          bool found = false;
+          for (size_t i = 0; i < array->elements->size(); ++i) {
+            // Basic equality check
+            if ((*array->elements)[i].index() == elementToRemove.index()) {
+              if ((*array->elements)[i] == elementToRemove) {
+                array->removeAt(i);
+                found = true;
+                break;
+              }
+            }
+          }
+          result = Value(found);
+          return;
+        } else {
+          throw std::runtime_error("remove method requires 1 argument");
+        }
+      } else if (methodName == "contains") {
+        if (args.size() == 1) {
+          Value elementToFind = args[0];
+          bool found = false;
+          for (const auto &element : *array->elements) {
+            if (element.index() == elementToFind.index()) {
+              if (element == elementToFind) {
+                found = true;
+                break;
+              }
+            }
+          }
+          result = Value(found);
+          return;
+        } else {
+          throw std::runtime_error("contains method requires 1 argument");
+        }
+      } else if (methodName == "clear") {
+        if (args.empty()) {
+          array->elements->clear();
+          result = Value(); // Unit/Void
+          return;
+        } else {
+          throw std::runtime_error("clear method takes no arguments");
+        }
+      } else if (methodName == "isEmpty") {
+        if (args.empty()) {
+          result = Value(array->elements->empty());
+          return;
+        } else {
+          throw std::runtime_error("isEmpty method takes no arguments");
         }
       }
     } else if (methodName == "substring" && args.size() >= 1) {
