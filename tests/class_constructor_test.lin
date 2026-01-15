@@ -1,0 +1,23 @@
+class Person {
+    var personName: String = "";
+    var personAge: Int = 0;
+
+    constructor(name: String, age: Int) {
+        this.personName = name;
+        this.personAge = age;
+    }
+
+    fun introduce() {
+        println("Hi, I am " + personName + " and I am " + personAge + " years old.");
+    }
+}
+
+var p = Person("Alice", 30);
+p.introduce();
+
+if (p.personName == "Alice") {
+    println("Name check passed");
+}
+if (p.personAge == 30) {
+    println("Age check passed");
+}

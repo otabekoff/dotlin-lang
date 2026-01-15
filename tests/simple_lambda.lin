@@ -1,0 +1,16 @@
+var greet = { name: String -> 
+    println("Hello, " + name);
+};
+
+greet("World");
+
+var add = { a: Int, b: Int -> 
+    a + b
+};
+
+var result = add(5, 3);
+println("Result: " + result);
+
+if (result == 8) {
+    println("Lambda return check passed");
+}

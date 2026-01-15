@@ -1,0 +1,28 @@
+fun apply(v: Int, func: (Int) -> Int) {
+    return func(v);
+}
+
+var square = { x: Int -> 
+    x * x
+};
+
+var res = apply(4, square);
+println("Square of 4 is " + res);
+
+// Closure test
+fun makeAdder(n: Int) {
+    return { i: Int -> 
+        i + n
+    };
+}
+
+var addFive = makeAdder(5);
+var sum = addFive(10);
+println("10 + 5 = " + sum);
+
+if (res == 16) {
+    println("Higher order function check passed");
+}
+if (sum == 15) {
+    println("Closure check passed");
+}
