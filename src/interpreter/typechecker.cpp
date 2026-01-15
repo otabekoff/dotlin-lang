@@ -44,9 +44,8 @@ void TypeCheckVisitor::visit(IdentifierExpr &node) {
 
 void TypeCheckVisitor::visit(LambdaExpr &node) {
   (void)node;
-  // For now, just return UNKNOWN type for lambdas
-  // In a full implementation, we'd analyze the lambda body and parameters
-  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+  // Use the new FUNCTION type kind
+  result = std::make_shared<dotlin::Type>(TypeKind::FUNCTION);
 }
 
 void TypeCheckVisitor::visit(BinaryExpr &node) {
@@ -277,8 +276,26 @@ void StmtTypeCheckVisitor::visit(FunctionDeclStmt &node) {
     checker->typeEnvironment->define(node.name, returnType);
   }
 
-  // Ideally, also check the function body in a new scope with parameters
-  // ... future work ...
+  // Check the function body in a new scope with parameters
+  auto previousTypeEnv = checker->typeEnvironment;
+  checker->typeEnvironment = std::make_shared<TypeEnvironment>(previousTypeEnv);
+
+  for (const auto &param : node.parameters) {
+    std::shared_ptr<dotlin::Type> paramType;
+    if (param.typeAnnotation.has_value() && param.typeAnnotation.value()) {
+      paramType = param.typeAnnotation.value();
+    } else {
+      paramType = std::make_shared<dotlin::Type>(TypeKind::ANY);
+    }
+    checker->typeEnvironment->define(param.name, paramType);
+  }
+
+  if (node.body) {
+    checker->checkStatement(*node.body);
+  }
+
+  // Restore the previous type environment
+  checker->typeEnvironment = previousTypeEnv;
 }
 
 void StmtTypeCheckVisitor::visit(BlockStmt &node) {
