@@ -3,6 +3,7 @@
 #include "dotlin/visitors.h"
 #include <algorithm>
 // #include <cmath>
+#include <functional>
 #include <iostream>
 #include <stdexcept>
 
@@ -141,148 +142,212 @@ void EvalVisitor::visit(BinaryExpr &node) {
   Value left = interpreter->evaluate(*node.left);
   Value right = interpreter->evaluate(*node.right);
 
-  // Handle arithmetic operations
+  auto handleArithmetic = [&](TokenType opType, auto op) -> bool {
+    if (node.op == opType) {
+      if (auto *lInt = std::get_if<int>(&left)) {
+        if (auto *rInt = std::get_if<int>(&right)) {
+          result = Value(op(*lInt, *rInt));
+          return true;
+        } else if (auto *rDouble = std::get_if<double>(&right)) {
+          result = Value(op(static_cast<double>(*lInt), *rDouble));
+          return true;
+        }
+      } else if (auto *lDouble = std::get_if<double>(&left)) {
+        if (auto *rInt = std::get_if<int>(&right)) {
+          result = Value(op(*lDouble, static_cast<double>(*rInt)));
+          return true;
+        } else if (auto *rDouble = std::get_if<double>(&right)) {
+          result = Value(op(*lDouble, *rDouble));
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  if (handleArithmetic(TokenType::MINUS, std::minus<>()))
+    return;
+  if (handleArithmetic(TokenType::MULTIPLY, std::multiplies<>()))
+    return;
+
   if (node.op == TokenType::PLUS) {
     if (auto *leftInt = std::get_if<int>(&left)) {
       if (auto *rightInt = std::get_if<int>(&right)) {
         result = Value(*leftInt + *rightInt);
         return;
+      } else if (auto *rightDouble = std::get_if<double>(&right)) {
+        result = Value(static_cast<double>(*leftInt) + *rightDouble);
+        return;
+      }
+    } else if (auto *leftDouble = std::get_if<double>(&left)) {
+      if (auto *rightInt = std::get_if<int>(&right)) {
+        result = Value(*leftDouble + static_cast<double>(*rightInt));
+        return;
+      } else if (auto *rightDouble = std::get_if<double>(&right)) {
+        result = Value(*leftDouble + *rightDouble);
+        return;
       }
     }
-    // Handle string concatenation with type conversion
-    if (auto *leftStr = std::get_if<std::string>(&left)) {
-      result = Value(*leftStr + interpreter->valueToString(right));
-      return;
-    }
-    if (auto *rightStr = std::get_if<std::string>(&right)) {
-      result = Value(interpreter->valueToString(left) + *rightStr);
+
+    // Handle string concatenation
+    if (std::holds_alternative<std::string>(left) ||
+        std::holds_alternative<std::string>(right)) {
+      result = Value(interpreter->valueToString(left) +
+                     interpreter->valueToString(right));
       return;
     }
     throw std::runtime_error("Invalid operands for + operator");
   }
 
-  if (node.op == TokenType::MINUS) {
-    if (auto *leftInt = std::get_if<int>(&left)) {
-      if (auto *rightInt = std::get_if<int>(&right)) {
-        result = Value(*leftInt - *rightInt);
-        return;
-      }
-    }
-    throw std::runtime_error("Invalid operands for - operator");
-  }
-
-  if (node.op == TokenType::MULTIPLY) {
-    if (auto *leftInt = std::get_if<int>(&left)) {
-      if (auto *rightInt = std::get_if<int>(&right)) {
-        result = Value(*leftInt * *rightInt);
-        return;
-      }
-    }
-    throw std::runtime_error("Invalid operands for * operator");
-  }
-
   if (node.op == TokenType::DIVIDE) {
-    if (auto *leftInt = std::get_if<int>(&left)) {
-      if (auto *rightInt = std::get_if<int>(&right)) {
-        if (*rightInt == 0) {
-          throw std::runtime_error("Division by zero");
-        }
-        result = Value(*leftInt / *rightInt);
+    auto isZero = [](const Value &v) {
+      if (auto *i = std::get_if<int>(&v))
+        return *i == 0;
+      if (auto *d = std::get_if<double>(&v))
+        return *d == 0.0;
+      return false;
+    };
+    if (isZero(right)) {
+      throw std::runtime_error("Division by zero");
+    }
+
+    if (auto *lInt = std::get_if<int>(&left)) {
+      if (auto *rInt = std::get_if<int>(&right)) {
+        result = Value(*lInt / *rInt);
+        return;
+      } else if (auto *rDouble = std::get_if<double>(&right)) {
+        result = Value(static_cast<double>(*lInt) / *rDouble);
+        return;
+      }
+    } else if (auto *lDouble = std::get_if<double>(&left)) {
+      if (auto *rInt = std::get_if<int>(&right)) {
+        result = Value(*lDouble / static_cast<double>(*rInt));
+        return;
+      } else if (auto *rDouble = std::get_if<double>(&right)) {
+        result = Value(*lDouble / *rDouble);
         return;
       }
     }
     throw std::runtime_error("Invalid operands for / operator");
   }
 
-  // Handle comparison operations
-  if (node.op == TokenType::EQUAL) {
-    bool isEqual = false;
-    if (left.index() != right.index()) {
-      // Different types are not equal
-      result = Value(isEqual);
-      return;
+  if (node.op == TokenType::MODULO) {
+    if (auto *lInt = std::get_if<int>(&left)) {
+      if (auto *rInt = std::get_if<int>(&right)) {
+        if (*rInt == 0)
+          throw std::runtime_error("Modulo by zero");
+        result = Value(*lInt % *rInt);
+        return;
+      }
     }
+    throw std::runtime_error("Invalid operands for % operator");
+  }
 
-    if (auto *leftInt = std::get_if<int>(&left)) {
-      if (auto *rightInt = std::get_if<int>(&right)) {
-        isEqual = (*leftInt == *rightInt);
+  // Handle comparison operations
+  auto handleComparison = [&](TokenType opType) -> bool {
+    if (node.op == opType) {
+      double lVal, rVal;
+      bool hasL = false, hasR = false;
+
+      if (auto *lInt = std::get_if<int>(&left)) {
+        lVal = static_cast<double>(*lInt);
+        hasL = true;
+      } else if (auto *lDouble = std::get_if<double>(&left)) {
+        lVal = *lDouble;
+        hasL = true;
       }
-    } else if (auto *leftStr = std::get_if<std::string>(&left)) {
-      if (auto *rightStr = std::get_if<std::string>(&right)) {
-        isEqual = (*leftStr == *rightStr);
+
+      if (auto *rInt = std::get_if<int>(&right)) {
+        rVal = static_cast<double>(*rInt);
+        hasR = true;
+      } else if (auto *rDouble = std::get_if<double>(&right)) {
+        rVal = *rDouble;
+        hasR = true;
       }
-    } else if (auto *leftBool = std::get_if<bool>(&left)) {
-      if (auto *rightBool = std::get_if<bool>(&right)) {
-        isEqual = (*leftBool == *rightBool);
+
+      if (hasL && hasR) {
+        if (opType == TokenType::LESS)
+          result = Value(lVal < rVal);
+        else if (opType == TokenType::LESS_EQUAL)
+          result = Value(lVal <= rVal);
+        else if (opType == TokenType::GREATER)
+          result = Value(lVal > rVal);
+        else if (opType == TokenType::GREATER_EQUAL)
+          result = Value(lVal >= rVal);
+        return true;
       }
     }
-    result = Value(isEqual);
+    return false;
+  };
+
+  if (handleComparison(TokenType::LESS))
+    return;
+  if (handleComparison(TokenType::LESS_EQUAL))
+    return;
+  if (handleComparison(TokenType::GREATER))
+    return;
+  if (handleComparison(TokenType::GREATER_EQUAL))
+    return;
+
+  if (node.op == TokenType::EQUAL) {
+    if (left.index() == right.index()) {
+      if (auto *lInt = std::get_if<int>(&left)) {
+        result = Value(*lInt == std::get<int>(right));
+      } else if (auto *lDouble = std::get_if<double>(&left)) {
+        result = Value(*lDouble == std::get<double>(right));
+      } else if (auto *lStr = std::get_if<std::string>(&left)) {
+        result = Value(*lStr == std::get<std::string>(right));
+      } else if (auto *lBool = std::get_if<bool>(&left)) {
+        result = Value(*lBool == std::get<bool>(right));
+      } else {
+        result = Value(left == right);
+      }
+    } else {
+      // Allow int vs double
+      if (auto *lInt = std::get_if<int>(&left)) {
+        if (auto *rDouble = std::get_if<double>(&right)) {
+          result = Value(static_cast<double>(*lInt) == *rDouble);
+          return;
+        }
+      } else if (auto *lDouble = std::get_if<double>(&left)) {
+        if (auto *rInt = std::get_if<int>(&right)) {
+          result = Value(*lDouble == static_cast<double>(*rInt));
+          return;
+        }
+      }
+      result = Value(false);
+    }
     return;
   }
 
   if (node.op == TokenType::NOT_EQUAL) {
     bool isEqual = false;
-    if (left.index() != right.index()) {
-      // Different types are not equal
-      result = Value(true);
-      return;
-    }
-
-    if (auto *leftInt = std::get_if<int>(&left)) {
-      if (auto *rightInt = std::get_if<int>(&right)) {
-        isEqual = (*leftInt == *rightInt);
+    if (left.index() == right.index()) {
+      if (auto *lInt = std::get_if<int>(&left)) {
+        isEqual = (*lInt == std::get<int>(right));
+      } else if (auto *lDouble = std::get_if<double>(&left)) {
+        isEqual = (*lDouble == std::get<double>(right));
+      } else if (auto *lStr = std::get_if<std::string>(&left)) {
+        isEqual = (*lStr == std::get<std::string>(right));
+      } else if (auto *lBool = std::get_if<bool>(&left)) {
+        isEqual = (*lBool == std::get<bool>(right));
+      } else {
+        isEqual = (left == right);
       }
-    } else if (auto *leftStr = std::get_if<std::string>(&left)) {
-      if (auto *rightStr = std::get_if<std::string>(&right)) {
-        isEqual = (*leftStr == *rightStr);
-      }
-    } else if (auto *leftBool = std::get_if<bool>(&left)) {
-      if (auto *rightBool = std::get_if<bool>(&right)) {
-        isEqual = (*leftBool == *rightBool);
+    } else {
+      // Allow int vs double
+      if (auto *lInt = std::get_if<int>(&left)) {
+        if (auto *rDouble = std::get_if<double>(&right)) {
+          isEqual = (static_cast<double>(*lInt) == *rDouble);
+        }
+      } else if (auto *lDouble = std::get_if<double>(&left)) {
+        if (auto *rInt = std::get_if<int>(&right)) {
+          isEqual = (*lDouble == static_cast<double>(*rInt));
+        }
       }
     }
     result = Value(!isEqual);
     return;
-  }
-
-  if (node.op == TokenType::LESS) {
-    if (auto *leftInt = std::get_if<int>(&left)) {
-      if (auto *rightInt = std::get_if<int>(&right)) {
-        result = Value(*leftInt < *rightInt);
-        return;
-      }
-    }
-    throw std::runtime_error("Invalid operands for < operator");
-  }
-
-  if (node.op == TokenType::LESS_EQUAL) {
-    if (auto *leftInt = std::get_if<int>(&left)) {
-      if (auto *rightInt = std::get_if<int>(&right)) {
-        result = Value(*leftInt <= *rightInt);
-        return;
-      }
-    }
-    throw std::runtime_error("Invalid operands for <= operator");
-  }
-
-  if (node.op == TokenType::GREATER) {
-    if (auto *leftInt = std::get_if<int>(&left)) {
-      if (auto *rightInt = std::get_if<int>(&right)) {
-        result = Value(*leftInt > *rightInt);
-        return;
-      }
-    }
-    throw std::runtime_error("Invalid operands for > operator");
-  }
-
-  if (node.op == TokenType::GREATER_EQUAL) {
-    if (auto *leftInt = std::get_if<int>(&left)) {
-      if (auto *rightInt = std::get_if<int>(&right)) {
-        result = Value(*leftInt >= *rightInt);
-        return;
-      }
-    }
-    throw std::runtime_error("Invalid operands for >= operator");
   }
 
   throw std::runtime_error("Unknown binary operator");
@@ -431,6 +496,14 @@ void EvalVisitor::visit(CallExpr &node) {
         } else {
           throw std::runtime_error("contains method requires 1 argument");
         }
+      } else if (methodName == "clear") {
+        if (args.empty()) {
+          array->elements->clear();
+          result = Value(); // Unit/Void
+          return;
+        } else {
+          throw std::runtime_error("clear method takes no arguments");
+        }
       } else if (methodName == "isEmpty") {
         if (args.empty()) {
           result = Value(array->elements->empty());
@@ -504,6 +577,7 @@ void EvalVisitor::visit(CallExpr &node) {
               }
               interpreter->environment = prevEnv;
               interpreter->functionEnvironment = prevFuncEnv;
+
               bool keep = false;
               if (auto *b = std::get_if<bool>(&funcResult)) {
                 keep = *b;

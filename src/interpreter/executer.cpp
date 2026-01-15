@@ -93,14 +93,14 @@ void ExecVisitor::visit(WhileStmt &node) {
 }
 
 void ExecVisitor::visit(ReturnStmt &node) {
-  Value returnValue;
   if (node.value) {
-    returnValue = interpreter->evaluate(*node.value);
+    interpreter->lastEvaluatedValue = interpreter->evaluate(*node.value);
+  } else {
+    interpreter->lastEvaluatedValue = Value();
   }
 
-  // Throw an exception to propagate the return value
-  std::string returnMsg = "RETURN:" + dotlin::valueToString(returnValue);
-  throw std::runtime_error(returnMsg);
+  // Throw a signal exception to stop execution and return the value
+  throw std::runtime_error("RETURN_SIGNAL");
 }
 
 // Statement execution visitor implementations

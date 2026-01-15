@@ -357,6 +357,7 @@ private:
   static constexpr int MAX_EVALUATION_DEPTH =
       50; // Maximum allowed evaluation depth
 
+  Value lastEvaluatedValue;
   Value evaluate(Expression &expr);
   void execute(Statement &stmt);
   Value executeBlock(const std::vector<Statement::Ptr> &statements,

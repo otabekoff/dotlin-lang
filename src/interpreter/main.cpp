@@ -117,6 +117,7 @@ Value Interpreter::executeBlock(
 Value Interpreter::evaluate(Expression &expr) {
   EvalVisitor visitor(this);
   expr.accept(visitor);
+  lastEvaluatedValue = visitor.result;
   return visitor.result;
 }
 
@@ -133,20 +134,22 @@ Value Interpreter::executeFunction(Statement *body,
 
   auto previousEnv = environment;
   environment = funcEnv;
+  // Initialize lastEvaluatedValue to a default (0 / Unit)
+  lastEvaluatedValue = Value();
 
   try {
     execute(*body);
   } catch (const std::runtime_error &e) {
     environment = previousEnv;
     std::string msg = e.what();
-    if (msg.substr(0, 7) == "RETURN:") {
-      return Value(msg.substr(7)); // Remove "RETURN:" prefix
+    if (msg == "RETURN_SIGNAL") {
+      return lastEvaluatedValue;
     }
     throw;
   }
 
   environment = previousEnv;
-  return Value();
+  return lastEvaluatedValue;
 }
 
 std::shared_ptr<FunctionDef>
