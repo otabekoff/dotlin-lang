@@ -1829,3 +1829,9 @@ void EvalVisitor::visit(WhileStmt &node)
   (void)node;
   result = Value();
 }
+
+void EvalVisitor::visit(ExtensionFunctionDeclStmt &node)
+{
+  (void)node;
+  result = Value();
+}
