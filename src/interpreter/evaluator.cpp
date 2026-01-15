@@ -70,15 +70,6 @@ void EvalVisitor::visit(IdentifierExpr &node) {
       }
     }
   }
-  if (node.name == "println" || node.name == "print" || node.name == "sqrt" ||
-      node.name == "abs" || node.name == "pow" || node.name == "readln") {
-    // Return a special lambda that represents a built-in function
-    auto builtinLambda = std::make_shared<LambdaValue>(
-        std::vector<FunctionParameter>(), nullptr, interpreter->environment);
-    result = Value(builtinLambda);
-  } else {
-    result = Value(std::string("undefined"));
-  }
 }
 
 void EvalVisitor::visit(LambdaExpr &node) {
@@ -601,17 +592,9 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
     } else if (node.property == "endsWith") {
       throw std::runtime_error("EndsWith method requires arguments");
     } else if (node.property == "toUpperCase") {
-      std::string upperStr = *strValue;
-      std::transform(upperStr.begin(), upperStr.end(), upperStr.begin(),
-                     ::toupper);
-      result = Value(upperStr);
-      return;
+      throw std::runtime_error("ToUpper method requires arguments");
     } else if (node.property == "toLowerCase") {
-      std::string lowerStr = *strValue;
-      std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(),
-                     ::tolower);
-      result = Value(lowerStr);
-      return;
+      throw std::runtime_error("ToLower method requires arguments");
     } else if (node.property == "trim") {
       std::string trimmedStr = *strValue;
       // Left trim
