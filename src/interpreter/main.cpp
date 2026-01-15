@@ -28,6 +28,8 @@ Interpreter::Interpreter()
       mainFunctionStmt(nullptr), commandLineArgs({}) {}
 
 void Interpreter::resolve(const Expression *expr, int depth) {
+  // std::cout << "[DEBUG] Resolving expression at address " << expr << " to
+  // depth " << depth << std::endl;
   locals[expr] = depth;
 }
 
@@ -37,6 +39,14 @@ std::optional<int> Interpreter::getResolvedDistance(const Expression *expr) {
     return it->second;
   }
   return std::nullopt;
+}
+
+// Helper to trace lookups in Evaluator (will be called from Evaluator)
+void Interpreter::traceLookup(const std::string &name,
+                              std::optional<int> distance) {
+  std::cout << "[DEBUG] Looking up '" << name << "' at distance "
+            << (distance.has_value() ? std::to_string(*distance) : "global")
+            << std::endl;
 }
 
 Value Interpreter::interpret(const Program &program) {
@@ -141,7 +151,9 @@ Value Interpreter::executeBlock(
   try {
     environment = blockEnvironment;
     for (const auto &stmt : statements) {
-      execute(*stmt);
+      if (stmt) {
+        execute(*stmt);
+      }
     }
   } catch (const std::runtime_error &e) {
     environment = previous;
@@ -166,6 +178,8 @@ Value Interpreter::evaluate(Expression::Ptr &exprPtr) {
 }
 
 void Interpreter::execute(Statement &stmt) {
+  std::cout << "[DEBUG] Executing " << typeid(stmt).name() << " at line "
+            << stmt.line << std::endl;
   ExecVisitor visitor(this);
   stmt.accept(visitor);
 }

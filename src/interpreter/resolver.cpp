@@ -129,17 +129,16 @@ void ResolverVisitor::visit(ClassDeclStmt &node) {
     // simulate an access.
   }
 
-  beginScope();
-  // scope["this"] = true; // Use string literal for map key
-
+  // Resolve members
   for (const auto &member : node.members) {
     if (auto func = std::dynamic_pointer_cast<FunctionDeclStmt>(member)) {
       FunctionType declaration = FunctionType::METHOD;
-
       FunctionType enclosingFunction = currentFunction;
       currentFunction = declaration;
 
       beginScope();
+      declare("this");
+      define("this");
       for (const auto &param : func->parameters) {
         declare(param.name);
         define(param.name);
@@ -147,15 +146,28 @@ void ResolverVisitor::visit(ClassDeclStmt &node) {
       resolve(func->body);
       endScope();
       currentFunction = enclosingFunction;
+    } else if (auto ctor =
+                   std::dynamic_pointer_cast<ConstructorDeclStmt>(member)) {
+      FunctionType enclosingFunction = currentFunction;
+      currentFunction = FunctionType::INITIALIZER;
+
+      beginScope();
+      declare("this");
+      define("this");
+      for (const auto &param : ctor->parameters) {
+        declare(param.name);
+        define(param.name);
+      }
+      resolve(ctor->body);
+      endScope();
+      currentFunction = enclosingFunction;
     } else if (auto var = std::dynamic_pointer_cast<VariableDeclStmt>(member)) {
-      // Field declaration
+      // Field: resolve initializer only, don't declare in any local scope
       if (var->initializer) {
         resolve(var->initializer.value());
       }
     }
   }
-
-  endScope();
 }
 
 void ResolverVisitor::visit(IdentifierExpr &node) {

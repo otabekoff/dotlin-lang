@@ -13,8 +13,8 @@ using namespace dotlin;
 
 // Statement execution visitor implementations
 void ExecVisitor::visit(ExpressionStmt &node) {
-  // Execute the expression for its side effects
-  interpreter->evaluate(*node.expression);
+  // Execute the expression for its side effects and store for functional return
+  interpreter->lastEvaluatedValue = interpreter->evaluate(*node.expression);
 }
 
 void ExecVisitor::visit(VariableDeclStmt &node) {
@@ -26,6 +26,8 @@ void ExecVisitor::visit(VariableDeclStmt &node) {
     }
     value = interpreter->evaluate(*node.initializer.value());
   }
+  std::cout << "[DEBUG] Defining '" << node.name << "' in environment"
+            << std::endl;
   interpreter->environment->define(node.name, value);
 }
 
@@ -101,8 +103,10 @@ void ExecVisitor::visit(IfStmt &node) {
   }
 
   if (conditionValue) {
-    interpreter->execute(*node.thenBranch);
-  } else if (node.elseBranch) {
+    if (node.thenBranch) {
+      interpreter->execute(*node.thenBranch);
+    }
+  } else if (node.elseBranch && *node.elseBranch) {
     interpreter->execute(*node.elseBranch.value());
   }
 }
@@ -115,7 +119,9 @@ void ExecVisitor::visit(WhileStmt &node) {
       if (!*boolVal) {
         break;
       }
-      interpreter->execute(*node.body);
+      if (node.body) {
+        interpreter->execute(*node.body);
+      }
     } else {
       throw DotlinError("Runtime", "While condition must be boolean", node.line,
                         node.column);

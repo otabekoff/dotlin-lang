@@ -897,6 +897,10 @@ void EvalVisitor::visit(CallExpr &node) {
             }
           }
 
+          // Save original environment
+          auto oldEnv = interpreter->environment;
+          auto oldFuncEnv = interpreter->functionEnvironment;
+
           // Switch to extension function environment
           interpreter->environment = extFuncEnv;
           interpreter->functionEnvironment = extFuncEnv;
@@ -906,19 +910,14 @@ void EvalVisitor::visit(CallExpr &node) {
           try {
             returnValue = interpreter->executeFunction(
                 extensionFuncName, (*lambda)->body.get(), extFuncEnv);
-          } catch (DotlinError &e) {
-            if (e.stackTrace.empty())
-              e.setStackTrace(interpreter->callStack);
-            interpreter->environment = extFuncEnv->enclosing;
-            interpreter->functionEnvironment = extFuncEnv->enclosing;
-            throw;
+
+            interpreter->environment = oldEnv;
+            interpreter->functionEnvironment = oldFuncEnv;
           } catch (...) {
-            interpreter->environment = extFuncEnv->enclosing;
-            interpreter->functionEnvironment = extFuncEnv->enclosing;
+            interpreter->environment = oldEnv;
+            interpreter->functionEnvironment = oldFuncEnv;
             throw;
           }
-          interpreter->environment = extFuncEnv->enclosing;
-          interpreter->functionEnvironment = extFuncEnv->enclosing;
 
           result = returnValue;
           return;
@@ -1065,18 +1064,28 @@ void EvalVisitor::visit(CallExpr &node) {
     }
 
     // Switch to function environment
+    auto previousEnv = interpreter->environment;
+    auto previousFuncEnv = interpreter->functionEnvironment;
     interpreter->environment = funcEnv;
     interpreter->functionEnvironment = funcEnv;
 
-    // Execute function body
-    std::string funcName = "lambda";
-    if (auto *id = dynamic_cast<IdentifierExpr *>(node.callee.get())) {
-      funcName = id->name;
+    Value returnValue;
+    try {
+      // Execute function body
+      std::string funcName = "lambda";
+      if (auto *id = dynamic_cast<IdentifierExpr *>(node.callee.get())) {
+        funcName = id->name;
+      }
+      returnValue = interpreter->executeFunction(
+          funcName, (*lambda)->body.get(), funcEnv);
+
+      interpreter->environment = previousEnv;
+      interpreter->functionEnvironment = previousFuncEnv;
+    } catch (...) {
+      interpreter->environment = previousEnv;
+      interpreter->functionEnvironment = previousFuncEnv;
+      throw;
     }
-    Value returnValue =
-        interpreter->executeFunction(funcName, (*lambda)->body.get(), funcEnv);
-    interpreter->environment = funcEnv->enclosing;
-    interpreter->functionEnvironment = funcEnv->enclosing;
 
     result = returnValue;
   } else if (auto *classDef =

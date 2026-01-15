@@ -467,6 +467,7 @@ private:
   void resolve(const Expression *expr, int depth);
   // Helper to get resolved distance
   std::optional<int> getResolvedDistance(const Expression *expr);
+  void traceLookup(const std::string &name, std::optional<int> distance);
 };
 
 Value interpret(const Program &program);

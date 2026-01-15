@@ -59,11 +59,12 @@ Program parse(const std::vector<Token> &tokens) {
   size_t pos = 0;
 
   while (pos < tokens.size() && tokens[pos].type != TokenType::EOF_TOKEN) {
+    size_t oldPos = pos;
     auto stmt = parseStatement(tokens, pos);
     if (stmt) {
       program.statements.push_back(std::move(stmt));
-    } else {
-      // If we couldn't parse a statement, advance the position to avoid
+    } else if (pos == oldPos) {
+      // If we couldn't parse a statement AND didn't advance, advance to avoid
       // infinite loop
       pos++;
     }
@@ -76,6 +77,12 @@ std::unique_ptr<Statement> parseStatement(const std::vector<Token> &tokens,
                                           size_t &pos) {
   if (pos >= tokens.size())
     return nullptr;
+
+  if (tokens[pos].type != TokenType::SEMICOLON) {
+    // std::cout << "[PARSER DEBUG] Statement at line " << tokens[pos].line << "
+    // starts with token: " << tokens[pos].text << " (type " <<
+    // (int)tokens[pos].type << ")" << std::endl;
+  }
 
   switch (tokens[pos].type) {
   case TokenType::VAL:
@@ -900,8 +907,6 @@ std::unique_ptr<Statement> parseIfStatement(const std::vector<Token> &tokens,
   // Use the last token we consumed for position info, or default to 1,1
   size_t line = (pos > 0) ? tokens[pos - 1].line : 1;
   size_t col = (pos > 0) ? tokens[pos - 1].column : 1;
-  std::cout << "[Parser] parseIfStatement: thenBranch=" << thenBranch.get()
-            << std::endl;
   return std::make_unique<IfStmt>(std::move(condition), std::move(thenBranch),
                                   std::move(elseBranch), line, col);
 }
@@ -1363,12 +1368,12 @@ parseClassDeclaration(const std::vector<Token> &tokens, size_t &pos) {
             tokens[pos - 1].line, tokens[pos - 1].column);
         members.push_back(std::move(constructor));
       } else {
-        // Parse other members (methods, fields)
+        size_t oldMemberPos = pos;
         auto member = parseStatement(tokens, pos);
         if (member) {
           members.push_back(std::move(member));
-        } else {
-          // Skip token to avoid infinite loop
+        } else if (pos == oldMemberPos) {
+          // Skip token only if parseStatement didn't advance (safety)
           pos++;
         }
       }

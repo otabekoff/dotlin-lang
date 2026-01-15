@@ -1,0 +1,30 @@
+src/interpreter/typechecker.cpp:    // For now, if it starts with uppercase, assume it's a class constructor?
+src/interpreter/typechecker.cpp:  // For now, just skip class declarations
+src/interpreter/typechecker.cpp:  // For now, just skip constructor declarations
+src/interpreter/evaluator.cpp:    } else if (methodName == "toDouble" && args.empty()) {
+src/interpreter/evaluator.cpp:      // Handle toDouble method calls on String
+src/interpreter/evaluator.cpp:          throw std::runtime_error("Invalid number format for toDouble: " +
+src/interpreter/evaluator.cpp:        // Allow long -> double conversion via toDouble()
+src/interpreter/evaluator.cpp:            "toDouble method only supported on String, Int, and Long");
+src/interpreter/evaluator.cpp:        content += std::string(1, (*strValue)[i]); // Just the char for now
+src/interpreter/resolver.cpp:    // TODO: Resolve super class identifier? It's a string name here.
+src/interpreter/resolver.cpp:    // For now, let's treat it as a variable access if we can, but
+src/parser.cpp:  // For now, we'll create a simple block with expressions/statements
+src/parser.cpp:    // For now, we'll just break if we encounter a closing brace or EOF
+tests/files/format_functions_test.lin:    println("Converting string to double: " + toDouble("3.14").toString())
+tests/files/comprehensive_feature_test.lin:    println("String to double: " + toDouble(floatStr).toString())
+tests/files/formatting_test.lin:    val d1 = s2.toDouble()
+tests/files/formatting_test.lin:    val d2 = i2.toDouble()
+tests/files/all_comments.txt:src/interpreter/typechecker.cpp:33:      // For now, we'll just return UNKNOWN type
+tests/files/all_comments.txt:src/interpreter/typechecker.cpp:46:  // For now, just return UNKNOWN type for lambdas
+tests/files/all_comments.txt:src/interpreter/typechecker.cpp:55:  // For now, just return UNKNOWN type
+tests/files/all_comments.txt:src/interpreter/typechecker.cpp:169:    // For now, we'll just skip this
+tests/files/all_comments.txt:src/interpreter/typechecker.cpp:176:  // For now, just skip function declarations
+tests/files/all_comments.txt:src/interpreter/typechecker.cpp:226:  // For now, just skip class declarations
+tests/files/all_comments.txt:src/interpreter/typechecker.cpp:282:  // For now, just skip constructor declarations
+tests/files/all_comments.txt:src/interpreter/evaluator.cpp:747:      // Handle toDouble method calls on String
+tests/files/all_comments.txt:src/interpreter/evaluator.cpp:756:        // Allow long -> double conversion via toDouble()
+tests/files/all_comments.txt:src/interpreter/evaluator.cpp:1073:        content += std::string(1, (*strValue)[i]); // Just the char for now
+tests/files/all_comments.txt:src/parser.cpp:461:  // For now, we'll create a simple block with expressions/statements
+tests/files/all_comments.txt:src/parser.cpp:482:    // For now, we'll just break if we encounter a closing brace or EOF
+tests/files/inheritance_test.lin:    // For now, testing basic inheritance and override.

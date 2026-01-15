@@ -17,6 +17,8 @@ Value Environment::get(const std::string &name) {
     return enclosing->get(name);
   }
 
+  std::cout << "[DEBUG] Environment(" << this << ")::get failed for '" << name
+            << "'" << std::endl;
   throw std::runtime_error("Undefined variable: " + name);
 }
 
