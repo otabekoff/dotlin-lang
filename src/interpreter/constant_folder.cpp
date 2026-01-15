@@ -26,7 +26,9 @@ Expression::Ptr ConstantFolderVisitor::fold(Expression::Ptr expr) {
   resultExpr = nullptr;
   expr->accept(*this);
   if (resultExpr) {
-    auto res = std::move(resultExpr);
+    // std::cout << "FOLDED Expression at L" << expr->line << ":" <<
+    // expr->column << std::endl;
+    Expression::Ptr res = std::move(resultExpr);
     resultExpr = nullptr;
     return res;
   }
@@ -39,7 +41,9 @@ Statement::Ptr ConstantFolderVisitor::fold(Statement::Ptr stmt) {
   resultStmt = nullptr;
   stmt->accept(*this);
   if (resultStmt) {
-    auto res = std::move(resultStmt);
+    // std::cout << "FOLDED Statement at L" << stmt->line << ":" << stmt->column
+    // << std::endl;
+    Statement::Ptr res = resultStmt; // Use assignment for shared_ptr
     resultStmt = nullptr;
     return res;
   }
@@ -92,7 +96,7 @@ void ConstantFolderVisitor::visit(StringInterpolationExpr &node) {
 
 void ConstantFolderVisitor::visit(LambdaExpr &node) {
   if (node.body)
-    node.body = fold(std::move(node.body));
+    node.body = fold(node.body); // shared_ptr
   resultExpr = nullptr;
 }
 
@@ -390,25 +394,26 @@ void ConstantFolderVisitor::visit(VariableDeclStmt &node) {
     node.initializer = fold(std::move(node.initializer.value()));
   resultStmt = nullptr;
 }
+
 void ConstantFolderVisitor::visit(FunctionDeclStmt &node) {
   if (node.body)
-    node.body = fold(std::move(node.body));
+    node.body = fold(node.body);
   resultStmt = nullptr;
 }
+
 void ConstantFolderVisitor::visit(BlockStmt &node) {
-  for (auto &stmt : node.statements) {
+  for (auto &stmt : node.statements)
     if (stmt)
-      stmt = fold(std::move(stmt));
-  }
+      stmt = fold(stmt);
   resultStmt = nullptr;
 }
 
 void ConstantFolderVisitor::visit(IfStmt &node) {
   node.condition = fold(std::move(node.condition));
   if (node.thenBranch)
-    node.thenBranch = fold(std::move(node.thenBranch));
-  if (node.elseBranch.has_value())
-    node.elseBranch = fold(std::move(node.elseBranch.value()));
+    node.thenBranch = fold(node.thenBranch);
+  if (node.elseBranch.has_value() && node.elseBranch.value())
+    node.elseBranch = fold(node.elseBranch.value());
   if (!node.condition) {
     resultStmt = nullptr;
     return;
@@ -416,10 +421,10 @@ void ConstantFolderVisitor::visit(IfStmt &node) {
   auto cLit = dynamic_cast<LiteralExpr *>(node.condition.get());
   if (cLit && std::holds_alternative<bool>(cLit->value)) {
     if (std::get<bool>(cLit->value))
-      resultStmt = std::move(node.thenBranch);
+      resultStmt = node.thenBranch;
     else {
       if (node.elseBranch.has_value())
-        resultStmt = std::move(node.elseBranch.value());
+        resultStmt = node.elseBranch.value();
       else
         resultStmt = std::make_shared<BlockStmt>(std::vector<Statement::Ptr>(),
                                                  node.line, node.column);
@@ -432,7 +437,7 @@ void ConstantFolderVisitor::visit(IfStmt &node) {
 void ConstantFolderVisitor::visit(WhileStmt &node) {
   node.condition = fold(std::move(node.condition));
   if (node.body)
-    node.body = fold(std::move(node.body));
+    node.body = fold(node.body);
   if (!node.condition) {
     resultStmt = nullptr;
     return;
@@ -459,7 +464,7 @@ void ConstantFolderVisitor::visit(ClassDeclStmt &node) {
 void ConstantFolderVisitor::visit(ForStmt &node) {
   node.iterable = fold(std::move(node.iterable));
   if (node.body)
-    node.body = fold(std::move(node.body));
+    node.body = fold(node.body);
   resultStmt = nullptr;
 }
 void ConstantFolderVisitor::visit(WhenStmt &node) {
@@ -468,12 +473,12 @@ void ConstantFolderVisitor::visit(WhenStmt &node) {
 }
 void ConstantFolderVisitor::visit(TryStmt &node) {
   if (node.tryBlock)
-    node.tryBlock = fold(std::move(node.tryBlock));
+    node.tryBlock = fold(node.tryBlock);
   resultStmt = nullptr;
 }
 void ConstantFolderVisitor::visit(ConstructorDeclStmt &node) {
   if (node.body)
-    node.body = fold(std::move(node.body));
+    node.body = fold(node.body);
   resultStmt = nullptr;
 }
 

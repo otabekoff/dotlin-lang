@@ -138,6 +138,13 @@ Value Interpreter::evaluate(Expression &expr) {
   return visitor.result;
 }
 
+Value Interpreter::evaluate(Expression::Ptr &exprPtr) {
+  if (!exprPtr) {
+    throw std::runtime_error("Attempted to evaluate NULL expression!");
+  }
+  return evaluate(*exprPtr);
+}
+
 void Interpreter::execute(Statement &stmt) {
   ExecVisitor visitor(this);
   stmt.accept(visitor);

@@ -417,6 +417,7 @@ private:
   std::vector<std::string> callStack; // Current call stack for tracing
   Value lastEvaluatedValue;
   Value evaluate(Expression &expr);
+  Value evaluate(Expression::Ptr &exprPtr);
   void execute(Statement &stmt);
   Value executeBlock(const std::vector<Statement::Ptr> &statements,
                      std::shared_ptr<Environment> env);
