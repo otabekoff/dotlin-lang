@@ -1,0 +1,54 @@
+src/interpreter/typechecker.cpp:// Type checking visitor for expressions - Implementation
+src/interpreter/typechecker.cpp:// Statement type checking visitor - Implementation
+src/interpreter/typechecker.cpp:  // Variable declaration - just check the initializer type
+src/interpreter/typechecker.cpp:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:  (void)node; // Not used in statement type checking
+src/interpreter/typechecker.cpp:  (void)node; // Not used in statement type checking
+src/interpreter/executer.cpp:      // Also add to fields metadata (optional, mainly for type checking if we
+src/interpreter/executer.cpp:      // TODO: Handle constructors
+src/interpreter/executer.cpp:  // TODO: Implement try-catch
+src/interpreter/executer.cpp:  // TODO: Implement constructor declaration
+src/interpreter/builtins.cpp:        // Simple equality check for now
+src/interpreter/builtins.cpp:  // Type checking functions
+src/interpreter/main.cpp:          return Value(msg.substr(7)); // Remove "RETURN:" prefix
+src/interpreter/main.cpp:      return Value(msg.substr(7)); // Remove "RETURN:" prefix
+src/interpreter/main.cpp:// Type checking methods
+src/interpreter/main.cpp:  // Create a type checker instance
+src/interpreter/evaluator.cpp:            // Basic equality check
+src/interpreter/evaluator.cpp:    // Create a temporary environment to execute field initializers
+src/lexer.cpp:      // Additional defensive checks
+src/lexer.cpp:      // Defensive check: ensure we're not creating an EOF token with non-empty
+src/lexer.cpp:      // Additional check: if text is empty for tokens that should have text,
+src/interpreter.cpp:    // Store function in environment for later use as a special marker
+src/interpreter.cpp:    // Store in a map so we can retrieve it later - now appending to vector for
+src/interpreter.cpp:    // but as a safeguard) Increment evaluation depth and check for recursion
+src/interpreter.cpp:                // Handle startsWith(prefix) method call
+src/interpreter.cpp:                // Handle endsWith(suffix) method call
+src/interpreter.cpp:              // Safety check for null object
+src/interpreter.cpp:                // Handle startsWith(prefix) method call
+src/interpreter.cpp:                // Handle endsWith(suffix) method call
+src/interpreter.cpp:        // original structure was correct but had a syntax error. We should check
+src/interpreter.cpp:                // it as an expression First, check if it's an expression
+src/interpreter.cpp:          // First, check if this is a class instantiation
+src/interpreter.cpp:          // Debug: check what type of object we have
+src/interpreter.cpp:    // Use visitor pattern to check expression types
+src/interpreter.cpp:    // Use visitor pattern to check statement types
+src/interpreter.cpp:        // In a more advanced implementation, we would check parameter types too
+src/interpreter.cpp:    // Create a type checker instance
+src/parser.cpp:  // Handle postfix operations like function calls and member access
+src/parser.cpp:      pos = temp_pos; // update position if block was successfully parsed
+src/parser.cpp:            pos = temp_pos; // update position if block was successfully parsed
+src/parser.cpp:    // Create a temporary token stream for the expression
+include/dotlin/parser.h:      // For generic types, check if generic parameters are compatible
+include/dotlin/parser.h.backup:        // For generic types, check if generic parameters are compatible
+include/dotlin/visitors.h:// Type checking visitor for expressions
+include/dotlin/visitors.h:// Type checking visitor for statements
+include/dotlin/interpreter.h:// TypeChecker class for type checking
+tests/files/inheritance_test.lin:    // calling super method not yet supported via 'super', but checks if method can be found in parent if not in child?

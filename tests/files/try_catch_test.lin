@@ -1,0 +1,30 @@
+
+fun main() {
+    println("--- Test 1: Basic Try-Catch ---")
+    try {
+        println("In try block")
+        val result = 10 / 0 // Should throw runtime error (assuming we check for it, or we throw manually)
+        // Since we don't have division by zero check in interpreter yet, let's manually throw
+        throw "Manual Exception" 
+    } catch (e) {
+        println("Caught exception: " + e)
+    }
+    println("After try-catch 1")
+
+    println("\n--- Test 2: Try-Catch-Finally ---")
+    try {
+        println("In try block 2")
+    } catch (e) {
+        println("Should not catch this")
+    } finally {
+        println("In finally block")
+    }
+    println("After try-catch 2")
+    
+    // Test exception variable
+    try {
+        fakeFunction() // Undefined function
+    } catch (err) {
+        println("Caught error: " + err)
+    }
+}

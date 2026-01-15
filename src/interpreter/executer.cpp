@@ -151,8 +151,15 @@ void ExecVisitor::visit(ClassDeclStmt &node) {
       // varDecl->typeAnnotation.value_or(nullptr)});
     } else if (auto *ctorDecl =
                    dynamic_cast<ConstructorDeclStmt *>(member.get())) {
-      // TODO: Handle constructors
-      (void)ctorDecl; // Silence unused variable warning
+      // Create constructor function definition
+      std::vector<FunctionParameter> paramsCopy;
+      for (const auto &param : ctorDecl->parameters) {
+        paramsCopy.push_back(param);
+      }
+      // Use "init" as internal name for constructors
+      auto ctorDef = std::make_shared<FunctionDef>(
+          "init", std::move(paramsCopy), ctorDecl->body);
+      classDef->constructors.push_back(ctorDef);
     }
   }
 
@@ -229,15 +236,39 @@ void ExecVisitor::visit(WhenStmt &node) {
 }
 
 void ExecVisitor::visit(TryStmt &node) {
-  (void)node;
-  // TODO: Implement try-catch
-  throw std::runtime_error("Try-catch not yet implemented");
+  try {
+    interpreter->execute(*node.tryBlock);
+  } catch (const std::runtime_error &e) {
+    // Create a new scope for the catch block
+    auto catchEnv = std::make_shared<Environment>(interpreter->environment);
+
+    // Define the exception variable (remove "Runtime Error: " prefix if present
+    // for cleaner access)
+    std::string msg = e.what();
+    catchEnv->define(node.exceptionVar, Value(msg));
+
+    // Execute catch block in the new scope
+    auto oldEnv = interpreter->environment;
+    interpreter->environment = catchEnv;
+    try {
+      interpreter->execute(*node.catchBlock);
+    } catch (...) {
+      interpreter->environment = oldEnv;
+      throw;
+    }
+    interpreter->environment = oldEnv;
+  }
+
+  // Execute finally block if present
+  if (node.finallyBlock) {
+    interpreter->execute(**node.finallyBlock);
+  }
 }
 
 void ExecVisitor::visit(ConstructorDeclStmt &node) {
   (void)node;
-  // TODO: Implement constructor declaration
-  throw std::runtime_error("Constructor declarations not yet implemented");
+  // This visitor is reached only if a constructor is defined outside a class,
+  // which should be a parser error properly, or we just ignore it here.
 }
 
 // Expression visit methods (needed for complete interface but not used in

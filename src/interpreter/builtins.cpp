@@ -389,5 +389,58 @@ Value Interpreter::executeBuiltinFunction(
     return Value(static_cast<int>(millis.count()));
   }
 
+  if (name == "format") {
+    if (arguments.empty()) {
+      throw std::runtime_error(
+          "format function requires at least one argument (format string)");
+    }
+
+    Value firstArg = evaluate(*arguments[0]);
+    if (!std::holds_alternative<std::string>(firstArg)) {
+      throw std::runtime_error("First argument to format must be a string");
+    }
+
+    std::string formatStr = std::get<std::string>(firstArg);
+    std::string result = "";
+    size_t argIndex = 1;
+
+    for (size_t i = 0; i < formatStr.length(); ++i) {
+      if (formatStr[i] == '%' && i + 1 < formatStr.length()) {
+        char specifier = formatStr[i + 1];
+        if (specifier == '%') {
+          result += '%';
+          i++;
+        } else if (argIndex < arguments.size()) {
+          Value val = evaluate(*arguments[argIndex++]);
+          if (specifier == 'd') {
+            if (std::holds_alternative<int>(val))
+              result += std::to_string(std::get<int>(val));
+            else if (std::holds_alternative<double>(val))
+              result += std::to_string(static_cast<int>(std::get<double>(val)));
+            else
+              result += "0";
+          } else if (specifier == 'f') {
+            if (std::holds_alternative<double>(val))
+              result += std::to_string(std::get<double>(val));
+            else if (std::holds_alternative<int>(val))
+              result += std::to_string(static_cast<double>(std::get<int>(val)));
+            else
+              result += "0.0";
+          } else if (specifier == 's') {
+            result += valueToString(val);
+          } else {
+            result += valueToString(val);
+          }
+          i++;
+        } else {
+          result += formatStr[i];
+        }
+      } else {
+        result += formatStr[i];
+      }
+    }
+    return Value(result);
+  }
+
   throw std::runtime_error("Unknown built-in function: " + name);
 }

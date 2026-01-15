@@ -1,0 +1,29 @@
+
+fun main() {
+    println("--- Conversions ---")
+    val s1 = "123"
+    val i1 = s1.toInt()
+    println("String to Int: " + i1.toString())
+    
+    val s2 = "45.67"
+    val d1 = s2.toDouble()
+    println("String to Double: " + d1.toString())
+    
+    val i2 = 100
+    val d2 = i2.toDouble()
+    println("Int to Double: " + d2.toString())
+    
+    val d3 = 99.99
+    val i3 = d3.toInt()
+    println("Double to Int (truncated): " + i3.toString())
+
+    println("\n--- Formatting ---")
+    val name = "Alice"
+    val age = 30
+    val height = 1.75
+    
+    val formatted = format("Name: %s, Age: %d, Height: %f", name, age, height)
+    println(formatted)
+    
+    println(format("Hello %s", "World"))
+}

@@ -88,7 +88,8 @@ void EvalVisitor::visit(IdentifierExpr &node) {
           node.name == "ceil" || node.name == "floor" ||
           node.name == "random" || node.name == "clock" ||
           node.name == "exit" || node.name == "readLine" ||
-          node.name == "toInt" || node.name == "toString") {
+          node.name == "toInt" || node.name == "toString" ||
+          node.name == "format") {
         // Return a special lambda that represents a built-in function
         auto builtinLambda =
             std::make_shared<LambdaValue>(std::vector<FunctionParameter>(),
@@ -572,6 +573,40 @@ void EvalVisitor::visit(CallExpr &node) {
         result = Value(ArrayValue());
       }
       return;
+    } else if (methodName == "toInt" && args.empty()) {
+      // Handle toInt method calls on String
+      if (auto *strValue = std::get_if<std::string>(&objValue)) {
+        try {
+          result = Value(std::stoi(*strValue));
+        } catch (...) {
+          throw std::runtime_error("Invalid number format for toInt: " +
+                                   *strValue);
+        }
+      } else if (auto *doubleValue = std::get_if<double>(&objValue)) {
+        // Allow double -> int conversion via toInt()
+        result = Value(static_cast<int>(*doubleValue));
+      } else {
+        throw std::runtime_error(
+            "toInt method only supported on String and Double");
+      }
+      return;
+    } else if (methodName == "toDouble" && args.empty()) {
+      // Handle toDouble method calls on String
+      if (auto *strValue = std::get_if<std::string>(&objValue)) {
+        try {
+          result = Value(std::stod(*strValue));
+        } catch (...) {
+          throw std::runtime_error("Invalid number format for toDouble: " +
+                                   *strValue);
+        }
+      } else if (auto *intValue = std::get_if<int>(&objValue)) {
+        // Allow int -> double conversion via toDouble()
+        result = Value(static_cast<double>(*intValue));
+      } else {
+        throw std::runtime_error(
+            "toDouble method only supported on String and Int");
+      }
+      return;
     }
 
     // Check if the object is a class instance
@@ -716,6 +751,68 @@ void EvalVisitor::visit(CallExpr &node) {
 
     // Copy initialized variables to instance fields
     instance->fields = instanceEnv->values;
+
+    // Execute matching constructor
+    if (!(*classDef)->constructors.empty()) {
+      // Look for a matching constructor (overload resolution)
+      // For now, just find the first one with matching argument count
+      // TODO: Implement full overload resolution
+      bool constructorFound = false;
+      for (const auto &ctor : (*classDef)->constructors) {
+        if (ctor->parameters.size() == node.arguments.size()) {
+          // Found a compatible constructor
+          constructorFound = true;
+
+          // Create constructor environment (extending same instance scope?
+          // Or new scope with instance set as 'this'?)
+          // Constructors need access to 'this' (instance) and parameters.
+          // They should probably run IN the instance environment (closure =
+          // instanceEnv?) or a new env with 'this' defined.
+
+          auto ctorEnv =
+              std::make_shared<Environment>(interpreter->environment);
+          ctorEnv->define("this", Value(instance)); // Define 'this'
+
+          // Bind parameters
+          for (size_t i = 0; i < ctor->parameters.size(); ++i) {
+            Value argValue = interpreter->evaluate(*node.arguments[i]);
+            ctorEnv->define(ctor->parameters[i].name, argValue);
+          }
+
+          // Execute constructor body
+          // We need to temporarily set environment?
+          auto prevFuncEnv = interpreter->functionEnvironment;
+          interpreter->environment = ctorEnv;
+          interpreter->functionEnvironment = ctorEnv;
+
+          try {
+            interpreter->executeFunction(ctor->body.get(), ctorEnv);
+          } catch (...) {
+            interpreter->environment = oldEnv;
+            interpreter->functionEnvironment = prevFuncEnv;
+            throw;
+          }
+          interpreter->environment = oldEnv;
+          interpreter->functionEnvironment = prevFuncEnv;
+
+          // After constructor runs, update instance fields again in case they
+          // were modified via 'this' Is 'this' reference to same instance? yes.
+          // If ctorEnv modified 'this' fields via member access, 'instance' is
+          // already updated (shared_ptr). But if it modified variables in
+          // ctorEnv that shadow fields? No, assignments to 'this.field' update
+          // instance.
+          break;
+        }
+      }
+      if (!constructorFound) {
+        throw std::runtime_error("No matching constructor found for class " +
+                                 (*classDef)->name);
+      }
+    } else if (!node.arguments.empty()) {
+      throw std::runtime_error(
+          "Class " + (*classDef)->name +
+          " has no constructors but arguments were provided");
+    }
 
     result = Value(instance);
   } else {
