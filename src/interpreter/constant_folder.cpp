@@ -1,12 +1,11 @@
 #include "dotlin/visitors.h"
-#include <iostream>
+// #include <iostream>
 #include <variant>
 
 using namespace dotlin;
 
 namespace dotlin {
 
-// Helper to convert Value to LiteralExpr's variant
 static LiteralValue valueToLiteralVariant(const Value &v) {
   if (std::holds_alternative<int>(v))
     return std::get<int>(v);
@@ -18,49 +17,40 @@ static LiteralValue valueToLiteralVariant(const Value &v) {
     return std::get<bool>(v);
   if (std::holds_alternative<std::string>(v))
     return std::get<std::string>(v);
-  return 0; // Should not happen for constant expressions
+  return 0;
 }
 
-// Helper to fold an expression and return the new pointer
 Expression::Ptr ConstantFolderVisitor::fold(Expression::Ptr expr) {
   if (!expr)
     return nullptr;
-
   resultExpr = nullptr;
   expr->accept(*this);
-
   if (resultExpr) {
-    std::cout << "FOLDED Expression at L" << expr->line << ":" << expr->column
-              << std::endl;
-    Expression::Ptr res = std::move(resultExpr);
+    auto res = std::move(resultExpr);
     resultExpr = nullptr;
     return res;
   }
-
   return expr;
 }
 
-// Helper to fold a statement and return the new pointer
 Statement::Ptr ConstantFolderVisitor::fold(Statement::Ptr stmt) {
   if (!stmt)
     return nullptr;
-
   resultStmt = nullptr;
   stmt->accept(*this);
-
   if (resultStmt) {
-    std::cout << "FOLDED Statement at L" << stmt->line << ":" << stmt->column
-              << std::endl;
-    Statement::Ptr res = std::move(resultStmt);
+    auto res = std::move(resultStmt);
     resultStmt = nullptr;
     return res;
   }
-
   return stmt;
 }
 
-// Expression visit methods
 void ConstantFolderVisitor::visit(LiteralExpr &node) {
+  (void)node;
+  resultExpr = nullptr;
+}
+void ConstantFolderVisitor::visit(IdentifierExpr &node) {
   (void)node;
   resultExpr = nullptr;
 }
@@ -68,77 +58,58 @@ void ConstantFolderVisitor::visit(LiteralExpr &node) {
 void ConstantFolderVisitor::visit(StringInterpolationExpr &node) {
   bool allLiterals = true;
   std::string resultStr = "";
-
   for (auto &part : node.parts) {
     if (!part)
       continue;
-
     part = fold(std::move(part));
-
     if (!part) {
       allLiterals = false;
       continue;
     }
-
     auto lit = dynamic_cast<LiteralExpr *>(part.get());
     if (lit) {
-      if (std::holds_alternative<std::string>(lit->value)) {
+      if (std::holds_alternative<std::string>(lit->value))
         resultStr += std::get<std::string>(lit->value);
-      } else if (std::holds_alternative<int>(lit->value)) {
+      else if (std::holds_alternative<int>(lit->value))
         resultStr += std::to_string(std::get<int>(lit->value));
-      } else if (std::holds_alternative<int64_t>(lit->value)) {
+      else if (std::holds_alternative<int64_t>(lit->value))
         resultStr += std::to_string(std::get<int64_t>(lit->value));
-      } else if (std::holds_alternative<double>(lit->value)) {
+      else if (std::holds_alternative<double>(lit->value))
         resultStr += std::to_string(std::get<double>(lit->value));
-      } else if (std::holds_alternative<bool>(lit->value)) {
+      else if (std::holds_alternative<bool>(lit->value))
         resultStr += std::get<bool>(lit->value) ? "true" : "false";
-      } else {
+      else
         allLiterals = false;
-      }
-    } else {
+    } else
       allLiterals = false;
-    }
   }
-
-  if (allLiterals) {
+  if (allLiterals)
     resultExpr = std::make_unique<LiteralExpr>(
         valueToLiteralVariant(Value(resultStr)), node.line, node.column);
-  } else {
+  else
     resultExpr = nullptr;
-  }
-}
-
-void ConstantFolderVisitor::visit(IdentifierExpr &node) {
-  (void)node;
-  resultExpr = nullptr;
 }
 
 void ConstantFolderVisitor::visit(LambdaExpr &node) {
-  if (node.body) {
+  if (node.body)
     node.body = fold(std::move(node.body));
-  }
   resultExpr = nullptr;
 }
 
 void ConstantFolderVisitor::visit(BinaryExpr &node) {
   node.left = fold(std::move(node.left));
   node.right = fold(std::move(node.right));
-
   if (!node.left || !node.right) {
     resultExpr = nullptr;
     return;
   }
-
   auto leftLit = dynamic_cast<LiteralExpr *>(node.left.get());
   auto rightLit = dynamic_cast<LiteralExpr *>(node.right.get());
-
   if (leftLit && rightLit) {
-    // Int operations
     if (std::holds_alternative<int>(leftLit->value) &&
         std::holds_alternative<int>(rightLit->value)) {
       int l = std::get<int>(leftLit->value);
       int r = std::get<int>(rightLit->value);
-
       switch (node.op) {
       case TokenType::PLUS:
         resultExpr = std::make_unique<LiteralExpr>(
@@ -193,19 +164,16 @@ void ConstantFolderVisitor::visit(BinaryExpr &node) {
       default:
         break;
       }
-    }
-    // Long operations
-    else if ((std::holds_alternative<int64_t>(leftLit->value) ||
-              std::holds_alternative<int>(leftLit->value)) &&
-             (std::holds_alternative<int64_t>(rightLit->value) ||
-              std::holds_alternative<int>(rightLit->value))) {
+    } else if ((std::holds_alternative<int64_t>(leftLit->value) ||
+                std::holds_alternative<int>(leftLit->value)) &&
+               (std::holds_alternative<int64_t>(rightLit->value) ||
+                std::holds_alternative<int>(rightLit->value))) {
       int64_t l = std::holds_alternative<int64_t>(leftLit->value)
                       ? std::get<int64_t>(leftLit->value)
                       : static_cast<int64_t>(std::get<int>(leftLit->value));
       int64_t r = std::holds_alternative<int64_t>(rightLit->value)
                       ? std::get<int64_t>(rightLit->value)
                       : static_cast<int64_t>(std::get<int>(rightLit->value));
-
       switch (node.op) {
       case TokenType::PLUS:
         resultExpr = std::make_unique<LiteralExpr>(
@@ -253,14 +221,12 @@ void ConstantFolderVisitor::visit(BinaryExpr &node) {
       default:
         break;
       }
-    }
-    // Double operations
-    else if ((std::holds_alternative<double>(leftLit->value) ||
-              std::holds_alternative<int>(leftLit->value) ||
-              std::holds_alternative<int64_t>(leftLit->value)) &&
-             (std::holds_alternative<double>(rightLit->value) ||
-              std::holds_alternative<int>(rightLit->value) ||
-              std::holds_alternative<int64_t>(rightLit->value))) {
+    } else if ((std::holds_alternative<double>(leftLit->value) ||
+                std::holds_alternative<int>(leftLit->value) ||
+                std::holds_alternative<int64_t>(leftLit->value)) &&
+               (std::holds_alternative<double>(rightLit->value) ||
+                std::holds_alternative<int>(rightLit->value) ||
+                std::holds_alternative<int64_t>(rightLit->value))) {
       double l =
           std::holds_alternative<double>(leftLit->value)
               ? std::get<double>(leftLit->value)
@@ -273,7 +239,6 @@ void ConstantFolderVisitor::visit(BinaryExpr &node) {
               : (std::holds_alternative<int64_t>(rightLit->value)
                      ? static_cast<double>(std::get<int64_t>(rightLit->value))
                      : static_cast<double>(std::get<int>(rightLit->value)));
-
       switch (node.op) {
       case TokenType::PLUS:
         resultExpr = std::make_unique<LiteralExpr>(
@@ -321,20 +286,16 @@ void ConstantFolderVisitor::visit(BinaryExpr &node) {
       default:
         break;
       }
-    }
-    // String concatenation
-    else if (std::holds_alternative<std::string>(leftLit->value) &&
-             std::holds_alternative<std::string>(rightLit->value) &&
-             node.op == TokenType::PLUS) {
+    } else if (std::holds_alternative<std::string>(leftLit->value) &&
+               std::holds_alternative<std::string>(rightLit->value) &&
+               node.op == TokenType::PLUS) {
       resultExpr = std::make_unique<LiteralExpr>(
           valueToLiteralVariant(Value(std::get<std::string>(leftLit->value) +
                                       std::get<std::string>(rightLit->value))),
           node.line, node.column);
       return;
-    }
-    // Boolean logic
-    else if (std::holds_alternative<bool>(leftLit->value) &&
-             std::holds_alternative<bool>(rightLit->value)) {
+    } else if (std::holds_alternative<bool>(leftLit->value) &&
+               std::holds_alternative<bool>(rightLit->value)) {
       bool l = std::get<bool>(leftLit->value);
       bool r = std::get<bool>(rightLit->value);
       switch (node.op) {
@@ -359,7 +320,6 @@ void ConstantFolderVisitor::visit(BinaryExpr &node) {
       }
     }
   }
-
   resultExpr = nullptr;
 }
 
@@ -369,7 +329,6 @@ void ConstantFolderVisitor::visit(UnaryExpr &node) {
     resultExpr = nullptr;
     return;
   }
-
   auto lit = dynamic_cast<LiteralExpr *>(node.operand.get());
   if (lit) {
     if (node.op == TokenType::MINUS) {
@@ -398,15 +357,13 @@ void ConstantFolderVisitor::visit(UnaryExpr &node) {
       }
     }
   }
-
   resultExpr = nullptr;
 }
 
 void ConstantFolderVisitor::visit(CallExpr &node) {
   node.callee = fold(std::move(node.callee));
-  for (auto &arg : node.arguments) {
+  for (auto &arg : node.arguments)
     arg = fold(std::move(arg));
-  }
   resultExpr = nullptr;
 }
 
@@ -414,91 +371,72 @@ void ConstantFolderVisitor::visit(MemberAccessExpr &node) {
   node.object = fold(std::move(node.object));
   resultExpr = nullptr;
 }
-
 void ConstantFolderVisitor::visit(ArrayLiteralExpr &node) {
-  for (auto &element : node.elements) {
+  for (auto &element : node.elements)
     element = fold(std::move(element));
-  }
   resultExpr = nullptr;
 }
-
 void ConstantFolderVisitor::visit(ArrayAccessExpr &node) {
   node.array = fold(std::move(node.array));
   node.index = fold(std::move(node.index));
   resultExpr = nullptr;
 }
-
 void ConstantFolderVisitor::visit(ExpressionStmt &node) {
   node.expression = fold(std::move(node.expression));
   resultStmt = nullptr;
 }
-
 void ConstantFolderVisitor::visit(VariableDeclStmt &node) {
-  if (node.initializer.has_value()) {
+  if (node.initializer.has_value())
     node.initializer = fold(std::move(node.initializer.value()));
-  }
   resultStmt = nullptr;
 }
-
 void ConstantFolderVisitor::visit(FunctionDeclStmt &node) {
-  if (node.body) {
+  if (node.body)
     node.body = fold(std::move(node.body));
-  }
   resultStmt = nullptr;
 }
-
 void ConstantFolderVisitor::visit(BlockStmt &node) {
   for (auto &stmt : node.statements) {
-    if (stmt) {
+    if (stmt)
       stmt = fold(std::move(stmt));
-    }
   }
   resultStmt = nullptr;
 }
 
 void ConstantFolderVisitor::visit(IfStmt &node) {
   node.condition = fold(std::move(node.condition));
-  if (node.thenBranch) {
+  if (node.thenBranch)
     node.thenBranch = fold(std::move(node.thenBranch));
-  }
-  if (node.elseBranch.has_value()) {
+  if (node.elseBranch.has_value())
     node.elseBranch = fold(std::move(node.elseBranch.value()));
-  }
-
   if (!node.condition) {
     resultStmt = nullptr;
     return;
   }
-
   auto cLit = dynamic_cast<LiteralExpr *>(node.condition.get());
   if (cLit && std::holds_alternative<bool>(cLit->value)) {
-    if (std::get<bool>(cLit->value)) {
+    if (std::get<bool>(cLit->value))
       resultStmt = std::move(node.thenBranch);
-    } else {
-      if (node.elseBranch.has_value()) {
+    else {
+      if (node.elseBranch.has_value())
         resultStmt = std::move(node.elseBranch.value());
-      } else {
+      else
         resultStmt = std::make_shared<BlockStmt>(std::vector<Statement::Ptr>(),
                                                  node.line, node.column);
-      }
     }
     return;
   }
-
   resultStmt = nullptr;
 }
 
 void ConstantFolderVisitor::visit(WhileStmt &node) {
   node.condition = fold(std::move(node.condition));
-  if (node.body) {
+  if (node.body)
     node.body = fold(std::move(node.body));
-  }
-
   if (!node.condition) {
     resultStmt = nullptr;
     return;
   }
-
   auto cLit = dynamic_cast<LiteralExpr *>(node.condition.get());
   if (cLit && std::holds_alternative<bool>(cLit->value) &&
       !std::get<bool>(cLit->value)) {
@@ -506,46 +444,36 @@ void ConstantFolderVisitor::visit(WhileStmt &node) {
                                              node.line, node.column);
     return;
   }
-
   resultStmt = nullptr;
 }
 
 void ConstantFolderVisitor::visit(ReturnStmt &node) {
-  if (node.value) {
+  if (node.value)
     node.value = fold(std::move(node.value));
-  }
   resultStmt = nullptr;
 }
-
 void ConstantFolderVisitor::visit(ClassDeclStmt &node) {
   (void)node;
   resultStmt = nullptr;
 }
-
 void ConstantFolderVisitor::visit(ForStmt &node) {
   node.iterable = fold(std::move(node.iterable));
-  if (node.body) {
+  if (node.body)
     node.body = fold(std::move(node.body));
-  }
   resultStmt = nullptr;
 }
-
 void ConstantFolderVisitor::visit(WhenStmt &node) {
   (void)node;
   resultStmt = nullptr;
 }
-
 void ConstantFolderVisitor::visit(TryStmt &node) {
-  if (node.tryBlock) {
+  if (node.tryBlock)
     node.tryBlock = fold(std::move(node.tryBlock));
-  }
   resultStmt = nullptr;
 }
-
 void ConstantFolderVisitor::visit(ConstructorDeclStmt &node) {
-  if (node.body) {
+  if (node.body)
     node.body = fold(std::move(node.body));
-  }
   resultStmt = nullptr;
 }
 
