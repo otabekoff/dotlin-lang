@@ -1,0 +1,14 @@
+fun main() {
+    val x = 10
+    val y = 20.5
+    val z = x + y
+    
+    val s = "Hello " + "World"
+    
+    val arr = [1, 2, 3]
+    val first = arr[0]
+    
+    val result = sqrt(16.0)
+    
+    println("Test completed")
+}

@@ -248,9 +248,15 @@ void StmtTypeCheckVisitor::visit(VariableDeclStmt &node) {
     varType = node.typeAnnotation.value();
   } else if (node.initializer.has_value() && node.initializer.value()) {
     varType = checker->checkExpression(*node.initializer.value());
+    // Store back in node for persistence/runtime use
+    node.typeAnnotation = varType;
   } else {
     varType = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
   }
+
+  // Log inferred type if it was missing
+  std::cout << "Type inferred for variable '" << node.name
+            << "': " << checker->typeToString(varType) << std::endl;
 
   // Store the variable type in the environment
   if (checker->typeEnvironment) {
@@ -427,4 +433,19 @@ void StmtTypeCheckVisitor::visit(StringInterpolationExpr &node) {
 
 void StmtTypeCheckVisitor::visit(ArrayAccessExpr &node) {
   (void)node; // Not used in statement type checking
-} // namespace dotlin
+}
+
+std::shared_ptr<Type> TypeChecker::checkExpression(Expression &expr) {
+  TypeCheckVisitor visitor(this);
+  expr.accept(visitor);
+  return visitor.result;
+}
+
+void TypeChecker::checkStatement(Statement &stmt) {
+  StmtTypeCheckVisitor visitor(this);
+  stmt.accept(visitor);
+}
+
+std::string TypeChecker::typeToString(const std::shared_ptr<Type> &type) {
+  return ::dotlin::typeToString(type);
+}

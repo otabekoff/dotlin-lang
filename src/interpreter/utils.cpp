@@ -71,6 +71,8 @@ std::string typeToString(const std::shared_ptr<Type> &type) {
   switch (type->kind) {
   case TypeKind::INT:
     return "Int";
+  case TypeKind::LONG:
+    return "Long";
   case TypeKind::DOUBLE:
     return "Double";
   case TypeKind::BOOL:
@@ -78,7 +80,16 @@ std::string typeToString(const std::shared_ptr<Type> &type) {
   case TypeKind::STRING:
     return "String";
   case TypeKind::ARRAY:
+    if (type->elementType) {
+      return "Array<" + typeToString(type->elementType) + ">";
+    }
     return "Array";
+  case TypeKind::VOID:
+    return "Void";
+  case TypeKind::ANY:
+    return "Any";
+  case TypeKind::FUNCTION:
+    return "Function";
   case TypeKind::UNKNOWN:
     return "Unknown";
   default:

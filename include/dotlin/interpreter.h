@@ -453,6 +453,12 @@ private:
 Value interpret(const Program &program);
 Value interpret(const Program &program, const std::vector<std::string> &args);
 
+// Utility functions
+std::string getTypeOfValue(const Value &value);
+std::string valueToString(const Value &value);
+std::string typeToString(const std::shared_ptr<Type> &type);
+bool valuesEqual(const Value &v1, const Value &v2);
+
 // TypeChecker class for type checking
 class TypeChecker {
 public:

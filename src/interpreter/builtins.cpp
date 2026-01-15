@@ -71,13 +71,20 @@ Value Interpreter::executeBuiltinFunction(
       throw std::runtime_error("sqrt() expects exactly 1 argument");
     }
     Value arg = evaluate(*arguments[0]);
-    if (auto *num = std::get_if<int>(&arg)) {
-      if (*num < 0) {
-        throw std::runtime_error("sqrt() cannot take negative numbers");
-      }
-      return Value(static_cast<int>(std::sqrt(*num)));
+    double val;
+    if (auto *num = std::get_if<int>(&arg))
+      val = static_cast<double>(*num);
+    else if (auto *lnum = std::get_if<int64_t>(&arg))
+      val = static_cast<double>(*lnum);
+    else if (auto *dnum = std::get_if<double>(&arg))
+      val = *dnum;
+    else
+      throw std::runtime_error("sqrt() expects a number");
+
+    if (val < 0) {
+      throw std::runtime_error("sqrt() cannot take negative numbers");
     }
-    throw std::runtime_error("sqrt() expects a number");
+    return Value(std::sqrt(val));
   }
 
   if (name == "abs") {
@@ -85,9 +92,12 @@ Value Interpreter::executeBuiltinFunction(
       throw std::runtime_error("abs() expects exactly 1 argument");
     }
     Value arg = evaluate(*arguments[0]);
-    if (auto *num = std::get_if<int>(&arg)) {
+    if (auto *num = std::get_if<int>(&arg))
       return Value(std::abs(*num));
-    }
+    if (auto *lnum = std::get_if<int64_t>(&arg))
+      return Value(static_cast<int64_t>(std::abs(*lnum)));
+    if (auto *dnum = std::get_if<double>(&arg))
+      return Value(std::abs(*dnum));
     throw std::runtime_error("abs() expects a number");
   }
 
