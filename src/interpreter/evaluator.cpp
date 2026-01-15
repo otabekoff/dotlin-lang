@@ -418,7 +418,10 @@ void EvalVisitor::visit(CallExpr &node) {
           parts.push_back(Value(str.substr(0, pos)));
           pos += delimLen;
         }
-        parts.push_back(Value(str.substr(pos)));
+        // Add the remaining part (only if pos is valid)
+        if (pos < str.length()) {
+          parts.push_back(Value(str.substr(pos)));
+        }
         result = Value(ArrayValue(parts));
       } else {
         result = Value(ArrayValue());
