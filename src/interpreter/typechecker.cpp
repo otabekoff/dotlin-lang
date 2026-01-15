@@ -11,90 +11,62 @@ TypeChecker::TypeChecker(std::shared_ptr<TypeEnvironment> typeEnv,
     : typeEnvironment(typeEnv), environment(env) {}
 
 // Type checking visitor for expressions - Implementation
-void TypeCheckVisitor::visit(LiteralExpr &node)
-{
+void TypeCheckVisitor::visit(LiteralExpr &node) {
   (void)node;
   // Determine type from literal value
-  if (std::holds_alternative<int>(node.value))
-  {
+  if (std::holds_alternative<int>(node.value)) {
     result = std::make_shared<dotlin::Type>(dotlin::TypeKind::INT);
-  }
-  else if (std::holds_alternative<double>(node.value))
-  {
+  } else if (std::holds_alternative<double>(node.value)) {
     result = std::make_shared<dotlin::Type>(dotlin::TypeKind::DOUBLE);
-  }
-  else if (std::holds_alternative<bool>(node.value))
-  {
+  } else if (std::holds_alternative<bool>(node.value)) {
     result = std::make_shared<dotlin::Type>(dotlin::TypeKind::BOOL);
-  }
-  else if (std::holds_alternative<std::string>(node.value))
-  {
+  } else if (std::holds_alternative<std::string>(node.value)) {
     result = std::make_shared<dotlin::Type>(dotlin::TypeKind::STRING);
-  }
-  else
-  {
+  } else {
     result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
   }
 }
 
-void TypeCheckVisitor::visit(IdentifierExpr &node)
-{
+void TypeCheckVisitor::visit(IdentifierExpr &node) {
   // Look up the identifier in the current type environment
-  if (checker->typeEnvironment)
-  {
+  if (checker->typeEnvironment) {
     auto type = checker->typeEnvironment->get(node.name);
-    if (type)
-    {
+    if (type) {
       result = type;
-    }
-    else
-    {
+    } else {
       // Fallback to UNKNOWN if not found
       result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
     }
-  }
-  else
-  {
+  } else {
     result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
   }
 }
 
-void TypeCheckVisitor::visit(LambdaExpr &node)
-{
+void TypeCheckVisitor::visit(LambdaExpr &node) {
   (void)node;
   // Use the new FUNCTION type kind
   result = std::make_shared<dotlin::Type>(TypeKind::FUNCTION);
 }
 
-void TypeCheckVisitor::visit(BinaryExpr &node)
-{
+void TypeCheckVisitor::visit(BinaryExpr &node) {
   auto leftType = checker->checkExpression(*node.left);
   auto rightType = checker->checkExpression(*node.right);
 
   // Arithmetic operators
   if (node.op == TokenType::PLUS || node.op == TokenType::MINUS ||
       node.op == TokenType::MULTIPLY || node.op == TokenType::DIVIDE ||
-      node.op == TokenType::MODULO)
-  {
+      node.op == TokenType::MODULO) {
     if (leftType->kind == TypeKind::DOUBLE ||
-        rightType->kind == TypeKind::DOUBLE)
-    {
+        rightType->kind == TypeKind::DOUBLE) {
       result = std::make_shared<dotlin::Type>(TypeKind::DOUBLE);
-    }
-    else if (leftType->kind == TypeKind::STRING ||
-             rightType->kind == TypeKind::STRING)
-    {
-      if (node.op == TokenType::PLUS)
-      {
+    } else if (leftType->kind == TypeKind::STRING ||
+               rightType->kind == TypeKind::STRING) {
+      if (node.op == TokenType::PLUS) {
         result = std::make_shared<dotlin::Type>(TypeKind::STRING);
-      }
-      else
-      {
+      } else {
         result = std::make_shared<dotlin::Type>(TypeKind::UNKNOWN);
       }
-    }
-    else
-    {
+    } else {
       result = std::make_shared<dotlin::Type>(TypeKind::INT);
     }
     return;
@@ -104,8 +76,7 @@ void TypeCheckVisitor::visit(BinaryExpr &node)
   if (node.op == TokenType::EQUAL || node.op == TokenType::NOT_EQUAL ||
       node.op == TokenType::LESS || node.op == TokenType::LESS_EQUAL ||
       node.op == TokenType::GREATER || node.op == TokenType::GREATER_EQUAL ||
-      node.op == TokenType::AND || node.op == TokenType::OR)
-  {
+      node.op == TokenType::AND || node.op == TokenType::OR) {
     result = std::make_shared<dotlin::Type>(TypeKind::BOOL);
     return;
   }
@@ -113,25 +84,19 @@ void TypeCheckVisitor::visit(BinaryExpr &node)
   result = std::make_shared<dotlin::Type>(TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(UnaryExpr &node)
-{
+void TypeCheckVisitor::visit(UnaryExpr &node) {
   auto operandType = checker->checkExpression(*node.operand);
 
-  if (node.op == TokenType::MINUS)
-  {
-    if (operandType->kind == TypeKind::DOUBLE)
-    {
+  if (node.op == TokenType::MINUS) {
+    if (operandType->kind == TypeKind::DOUBLE) {
       result = std::make_shared<dotlin::Type>(TypeKind::DOUBLE);
-    }
-    else
-    {
+    } else {
       result = std::make_shared<dotlin::Type>(TypeKind::INT);
     }
     return;
   }
 
-  if (node.op == TokenType::NOT)
-  {
+  if (node.op == TokenType::NOT) {
     result = std::make_shared<dotlin::Type>(TypeKind::BOOL);
     return;
   }
@@ -139,17 +104,13 @@ void TypeCheckVisitor::visit(UnaryExpr &node)
   result = std::make_shared<dotlin::Type>(TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(CallExpr &node)
-{
+void TypeCheckVisitor::visit(CallExpr &node) {
   // Determine return type based on callee
-  if (auto *id = dynamic_cast<IdentifierExpr *>(node.callee.get()))
-  {
+  if (auto *id = dynamic_cast<IdentifierExpr *>(node.callee.get())) {
     // Look up function return type in environment
-    if (checker->typeEnvironment)
-    {
+    if (checker->typeEnvironment) {
       auto type = checker->typeEnvironment->get(id->name);
-      if (type)
-      {
+      if (type) {
         result = type;
         return;
       }
@@ -158,25 +119,20 @@ void TypeCheckVisitor::visit(CallExpr &node)
     // Check if it's a class constructor (class name used as function)
     // In a full implementation, we'd check if id->name is a registered class
     // For now, if it starts with uppercase, assume it's a class constructor?
-    if (!id->name.empty() && std::isupper(id->name[0]))
-    {
+    if (!id->name.empty() && std::isupper(id->name[0])) {
       // Return UNKNOWN or a Class type if implemented
       result = std::make_shared<dotlin::Type>(TypeKind::ANY);
       return;
     }
-  }
-  else if (auto *memberAccess =
-               dynamic_cast<MemberAccessExpr *>(node.callee.get()))
-  {
+  } else if (auto *memberAccess =
+                 dynamic_cast<MemberAccessExpr *>(node.callee.get())) {
     // Basic method return type inference
     if (memberAccess->property == "size" ||
-        memberAccess->property == "length")
-    {
+        memberAccess->property == "length") {
       result = std::make_shared<dotlin::Type>(TypeKind::INT);
       return;
     }
-    if (memberAccess->property == "toString")
-    {
+    if (memberAccess->property == "toString") {
       result = std::make_shared<dotlin::Type>(TypeKind::STRING);
       return;
     }
@@ -185,19 +141,16 @@ void TypeCheckVisitor::visit(CallExpr &node)
   result = std::make_shared<dotlin::Type>(TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(MemberAccessExpr &node)
-{
+void TypeCheckVisitor::visit(MemberAccessExpr &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(ArrayLiteralExpr &node)
-{
+void TypeCheckVisitor::visit(ArrayLiteralExpr &node) {
   // Infer element type from elements
   std::shared_ptr<dotlin::Type> elementType =
       std::make_shared<dotlin::Type>(TypeKind::UNKNOWN);
-  if (!node.elements.empty() && node.elements[0])
-  {
+  if (!node.elements.empty() && node.elements[0]) {
     elementType = checker->checkExpression(*node.elements[0]);
   }
 
@@ -206,150 +159,116 @@ void TypeCheckVisitor::visit(ArrayLiteralExpr &node)
   result = arrayType;
 }
 
-void TypeCheckVisitor::visit(StringInterpolationExpr &node)
-{
+void TypeCheckVisitor::visit(StringInterpolationExpr &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::STRING);
 }
 
-void TypeCheckVisitor::visit(ArrayAccessExpr &node)
-{
+void TypeCheckVisitor::visit(ArrayAccessExpr &node) {
   auto arrayType = checker->checkExpression(*node.array);
-  if (arrayType->kind == TypeKind::ARRAY && arrayType->elementType)
-  {
+  if (arrayType->kind == TypeKind::ARRAY && arrayType->elementType) {
     result = arrayType->elementType;
-  }
-  else
-  {
+  } else {
     result = std::make_shared<dotlin::Type>(TypeKind::UNKNOWN);
   }
 }
 
 // Add the missing statement visitor implementations to TypeCheckVisitor
-void TypeCheckVisitor::visit(ExpressionStmt &node)
-{
+void TypeCheckVisitor::visit(ExpressionStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(VariableDeclStmt &node)
-{
+void TypeCheckVisitor::visit(VariableDeclStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(FunctionDeclStmt &node)
-{
+void TypeCheckVisitor::visit(FunctionDeclStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(BlockStmt &node)
-{
+void TypeCheckVisitor::visit(BlockStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(ReturnStmt &node)
-{
+void TypeCheckVisitor::visit(ReturnStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(IfStmt &node)
-{
+void TypeCheckVisitor::visit(IfStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(WhileStmt &node)
-{
+void TypeCheckVisitor::visit(WhileStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(ForStmt &node)
-{
+void TypeCheckVisitor::visit(ForStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(WhenStmt &node)
-{
+void TypeCheckVisitor::visit(WhenStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(TryStmt &node)
-{
+void TypeCheckVisitor::visit(TryStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(ConstructorDeclStmt &node)
-{
+void TypeCheckVisitor::visit(ConstructorDeclStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void TypeCheckVisitor::visit(ClassDeclStmt &node)
-{
+void TypeCheckVisitor::visit(ClassDeclStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
 // Statement type checking visitor - Implementation
-void StmtTypeCheckVisitor::visit(ExpressionStmt &node)
-{
+void StmtTypeCheckVisitor::visit(ExpressionStmt &node) {
   checker->checkExpression(*node.expression);
 }
 
-void StmtTypeCheckVisitor::visit(VariableDeclStmt &node)
-{
+void StmtTypeCheckVisitor::visit(VariableDeclStmt &node) {
   // Variable declaration - determine the type
   std::shared_ptr<dotlin::Type> varType;
 
-  if (node.typeAnnotation.has_value() && node.typeAnnotation.value())
-  {
+  if (node.typeAnnotation.has_value() && node.typeAnnotation.value()) {
     varType = node.typeAnnotation.value();
-  }
-  else if (node.initializer.has_value() && node.initializer.value())
-  {
+  } else if (node.initializer.has_value() && node.initializer.value()) {
     varType = checker->checkExpression(*node.initializer.value());
     // Store back in node for persistence/runtime use
     node.typeAnnotation = varType;
-  }
-  else
-  {
+  } else {
     varType = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
   }
 
-  // Log inferred type if it was missing
-  std::cout << "Type inferred for variable '" << node.name
-            << "': " << checker->typeToString(varType) << std::endl;
-
   // Store the variable type in the environment
-  if (checker->typeEnvironment)
-  {
+  if (checker->typeEnvironment) {
     checker->typeEnvironment->define(node.name, varType);
   }
 }
 
-void StmtTypeCheckVisitor::visit(FunctionDeclStmt &node)
-{
+void StmtTypeCheckVisitor::visit(FunctionDeclStmt &node) {
   // Register function name and return type in environment
   std::shared_ptr<dotlin::Type> returnType;
-  if (node.returnType.has_value() && node.returnType.value())
-  {
+  if (node.returnType.has_value() && node.returnType.value()) {
     returnType = node.returnType.value();
-  }
-  else
-  {
+  } else {
     returnType = std::make_shared<dotlin::Type>(TypeKind::VOID);
   }
 
-  if (checker->typeEnvironment)
-  {
+  if (checker->typeEnvironment) {
     checker->typeEnvironment->define(node.name, returnType);
   }
 
@@ -357,22 +276,17 @@ void StmtTypeCheckVisitor::visit(FunctionDeclStmt &node)
   auto previousTypeEnv = checker->typeEnvironment;
   checker->typeEnvironment = std::make_shared<TypeEnvironment>(previousTypeEnv);
 
-  for (const auto &param : node.parameters)
-  {
+  for (const auto &param : node.parameters) {
     std::shared_ptr<dotlin::Type> paramType;
-    if (param.typeAnnotation.has_value() && param.typeAnnotation.value())
-    {
+    if (param.typeAnnotation.has_value() && param.typeAnnotation.value()) {
       paramType = param.typeAnnotation.value();
-    }
-    else
-    {
+    } else {
       paramType = std::make_shared<dotlin::Type>(TypeKind::ANY);
     }
     checker->typeEnvironment->define(param.name, paramType);
   }
 
-  if (node.body)
-  {
+  if (node.body) {
     checker->checkStatement(*node.body);
   }
 
@@ -380,17 +294,14 @@ void StmtTypeCheckVisitor::visit(FunctionDeclStmt &node)
   checker->typeEnvironment = previousTypeEnv;
 }
 
-void StmtTypeCheckVisitor::visit(BlockStmt &node)
-{
+void StmtTypeCheckVisitor::visit(BlockStmt &node) {
   // Create a new scoped type environment
   auto previousTypeEnv = checker->typeEnvironment;
   checker->typeEnvironment = std::make_shared<TypeEnvironment>(previousTypeEnv);
 
   // Check each statement in the block
-  for (const auto &stmt : node.statements)
-  {
-    if (stmt)
-    {
+  for (const auto &stmt : node.statements) {
+    if (stmt) {
       checker->checkStatement(*stmt);
     }
   }
@@ -399,203 +310,164 @@ void StmtTypeCheckVisitor::visit(BlockStmt &node)
   checker->typeEnvironment = previousTypeEnv;
 }
 
-void StmtTypeCheckVisitor::visit(IfStmt &node)
-{
+void StmtTypeCheckVisitor::visit(IfStmt &node) {
   // Check condition
-  if (node.condition)
-  {
+  if (node.condition) {
     checker->checkExpression(*node.condition);
   }
 
   // Check then branch
-  if (node.thenBranch)
-  {
+  if (node.thenBranch) {
     checker->checkStatement(*node.thenBranch);
   }
 
   // Check else branch if present
-  if (node.elseBranch.has_value() && node.elseBranch.value())
-  {
+  if (node.elseBranch.has_value() && node.elseBranch.value()) {
     checker->checkStatement(*node.elseBranch.value());
   }
 }
 
-void StmtTypeCheckVisitor::visit(WhileStmt &node)
-{
+void StmtTypeCheckVisitor::visit(WhileStmt &node) {
   // Check condition
-  if (node.condition)
-  {
+  if (node.condition) {
     checker->checkExpression(*node.condition);
   }
 
   // Check body
-  if (node.body)
-  {
+  if (node.body) {
     checker->checkStatement(*node.body);
   }
 }
 
-void StmtTypeCheckVisitor::visit(ReturnStmt &node)
-{
+void StmtTypeCheckVisitor::visit(ReturnStmt &node) {
   // Check return value if present
-  if (node.value)
-  {
+  if (node.value) {
     checker->checkExpression(*node.value);
   }
 }
 
-void StmtTypeCheckVisitor::visit(ClassDeclStmt &node)
-{
+void StmtTypeCheckVisitor::visit(ClassDeclStmt &node) {
   (void)node;
   // For now, just skip class declarations
 }
 
-void StmtTypeCheckVisitor::visit(ForStmt &node)
-{
+void StmtTypeCheckVisitor::visit(ForStmt &node) {
   // Check iterable
-  if (node.iterable)
-  {
+  if (node.iterable) {
     checker->checkExpression(*node.iterable);
   }
 
   // Check body
-  if (node.body)
-  {
+  if (node.body) {
     checker->checkStatement(*node.body);
   }
 }
 
-void StmtTypeCheckVisitor::visit(WhenStmt &node)
-{
+void StmtTypeCheckVisitor::visit(WhenStmt &node) {
   // Check subject
-  if (node.subject)
-  {
+  if (node.subject) {
     checker->checkExpression(*node.subject);
   }
 
   // Check each branch
-  for (const auto &branch : node.branches)
-  {
-    if (branch.first)
-    {
+  for (const auto &branch : node.branches) {
+    if (branch.first) {
       checker->checkExpression(*branch.first);
     }
-    if (branch.second)
-    {
+    if (branch.second) {
       checker->checkStatement(*branch.second);
     }
   }
 
   // Check else branch if present
-  if (node.elseBranch.has_value() && node.elseBranch.value())
-  {
+  if (node.elseBranch.has_value() && node.elseBranch.value()) {
     checker->checkStatement(*node.elseBranch.value());
   }
 }
 
-void StmtTypeCheckVisitor::visit(TryStmt &node)
-{
+void StmtTypeCheckVisitor::visit(TryStmt &node) {
   // Check try block
-  if (node.tryBlock)
-  {
+  if (node.tryBlock) {
     checker->checkStatement(*node.tryBlock);
   }
 
   // Check catch block if present
-  if (node.catchBlock)
-  {
+  if (node.catchBlock) {
     checker->checkStatement(*node.catchBlock);
   }
 
   // Check finally block if present
-  if (node.finallyBlock.has_value() && node.finallyBlock.value())
-  {
+  if (node.finallyBlock.has_value() && node.finallyBlock.value()) {
     checker->checkStatement(*node.finallyBlock.value());
   }
 }
 
-void StmtTypeCheckVisitor::visit(ConstructorDeclStmt &node)
-{
+void StmtTypeCheckVisitor::visit(ConstructorDeclStmt &node) {
   (void)node;
   // For now, just skip constructor declarations
 }
 
 // Add the missing StmtTypeCheckVisitor implementations for expressions
-void StmtTypeCheckVisitor::visit(LiteralExpr &node)
-{
+void StmtTypeCheckVisitor::visit(LiteralExpr &node) {
   (void)node; // Not used in statement type checking
 }
 
-void StmtTypeCheckVisitor::visit(IdentifierExpr &node)
-{
+void StmtTypeCheckVisitor::visit(IdentifierExpr &node) {
   (void)node; // Not used in statement type checking
 }
 
-void StmtTypeCheckVisitor::visit(LambdaExpr &node)
-{
+void StmtTypeCheckVisitor::visit(LambdaExpr &node) {
   (void)node; // Not used in statement type checking
 }
 
-void StmtTypeCheckVisitor::visit(BinaryExpr &node)
-{
+void StmtTypeCheckVisitor::visit(BinaryExpr &node) {
   (void)node; // Not used in statement type checking
 }
 
-void StmtTypeCheckVisitor::visit(UnaryExpr &node)
-{
+void StmtTypeCheckVisitor::visit(UnaryExpr &node) {
   (void)node; // Not used in statement type checking
 }
 
-void StmtTypeCheckVisitor::visit(CallExpr &node)
-{
+void StmtTypeCheckVisitor::visit(CallExpr &node) {
   (void)node; // Not used in statement type checking
 }
 
-void StmtTypeCheckVisitor::visit(MemberAccessExpr &node)
-{
+void StmtTypeCheckVisitor::visit(MemberAccessExpr &node) {
   (void)node; // Not used in statement type checking
 }
 
-void StmtTypeCheckVisitor::visit(ArrayLiteralExpr &node)
-{
+void StmtTypeCheckVisitor::visit(ArrayLiteralExpr &node) {
   (void)node; // Not used in statement type checking
 }
 
-void StmtTypeCheckVisitor::visit(StringInterpolationExpr &node)
-{
+void StmtTypeCheckVisitor::visit(StringInterpolationExpr &node) {
   (void)node; // Not used in statement type checking
 }
 
-void StmtTypeCheckVisitor::visit(ArrayAccessExpr &node)
-{
+void StmtTypeCheckVisitor::visit(ArrayAccessExpr &node) {
   (void)node; // Not used in statement type checking
 }
 
-void TypeCheckVisitor::visit(ExtensionFunctionDeclStmt &node)
-{
+void TypeCheckVisitor::visit(ExtensionFunctionDeclStmt &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
 }
 
-void StmtTypeCheckVisitor::visit(ExtensionFunctionDeclStmt &node)
-{
+void StmtTypeCheckVisitor::visit(ExtensionFunctionDeclStmt &node) {
   (void)node;
 }
 
-std::shared_ptr<Type> TypeChecker::checkExpression(Expression &expr)
-{
+std::shared_ptr<Type> TypeChecker::checkExpression(Expression &expr) {
   TypeCheckVisitor visitor(this);
   expr.accept(visitor);
   return visitor.result;
 }
 
-void TypeChecker::checkStatement(Statement &stmt)
-{
+void TypeChecker::checkStatement(Statement &stmt) {
   StmtTypeCheckVisitor visitor(this);
   stmt.accept(visitor);
 }
 
-std::string TypeChecker::typeToString(const std::shared_ptr<Type> &type)
-{
+std::string TypeChecker::typeToString(const std::shared_ptr<Type> &type) {
   return ::dotlin::typeToString(type);
 }

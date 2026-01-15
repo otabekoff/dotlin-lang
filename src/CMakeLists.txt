@@ -13,6 +13,7 @@ set(SOURCES
   interpreter/typechecker.cpp
   interpreter/builtins.cpp
   interpreter/interpreter.cpp
+  interpreter/resolver.cpp
   interpreter/constant_folder.cpp
   interpreter/dead_code_elimination.cpp
 )

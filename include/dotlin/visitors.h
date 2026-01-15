@@ -214,4 +214,51 @@ struct DeadCodeEliminationVisitor : public AstVisitor {
   void visit(ArrayLiteralExpr &node) override;
   void visit(ArrayAccessExpr &node) override;
 };
+
+// Resolver visitor for static analysis
+struct ResolverVisitor : public AstVisitor {
+  Interpreter *interpreter;
+  std::vector<std::unordered_map<std::string, bool>> scopes;
+
+  // Helper for function types
+  enum class FunctionType { NONE, FUNCTION, INITIALIZER, METHOD };
+  FunctionType currentFunction = FunctionType::NONE;
+
+  ResolverVisitor(Interpreter *interp) : interpreter(interp) {}
+
+  void resolve(const std::vector<Statement::Ptr> &statements);
+  void resolve(const Statement::Ptr &stmt);
+  void resolve(const Expression::Ptr &expr);
+
+  void beginScope();
+  void endScope();
+  void declare(const std::string &name);
+  void define(const std::string &name);
+  void resolveLocal(Expression &expr, const std::string &name);
+
+  void visit(BlockStmt &node) override;
+  void visit(VariableDeclStmt &node) override;
+  void visit(FunctionDeclStmt &node) override;
+  void visit(ExpressionStmt &node) override;
+  void visit(IfStmt &node) override;
+  void visit(WhileStmt &node) override;
+  void visit(ReturnStmt &node) override;
+  void visit(ClassDeclStmt &node) override;
+  void visit(ForStmt &node) override;
+  void visit(WhenStmt &node) override;
+  void visit(TryStmt &node) override;
+  void visit(ConstructorDeclStmt &node) override;
+  void visit(ExtensionFunctionDeclStmt &node) override;
+
+  void visit(IdentifierExpr &node) override;
+  void visit(BinaryExpr &node) override;
+  void visit(CallExpr &node) override;
+  void visit(LambdaExpr &node) override;
+  void visit(LiteralExpr &node) override;
+  void visit(StringInterpolationExpr &node) override;
+  void visit(UnaryExpr &node) override;
+  void visit(MemberAccessExpr &node) override;
+  void visit(ArrayLiteralExpr &node) override;
+  void visit(ArrayAccessExpr &node) override;
+};
 } // namespace dotlin

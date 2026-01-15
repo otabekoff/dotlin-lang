@@ -99,6 +99,9 @@ std::unique_ptr<Statement> parseStatement(const std::vector<Token> &tokens,
     return parseReturnStatement(tokens, pos);
   case TokenType::LBRACE:
     return parseBlockStatement(tokens, pos);
+  case TokenType::SEMICOLON:
+    pos++;          // consume semicolon
+    return nullptr; // return null to continue loop
   default:
     return parseExpressionStatement(tokens, pos);
   }

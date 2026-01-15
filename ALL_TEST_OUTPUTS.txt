@@ -1,8 +1,31 @@
-Dotlin test run - Thu Jan 15 12:05:08 +05 2026
+Dotlin test run - Thu Jan 15 22:29:09 +05 2026
 =========================
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/01_basic_minimal.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Type inferred for variable 'y': Int
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Visiting VariableDeclStmt: y
+Declared y in scope depth 2
+Defined y in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+Resolving y...
+Found y at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === Basic Minimal Test ===
 x + y = 30
 === Basic Minimal Complete ===
@@ -11,6 +34,31 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/01_toString_simple.lin
 ----------------------------------------
+Type inferred for variable 'num': Int
+Type inferred for variable 'bool': Boolean
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: num
+Declared num in scope depth 2
+Defined num in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving num...
+Found num at distance 0
+Visiting VariableDeclStmt: bool
+Declared bool in scope depth 2
+Defined bool in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving bool...
+Found bool at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === Simple ToString Test ===
 Number: 42
 Boolean: true
@@ -20,16 +68,202 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/02_string_methods_comprehensive.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'paddedStr': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving toString...
+Failed to resolve toString
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: paddedStr
+Declared paddedStr in scope depth 2
+Defined paddedStr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving paddedStr...
+Found paddedStr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving paddedStr...
+Found paddedStr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === String Methods Test ===
 Original: Hello World
-Length: 0
+Length: 11
 Substring(6): World
 Substring(0, 5): Hello
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Runtime error: toString() expects exactly 1 argument
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/03_array_methods_comprehensive.lin
 ----------------------------------------
+Type inferred for variable 'numbers': Unknown
+Type inferred for variable 'empty': Unknown
+Type inferred for variable 'single': Unknown
+Type inferred for variable 'mixed': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: numbers
+Declared numbers in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined numbers in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving numbers...
+Found numbers at distance 0
+Resolving println...
+Failed to resolve println
+Resolving numbers...
+Found numbers at distance 0
+Visiting VariableDeclStmt: empty
+Declared empty in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined empty in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving empty...
+Found empty at distance 0
+Resolving println...
+Failed to resolve println
+Resolving empty...
+Found empty at distance 0
+Visiting VariableDeclStmt: single
+Declared single in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined single in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving single...
+Found single at distance 0
+Resolving println...
+Failed to resolve println
+Resolving single...
+Found single at distance 0
+Visiting VariableDeclStmt: mixed
+Declared mixed in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined mixed in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving mixed...
+Found mixed at distance 0
+Resolving println...
+Failed to resolve println
+Resolving mixed...
+Found mixed at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === Array Methods Test ===
 Created array: [1, 2, 3, 4, 5]
 Array size: 5
@@ -45,6 +279,45 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/04_integration_simple.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'result': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving str...
+Found str at distance 0
+Resolving arr...
+Found arr at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === Integration Test ===
 Test 1: HELLO
 Test 2: 2
@@ -55,14 +328,109 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/addition_test.lin
 ----------------------------------------
-x: 5
-y: 8
-x after increment: 6
+Type inferred for variable 'x': Int
+Type inferred for variable 'y': Int
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Visiting VariableDeclStmt: y
+Declared y in scope depth 2
+Resolving x...
+Found x at distance 0
+Defined y in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+Resolving println...
+Failed to resolve println
+Resolving y...
+Found y at distance 0
+Resolving x...
+Found x at distance 0
+Resolving x...
+Found x at distance 0
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/advanced_array_methods_test.lin
+----------------------------------------
+Type inferred for variable 'a': Unknown
+Visiting VariableDeclStmt: a
+Resolving arrayOf...
+Failed to resolve arrayOf
+Resolving println...
+Failed to resolve println
+Resolving a...
+Failed to resolve a
+Resolving a...
+Failed to resolve a
+Resolving println...
+Failed to resolve println
+Resolving a...
+Failed to resolve a
+Resolving a...
+Failed to resolve a
+Resolving println...
+Failed to resolve println
+Resolving a...
+Failed to resolve a
+Resolving println...
+Failed to resolve println
+Resolving a...
+Failed to resolve a
+Resolving a...
+Failed to resolve a
+Resolving println...
+Failed to resolve println
+Resolving a...
+Failed to resolve a
+Initial: [1, 2, 3]
+After add(4): [1, 2, 3, 4]
+Val at 0: 100
+After set(0, 100): [100, 2, 3, 4]
+After removeAt(1): [100, 3, 4]
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/advanced_string_methods_test.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'sentence': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Visiting VariableDeclStmt: sentence
+Declared sentence in scope depth 2
+Defined sentence in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving sentence...
+Found sentence at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Original: [  Hello, Dotlin!  ]
 Trimmed: [Hello, Dotlin!]
 Split result: [apple, banana, cherry]
@@ -71,175 +439,1891 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/args_content_test.lin
 ----------------------------------------
-=== Args ContentToString Test ===
-Args content: []
-Args count: 0
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/args_test.lin
 ----------------------------------------
-Number of args: 0
+[Parser] parseIfStatement: thenBranch=0x5d27f00d3b50
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+Resolving args...
+Found args at distance 1
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 2
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_advanced_test.lin
+----------------------------------------
+Type inferred for variable 'arr': Array<Int>
+Type inferred for variable 'removed': Unknown
+Visiting VariableDeclStmt: arr
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Failed to resolve arr
+Resolving arr...
+Failed to resolve arr
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Failed to resolve arr
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Failed to resolve arr
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Failed to resolve arr
+Visiting VariableDeclStmt: removed
+Resolving arr...
+Failed to resolve arr
+Resolving println...
+Failed to resolve println
+Resolving removed...
+Failed to resolve removed
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Failed to resolve arr
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Failed to resolve arr
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Failed to resolve arr
+Resolving arr...
+Failed to resolve arr
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Failed to resolve arr
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Failed to resolve arr
+Resolving arr...
+Failed to resolve arr
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Failed to resolve arr
+Initial: [10, 20, 30, 40, 50]
+After insert(2, 25): [10, 20, 25, 30, 40, 50]
+Contains 25: true
+Contains 99: false
+Removed 40: true
+After remove(40): [10, 20, 25, 30, 50]
+Remove 99 (not found): false
+Is empty: false
+After clear(): []
+Is empty after clear: true
+After add(1): [1]
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_construction_test.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Type inferred for variable 'arr1': Unknown
+Type inferred for variable 'intArr': Unknown
+Type inferred for variable 'doubleArr': Unknown
+Type inferred for variable 'stringArr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr1
+Declared arr1 in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr1 in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr1...
+Found arr1 at distance 0
+Visiting VariableDeclStmt: intArr
+Declared intArr in scope depth 2
+Resolving intArrayOf...
+Failed to resolve intArrayOf
+Defined intArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving intArr...
+Found intArr at distance 0
+Visiting VariableDeclStmt: doubleArr
+Declared doubleArr in scope depth 2
+Resolving doubleArrayOf...
+Failed to resolve doubleArrayOf
+Defined doubleArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving doubleArr...
+Found doubleArr at distance 0
+Visiting VariableDeclStmt: stringArr
+Declared stringArr in scope depth 2
+Resolving stringArrayOf...
+Failed to resolve stringArrayOf
+Defined stringArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving stringArr...
+Found stringArr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving intArr...
+Found intArr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving stringArr...
+Found stringArr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving intArr...
+Found intArr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving stringArr...
+Found stringArr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array with mixed types: [1, 2, 3, hello, true]
+Runtime Error at source.lin:7:18: Undefined variable: intArrayOf
+Stack Trace:
+  at main
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_methods_test.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+Setting index 1 to 99: 99
+Adding 42: true
+Removing index 0: false
+Original: Hello Dotlin
+Upper: HELLO DOTLIN
+Lower: hello dotlin
+Trim: 'Hello Dotlin'
+Substring: Dotlin
+Substring with range: Hello
+Split: [Hello, Dotlin]
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_size_test.lin
 ----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 3
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_size_test2.lin
 ----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'size': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Visiting VariableDeclStmt: size
+Declared size in scope depth 2
+Resolving arr...
+Found arr at distance 0
+Defined size in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving size...
+Found size at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 3
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_test.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'strArr': Unknown
+Type inferred for variable 'mixedArr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: strArr
+Declared strArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined strArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving strArr...
+Found strArr at distance 0
+Visiting VariableDeclStmt: mixedArr
+Declared mixedArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined mixedArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving mixedArr...
+Found mixedArr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+First element: 1
+After set(1, 99): 99
+String array: [hello, world, dotlin]
+Mixed array size: 4
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_test2.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+First element: 1
+After set(1, 99): 99
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_test_comments3.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 3
+Element at index 2: 3
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_test_concat.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'strArr': Unknown
+Type inferred for variable 'mixedArr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: strArr
+Declared strArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined strArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving strArr...
+Found strArr at distance 0
+Visiting VariableDeclStmt: mixedArr
+Declared mixedArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined mixedArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving mixedArr...
+Found mixedArr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+String array: [hello, world, dotlin]
+Mixed array size: 4
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_test_fixed.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'strArr': Unknown
+Type inferred for variable 'mixedArr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: strArr
+Declared strArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined strArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving strArr...
+Found strArr at distance 0
+Visiting VariableDeclStmt: mixedArr
+Declared mixedArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined mixedArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving mixedArr...
+Found mixedArr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+First element: 1
+After set(1, 99): 99
+String array: [hello, world, dotlin]
+Mixed array size: 4
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_test_interpolation.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'strArr': Unknown
+Type inferred for variable 'mixedArr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: strArr
+Declared strArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined strArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving strArr...
+Found strArr at distance 0
+Visiting VariableDeclStmt: mixedArr
+Declared mixedArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined mixedArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving mixedArr...
+Found mixedArr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+String array: [hello, world, dotlin]
+Mixed array size: 4
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_test_minimal.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'strArr': Unknown
+Type inferred for variable 'mixedArr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: strArr
+Declared strArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined strArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving strArr...
+Found strArr at distance 0
+Visiting VariableDeclStmt: mixedArr
+Declared mixedArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined mixedArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving mixedArr...
+Found mixedArr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+String array: [hello, world, dotlin]
+Mixed array size: 4
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_test_no_content.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'strArr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: strArr
+Declared strArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined strArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving strArr...
+Found strArr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+String array size: 3
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_test_nocomments.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_test_separate.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'strArr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: strArr
+Declared strArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined strArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving strArr...
+Found strArr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+String array: [hello, world, dotlin]
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_test_simple.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'strArr': Unknown
+Type inferred for variable 'mixedArr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: strArr
+Declared strArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined strArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving strArr...
+Found strArr at distance 0
+Visiting VariableDeclStmt: mixedArr
+Declared mixedArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined mixedArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving mixedArr...
+Found mixedArr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+String array: [hello, world, dotlin]
+Mixed array size: 4
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/array_test_single.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/assignment_substring_test.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'result': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Substring: Hello
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/assignment_test.lin
 ----------------------------------------
-Initial value: 5
-After assignment: 10
-y = x + 3: 13
+Type inferred for variable 'x': Int
+Type inferred for variable 'y': Int
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+Resolving x...
+Found x at distance 0
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+Visiting VariableDeclStmt: y
+Declared y in scope depth 2
+Resolving x...
+Found x at distance 0
+Defined y in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving y...
+Found y at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/basic_test.lin
 ----------------------------------------
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 Basic test
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/chained_method_test.lin
 ----------------------------------------
-=== Chained Method Test ===
-Original text: hello world
-Chained result: 6
+Type inferred for variable 'text': String
+Type inferred for variable 'result': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: text
+Declared text in scope depth 2
+Defined text in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving text...
+Found text at distance 0
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving text...
+Found text at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/chained_test.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Type inferred for variable 'result': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+5
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/class_constructor_test.lin
 ----------------------------------------
-Runtime error: Attempt to call a non-function value
+Type inferred for variable 'person': Any
+Begin scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving this...
+Failed to resolve this
+End scope. Depth: 2
+End scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving this...
+Failed to resolve this
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: person
+Declared person in scope depth 2
+Resolving Person...
+Failed to resolve Person
+Defined person in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+0
+0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/class_test.lin
 ----------------------------------------
-Runtime error: Attempt to call a non-function value
+Type inferred for variable 'person': Any
+Begin scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+Resolving this...
+Failed to resolve this
+Resolving this...
+Failed to resolve this
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: person
+Declared person in scope depth 2
+Resolving Person...
+Failed to resolve Person
+Defined person in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Created person
+Hello, my name is 0 and I am 0 years old
+Name: 0
+Age: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/class_test_two.lin
 ----------------------------------------
-Runtime error: Attempt to call a non-function value
+Type inferred for variable 'person': Any
+Begin scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving this...
+Failed to resolve this
+Resolving this...
+Failed to resolve this
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: person
+Declared person in scope depth 2
+Resolving Person...
+Failed to resolve Person
+Defined person in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Hello, I'm 0 and I'm 0 years old
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/class_with_method_test.lin
 ----------------------------------------
-Runtime error: Attempt to call a non-function value
+Type inferred for variable 'person': Any
+Begin scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+Resolving this...
+Failed to resolve this
+Resolving this...
+Failed to resolve this
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: person
+Declared person in scope depth 2
+Resolving Person...
+Failed to resolve Person
+Defined person in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Created person
+Hello, my name is 0 and I am 0 years old
+Name: 0
+Age: 0
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/collection_test.lin
+----------------------------------------
+Type inferred for variable 'numbers': Unknown
+Type inferred for variable 'doubled': Unknown
+Type inferred for variable 'evens': Unknown
+Type inferred for variable 'odds': Unknown
+Type inferred for variable 'chained': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: numbers
+Declared numbers in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined numbers in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving numbers...
+Found numbers at distance 0
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: doubled
+Declared doubled in scope depth 2
+Resolving numbers...
+Found numbers at distance 0
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined doubled in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving doubled...
+Found doubled at distance 0
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: evens
+Declared evens in scope depth 2
+Resolving numbers...
+Found numbers at distance 0
+Begin scope. Depth: 3
+Declared n in scope depth 3
+Defined n in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving n...
+Found n at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined evens in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving evens...
+Found evens at distance 0
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: odds
+Declared odds in scope depth 2
+Resolving numbers...
+Found numbers at distance 0
+Begin scope. Depth: 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving it...
+Failed to resolve it
+End scope. Depth: 3
+End scope. Depth: 2
+Defined odds in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving odds...
+Found odds at distance 0
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: chained
+Declared chained in scope depth 2
+Resolving numbers...
+Found numbers at distance 0
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined chained in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving chained...
+Found chained at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+--- Original ---
+[1, 2, 3, 4, 5]
+
+--- Map (Double) ---
+[2, 4, 6, 8, 10]
+
+--- Filter (Even) ---
+[2, 4]
+
+--- Filter (Odd with implicit 'it') ---
+Runtime Error at source.lin:18:33: Undefined variable: it
+Stack Trace:
+  at main
+  at lambda@filter
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/complex_test.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving print...
+Failed to resolve print
+Resolving print...
+Failed to resolve print
+Resolving print...
+Failed to resolve print
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+=== Dotlin I/O Test ===
+Testing print function...
+Testing println function
+String: Hello, Dotlin!
+Length: 14
+=== Test Complete ===
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/complex_test_no_input.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 Testing string length
 String: Hello, Dotlin!
-Length: 0
+Length: 14
 Test complete
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/comprehensive_feature_test.lin
 ----------------------------------------
-=== Dotlin Comprehensive Feature Test ===
-Runtime error: Invalid operands for - operator
+Type inferred for variable 'str': String
+Type inferred for variable 'sentence': String
+Type inferred for variable 'numStr': String
+Type inferred for variable 'floatStr': String
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Visiting VariableDeclStmt: sentence
+Declared sentence in scope depth 2
+Defined sentence in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving sentence...
+Found sentence at distance 0
+Resolving println...
+Failed to resolve println
+Resolving format...
+Failed to resolve format
+Resolving println...
+Failed to resolve println
+Resolving format...
+Failed to resolve format
+Resolving println...
+Failed to resolve println
+Resolving format...
+Failed to resolve format
+Visiting VariableDeclStmt: numStr
+Declared numStr in scope depth 2
+Defined numStr in scope depth 2
+Visiting VariableDeclStmt: floatStr
+Declared floatStr in scope depth 2
+Defined floatStr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving toInt...
+Failed to resolve toInt
+Resolving numStr...
+Found numStr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving toDouble...
+Failed to resolve toDouble
+Resolving floatStr...
+Found floatStr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/comprehensive_lambda.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Type inferred for variable 'add': Function
+Type inferred for variable 'result': Function
+Type inferred for variable 'multiplyByTwo': Function
+Type inferred for variable 'result2': Function
+Type inferred for variable 'finalResult': Unknown
+Type inferred for variable 'greet': Function
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: add
+Declared add in scope depth 2
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Declared y in scope depth 3
+Defined y in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+Resolving y...
+Found y at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined add in scope depth 2
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving add...
+Found add at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+Visiting VariableDeclStmt: multiplyByTwo
+Declared multiplyByTwo in scope depth 2
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined multiplyByTwo in scope depth 2
+Visiting VariableDeclStmt: result2
+Declared result2 in scope depth 2
+Resolving multiplyByTwo...
+Found multiplyByTwo at distance 0
+Defined result2 in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result2...
+Found result2 at distance 0
+Visiting VariableDeclStmt: finalResult
+Declared finalResult in scope depth 2
+Resolving applyOperation...
+Failed to resolve applyOperation
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+Resolving x...
+Found x at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined finalResult in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving finalResult...
+Found finalResult at distance 0
+Visiting VariableDeclStmt: greet
+Declared greet in scope depth 2
+Begin scope. Depth: 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+End scope. Depth: 3
+End scope. Depth: 2
+Defined greet in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving greet...
+Found greet at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Declared x in scope depth 1
+Defined x in scope depth 1
+Declared op in scope depth 1
+Defined op in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving op...
+Found op at distance 1
+Resolving x...
+Found x at distance 1
+End scope. Depth: 1
+End scope. Depth: 0
+Addition result: 8
+Multiply by 2 result: 20
+Apply operation result: 49
+Hello, World!
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/comprehensive_test.lin
 ----------------------------------------
-=== Dotlin Comprehensive Test ===
-Runtime error: Invalid operands for - operator
+[Parser] parseIfStatement: thenBranch=0x5f3ad69e5ee0
+[Parser] parseIfStatement: thenBranch=0x5f3ad69e8100
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+Resolving args...
+Found args at distance 1
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 2
+End scope. Depth: 2
+Resolving args...
+Found args at distance 1
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 2
+End scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/comprehensive_test_two.lin
 ----------------------------------------
+[Parser] parseIfStatement: thenBranch=0x647db5dfbef0
+Type inferred for variable 'x': Int
+Type inferred for variable 'y': Double
+Type inferred for variable 'name': String
+Type inferred for variable 'flag': Boolean
+Type inferred for variable 'sum': Int
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'result': Int
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Visiting VariableDeclStmt: y
+Declared y in scope depth 2
+Defined y in scope depth 2
+Visiting VariableDeclStmt: name
+Declared name in scope depth 2
+Defined name in scope depth 2
+Visiting VariableDeclStmt: flag
+Declared flag in scope depth 2
+Defined flag in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+Resolving println...
+Failed to resolve println
+Resolving y...
+Found y at distance 0
+Resolving println...
+Failed to resolve println
+Resolving name...
+Found name at distance 0
+Resolving println...
+Failed to resolve println
+Resolving flag...
+Found flag at distance 0
+Visiting VariableDeclStmt: sum
+Declared sum in scope depth 2
+Resolving x...
+Found x at distance 0
+Defined sum in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving sum...
+Found sum at distance 0
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Declared add in scope depth 2
+Defined add in scope depth 2
+Begin scope. Depth: 3
+Declared a in scope depth 3
+Defined a in scope depth 3
+Declared b in scope depth 3
+Defined b in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving a...
+Found a at distance 1
+Resolving b...
+Found b at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving add...
+Found add at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+Resolving result...
+Found result at distance 0
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+End scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving i...
+Failed to resolve i
+End scope. Depth: 1
+End scope. Depth: 0
+Resolving println...
+Failed to resolve println
 All tests completed successfully!
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Basic variables test:
+x = 42
+y = 3.140000
+name = Dotlin
+flag = true
+Arithmetic: 42 + 10 = 52
+Array: [1, 2, 3, 4, 5]
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/constructor_test.lin
 ----------------------------------------
-Runtime error: Attempt to call a non-function value
+Type inferred for variable 'person': Any
+Begin scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: person
+Declared person in scope depth 2
+Resolving Person...
+Failed to resolve Person
+Defined person in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+Resolving person...
+Found person at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Person created: 0, age: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/control_flow_test.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Type inferred for variable 'i': Int
+Type inferred for variable 'numbers': Unknown
+Type inferred for variable 'x': Int
+Type inferred for variable 'day': String
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: i
+Declared i in scope depth 2
+Defined i in scope depth 2
+Resolving i...
+Found i at distance 0
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 1
+Resolving i...
+Found i at distance 1
+Resolving i...
+Found i at distance 1
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: numbers
+Declared numbers in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined numbers in scope depth 2
+Resolving numbers...
+Found numbers at distance 0
+Begin scope. Depth: 3
+Declared num in scope depth 3
+Defined num in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving println...
+Failed to resolve println
+Resolving num...
+Found num at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Resolving x...
+Found x at distance 0
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: day
+Declared day in scope depth 2
+Defined day in scope depth 2
+Resolving day...
+Found day at distance 0
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug.lin
 ----------------------------------------
+Resolving println...
+Failed to resolve println
 test
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug2.lin
 ----------------------------------------
+Resolving println...
+Failed to resolve println
 test
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_args_simple.lin
 ----------------------------------------
-Args count: 0
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_array.lin
 ----------------------------------------
-Runtime error: Attempt to call a non-function value
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving intArrayOf...
+Failed to resolve intArrayOf
+Defined arr in scope depth 2
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_array_indexing.lin
 ----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Size: 3
 Index 0: 1
 Index 1: 2
@@ -248,12 +2332,64 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_array_simple.lin
 ----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Size: 3
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_case_conversion.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'empty': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: empty
+Declared empty in scope depth 2
+Defined empty in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving empty...
+Found empty at distance 0
+Resolving println...
+Failed to resolve println
+Resolving empty...
+Found empty at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === Case Conversion Test ===
 Original: Hello World
 ToUpperCase: HELLO WORLD
@@ -266,11 +2402,60 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_class.lin
 ----------------------------------------
-Runtime error: Attempt to call a non-function value
+Type inferred for variable 'person': Any
+Begin scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: person
+Declared person in scope depth 2
+Resolving Person...
+Failed to resolve Person
+Defined person in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Created person
+Name: 0
+Age: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_comparison.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'result': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Test startsWith: true
 Assigned result: true
 Execution result: 
@@ -278,6 +2463,35 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_empty_string.lin
 ----------------------------------------
+Type inferred for variable 'emptyStr': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: emptyStr
+Declared emptyStr in scope depth 2
+Defined emptyStr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving emptyStr...
+Found emptyStr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving emptyStr...
+Found emptyStr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving emptyStr...
+Found emptyStr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving emptyStr...
+Found emptyStr at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === Debug Empty String ===
 Empty string length: 0
 Empty string toUpper: 
@@ -289,12 +2503,58 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_increment.lin
 ----------------------------------------
+Type inferred for variable 'i': Int
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: i
+Declared i in scope depth 2
+Defined i in scope depth 2
+Resolving i...
+Found i at distance 0
+Resolving i...
+Found i at distance 0
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Result: 1
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_indexof.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'result1': Unknown
+Type inferred for variable 'result2': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: result1
+Declared result1 in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined result1 in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result1...
+Found result1 at distance 0
+Visiting VariableDeclStmt: result2
+Declared result2 in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined result2 in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result2...
+Found result2 at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 IndexOf result: 5
 Chained IndexOf result: 5
 Execution result: 
@@ -302,46 +2562,163 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_io.lin
 ----------------------------------------
+Resolving println...
+Failed to resolve println
 Hello Dotlin!
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_lambda.lin
 ----------------------------------------
+Type inferred for variable 'add': Function
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: add
+Declared add in scope depth 2
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Declared y in scope depth 3
+Defined y in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+Resolving y...
+Found y at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined add in scope depth 2
+Resolving result...
+Failed to resolve result
+Resolving add...
+Found add at distance 0
+Resolving result...
+Failed to resolve result
+End scope. Depth: 1
+End scope. Depth: 0
 Runtime error: Undefined variable: result
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_main.lin
 ----------------------------------------
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 Hello from main
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_method.lin
 ----------------------------------------
-0
+Type inferred for variable 'str': String
+Visiting VariableDeclStmt: str
+Resolving println...
+Failed to resolve println
+Resolving str...
+Failed to resolve str
+5
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_no_args.lin
 ----------------------------------------
+Type inferred for variable 'i': Int
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: i
+Declared i in scope depth 2
+Defined i in scope depth 2
+Resolving i...
+Found i at distance 0
+Resolving i...
+Found i at distance 0
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Result: 1
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_no_newline.lin
 ----------------------------------------
+Resolving println...
+Failed to resolve println
 test
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_simple_lambda.lin
 ----------------------------------------
+Type inferred for variable 'add': Function
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: add
+Declared add in scope depth 2
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Declared y in scope depth 3
+Defined y in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+Resolving y...
+Found y at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined add in scope depth 2
+Resolving result...
+Failed to resolve result
+Resolving add...
+Found add at distance 0
+Resolving result...
+Failed to resolve result
+End scope. Depth: 1
+End scope. Depth: 0
 Runtime error: Undefined variable: result
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_split.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'parts': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Visiting VariableDeclStmt: parts
+Declared parts in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined parts in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving parts...
+Found parts at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === Debug Split Method ===
 Original: Hello World
 Split result: [Hello, World]
@@ -351,6 +2728,39 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_split_comprehensive.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'empty': String
+Type inferred for variable 'noDelim': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: empty
+Declared empty in scope depth 2
+Defined empty in scope depth 2
+Visiting VariableDeclStmt: noDelim
+Declared noDelim in scope depth 2
+Defined noDelim in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving empty...
+Found empty at distance 0
+Resolving println...
+Failed to resolve println
+Resolving noDelim...
+Found noDelim at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === Split Test ===
 Split comma: [a, b, c]
 Split empty: []
@@ -361,6 +2771,33 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_startswith.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'result': Unknown
+Type inferred for variable 'result2': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+Visiting VariableDeclStmt: result2
+Declared result2 in scope depth 2
+Defined result2 in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result2...
+Found result2 at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Type of result: true
 Direct call result: true
 Execution result: 
@@ -368,21 +2805,86 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_startswith_chained.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'result': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Type of result: true
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_startswith_same_string.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'result': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Type of result: true
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_string_step.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === Debug String Methods ===
 Step 1: String created
-Step 2: 0
+Step 2: 11
 Step 3: World
 Step 4: Hello
 === Debug Complete ===
@@ -391,6 +2893,35 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_substring.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'result1': Unknown
+Type inferred for variable 'result2': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: result1
+Declared result1 in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined result1 in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result1...
+Found result1 at distance 0
+Visiting VariableDeclStmt: result2
+Declared result2 in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined result2 in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result2...
+Found result2 at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Substring result: [Hello]
 Chained result: [Hello]
 Execution result: 
@@ -398,6 +2929,31 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_targeted.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === Targeted Debug Test ===
 Test 1: 6
 Test 2: true
@@ -408,22 +2964,118 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_test.lin
 ----------------------------------------
-Runtime error: Undefined variable: result
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving a...
+Failed to resolve a
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving b...
+Failed to resolve b
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving printStackTrace...
+Failed to resolve printStackTrace
+End scope. Depth: 1
+End scope. Depth: 0
+Manual Stack Trace Triggered:
+Stack Trace:
+  at main
+  at a
+  at b
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_this.lin
 ----------------------------------------
-Runtime error: Attempt to call a non-function value
+Type inferred for variable 'test': Any
+Begin scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+Resolving this...
+Failed to resolve this
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: test
+Declared test in scope depth 2
+Resolving Test...
+Failed to resolve Test
+Defined test in scope depth 2
+Resolving test...
+Found test at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Value is: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_tostring.lin
 ----------------------------------------
+Type inferred for variable 'num': Int
+Visiting VariableDeclStmt: num
+Resolving println...
+Failed to resolve println
+Resolving num...
+Failed to resolve num
 42
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_trim.lin
 ----------------------------------------
+Type inferred for variable 'padded': String
+Type inferred for variable 'spaces': String
+Type inferred for variable 'empty': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: padded
+Declared padded in scope depth 2
+Defined padded in scope depth 2
+Visiting VariableDeclStmt: spaces
+Declared spaces in scope depth 2
+Defined spaces in scope depth 2
+Visiting VariableDeclStmt: empty
+Declared empty in scope depth 2
+Defined empty in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving padded...
+Found padded at distance 0
+Resolving println...
+Failed to resolve println
+Resolving padded...
+Found padded at distance 0
+Resolving println...
+Failed to resolve println
+Resolving spaces...
+Found spaces at distance 0
+Resolving println...
+Failed to resolve println
+Resolving empty...
+Found empty at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === Trim Test ===
 Original: '   Hello World   '
 Trimmed: 'Hello World'
@@ -435,70 +3087,753 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_while.lin
 ----------------------------------------
-Before loop: 0
-In loop, i = 0
-After increment, i = 1
-In loop, i = 1
-After increment, i = 2
-In loop, i = 2
-After increment, i = 3
-After loop: 3
+Type inferred for variable 'i': Int
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: i
+Declared i in scope depth 2
+Defined i in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+Resolving i...
+Found i at distance 0
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 1
+Resolving i...
+Found i at distance 1
+Resolving i...
+Found i at distance 1
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 1
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/direct_call_only.lin
 ----------------------------------------
-Runtime error: Undefined variable: x
+Type inferred for variable 'text': String
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: text
+Declared text in scope depth 2
+Defined text in scope depth 2
+Resolving x...
+Failed to resolve x
+Resolving text...
+Found text at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/direct_method_test.lin
 ----------------------------------------
-=== Direct Method Call Test ===
-Original text: hello world
-Starts with 'hello': true
-Index of 'world': 6
-Uppercase: HELLO WORLD
-Runtime error: Undefined variable: chainedResult
+Type inferred for variable 'text': String
+Type inferred for variable 'starts': Unknown
+Type inferred for variable 'indexOfResult': Unknown
+Type inferred for variable 'upperText': Unknown
+Type inferred for variable 'chainedResult': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: text
+Declared text in scope depth 2
+Defined text in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving text...
+Found text at distance 0
+Visiting VariableDeclStmt: starts
+Declared starts in scope depth 2
+Resolving text...
+Found text at distance 0
+Defined starts in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving starts...
+Found starts at distance 0
+Visiting VariableDeclStmt: indexOfResult
+Declared indexOfResult in scope depth 2
+Resolving text...
+Found text at distance 0
+Defined indexOfResult in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving indexOfResult...
+Found indexOfResult at distance 0
+Visiting VariableDeclStmt: upperText
+Declared upperText in scope depth 2
+Resolving text...
+Found text at distance 0
+Defined upperText in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving upperText...
+Found upperText at distance 0
+Visiting VariableDeclStmt: chainedResult
+Declared chainedResult in scope depth 2
+Resolving text...
+Found text at distance 0
+Defined chainedResult in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving chainedResult...
+Found chainedResult at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/example.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+[Parser] parseIfStatement: thenBranch=0x5ed5e0835550
+Type inferred for variable 'name': String
+Type inferred for variable 'greeting': String
+Type inferred for variable 'integerNum': Int
+Type inferred for variable 'decimalNum': Double
+Type inferred for variable 'booleanVal': Boolean
+Type inferred for variable 'sum': Int
+Type inferred for variable 'product': Int
+Type inferred for variable 'result': String
+Type inferred for variable 'complex': Int
+Visiting VariableDeclStmt: name
+Visiting VariableDeclStmt: greeting
+Resolving name...
+Failed to resolve name
+Visiting VariableDeclStmt: integerNum
+Visiting VariableDeclStmt: decimalNum
+Visiting VariableDeclStmt: booleanVal
+Visiting VariableDeclStmt: sum
+Resolving integerNum...
+Failed to resolve integerNum
+Visiting VariableDeclStmt: product
+Resolving integerNum...
+Failed to resolve integerNum
+Resolving booleanVal...
+Failed to resolve booleanVal
+Visiting BlockStmt
+Begin scope. Depth: 1
+Visiting VariableDeclStmt: result
+Declared result in scope depth 1
+Defined result in scope depth 1
+End scope. Depth: 0
+Visiting VariableDeclStmt: complex
+Resolving sum...
+Failed to resolve sum
+Resolving product...
+Failed to resolve product
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/file_io_test.lin
+----------------------------------------
+[Parser] parseIfStatement: thenBranch=0x567693cea5d0
+[Parser] parseIfStatement: thenBranch=0x567693cec520
+[Parser] parseIfStatement: thenBranch=0x567693cef8d0
+Type inferred for variable 'filename': String
+Type inferred for variable 'content': String
+Type inferred for variable 'readContent': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: filename
+Declared filename in scope depth 2
+Defined filename in scope depth 2
+Visiting VariableDeclStmt: content
+Declared content in scope depth 2
+Defined content in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving exists...
+Failed to resolve exists
+Resolving filename...
+Found filename at distance 0
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+End scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+End scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving writeFile...
+Failed to resolve writeFile
+Resolving filename...
+Found filename at distance 1
+Resolving content...
+Found content at distance 1
+Resolving println...
+Failed to resolve println
+Resolving filename...
+Found filename at distance 1
+End scope. Depth: 2
+Begin scope. Depth: 3
+Declared e in scope depth 3
+Defined e in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving println...
+Failed to resolve println
+Resolving e...
+Found e at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Resolving exists...
+Failed to resolve exists
+Resolving filename...
+Found filename at distance 0
+Visiting BlockStmt
+Begin scope. Depth: 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Visiting VariableDeclStmt: readContent
+Declared readContent in scope depth 4
+Resolving readFile...
+Failed to resolve readFile
+Resolving filename...
+Found filename at distance 2
+Defined readContent in scope depth 4
+Resolving println...
+Failed to resolve println
+Resolving readContent...
+Found readContent at distance 0
+Resolving readContent...
+Found readContent at distance 0
+Resolving content...
+Found content at distance 2
+Visiting BlockStmt
+Begin scope. Depth: 5
+Resolving println...
+Failed to resolve println
+End scope. Depth: 4
+Visiting BlockStmt
+Begin scope. Depth: 5
+Resolving println...
+Failed to resolve println
+End scope. Depth: 4
+End scope. Depth: 3
+Begin scope. Depth: 4
+Declared e in scope depth 4
+Defined e in scope depth 4
+Visiting BlockStmt
+Begin scope. Depth: 5
+Resolving println...
+Failed to resolve println
+Resolving e...
+Found e at distance 1
+End scope. Depth: 4
+End scope. Depth: 3
+End scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+--- File I/O Test ---
+File already exists, overwriting...
+Written to file: test_io.txt
+/usr/include/c++/15/bits/shared_ptr_base.h:1344: _Tp* std::__shared_ptr_deref(_Tp*) [with _Tp = dotlin::Statement]: Assertion '__p != nullptr' failed.
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/final_test.lin
 ----------------------------------------
+Type inferred for variable 'add': Function
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: add
+Declared add in scope depth 2
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Declared y in scope depth 3
+Defined y in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+Resolving y...
+Found y at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined add in scope depth 2
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/final_test_four.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+[Parser] parseIfStatement: thenBranch=0x5df8695ac8a0
+Type inferred for variable 'x': Int
+Type inferred for variable 'y': Double
+Type inferred for variable 'name': String
+Type inferred for variable 'flag': Boolean
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'i': Int
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Visiting VariableDeclStmt: y
+Declared y in scope depth 2
+Defined y in scope depth 2
+Visiting VariableDeclStmt: name
+Declared name in scope depth 2
+Defined name in scope depth 2
+Visiting VariableDeclStmt: flag
+Declared flag in scope depth 2
+Defined flag in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Declared test in scope depth 2
+Defined test in scope depth 2
+Begin scope. Depth: 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+End scope. Depth: 3
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving test...
+Found test at distance 0
+Resolving x...
+Found x at distance 0
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+End scope. Depth: 2
+Visiting VariableDeclStmt: i
+Declared i in scope depth 2
+Defined i in scope depth 2
+Resolving i...
+Found i at distance 0
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving i...
+Found i at distance 1
+Resolving i...
+Found i at distance 1
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+=== Basic Functionality Test ===
+Variables work
+Arithmetic: 52
+Arrays work: 3
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/final_test_three.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+[Parser] parseIfStatement: thenBranch=0x56d4156008a0
+Type inferred for variable 'x': Int
+Type inferred for variable 'y': Double
+Type inferred for variable 'name': String
+Type inferred for variable 'flag': Boolean
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'i': Int
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Visiting VariableDeclStmt: y
+Declared y in scope depth 2
+Defined y in scope depth 2
+Visiting VariableDeclStmt: name
+Declared name in scope depth 2
+Defined name in scope depth 2
+Visiting VariableDeclStmt: flag
+Declared flag in scope depth 2
+Defined flag in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Declared test in scope depth 2
+Defined test in scope depth 2
+Begin scope. Depth: 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+End scope. Depth: 3
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving test...
+Found test at distance 0
+Resolving x...
+Found x at distance 0
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+End scope. Depth: 2
+Visiting VariableDeclStmt: i
+Declared i in scope depth 2
+Defined i in scope depth 2
+Resolving i...
+Found i at distance 0
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving i...
+Found i at distance 1
+Resolving i...
+Found i at distance 1
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+=== Basic Functionality Test ===
+Variables work
+Arithmetic: 52
+Arrays work: 3
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/final_test_two.lin
 ----------------------------------------
+Type inferred for variable 'text': String
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: text
+Declared text in scope depth 2
+Defined text in scope depth 2
+Resolving text...
+Found text at distance 0
+Resolving text...
+Found text at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/for_loop_test.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Type inferred for variable 'numbers': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: numbers
+Declared numbers in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined numbers in scope depth 2
+Resolving numbers...
+Found numbers at distance 0
+Begin scope. Depth: 3
+Declared num in scope depth 3
+Defined num in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving println...
+Failed to resolve println
+Resolving num...
+Found num at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/for_loop_test_nocomments.lin
+----------------------------------------
+Type inferred for variable 'numbers': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: numbers
+Declared numbers in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined numbers in scope depth 2
+Resolving numbers...
+Found numbers at distance 0
+Begin scope. Depth: 3
+Declared num in scope depth 3
+Defined num in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving println...
+Failed to resolve println
+Resolving num...
+Found num at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/format_functions_test.lin
 ----------------------------------------
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving format...
+Failed to resolve format
+Resolving println...
+Failed to resolve println
+Resolving format...
+Failed to resolve format
+Resolving println...
+Failed to resolve println
+Resolving toInt...
+Failed to resolve toInt
+Resolving println...
+Failed to resolve println
+Resolving toDouble...
+Failed to resolve toDouble
+End scope. Depth: 1
+End scope. Depth: 0
 Testing format functions:
-Runtime error: Attempt to call a non-function value
+Hello Dotlin!
+Number: 42
+Converting string to number: 123
+Runtime Error at source.lin:6:46: Undefined variable: toDouble
+Stack Trace:
+  at main
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/formatting_test.lin
+----------------------------------------
+Type inferred for variable 's1': String
+Type inferred for variable 'i1': Unknown
+Type inferred for variable 's2': String
+Type inferred for variable 'd1': Unknown
+Type inferred for variable 'i2': Int
+Type inferred for variable 'd2': Unknown
+Type inferred for variable 'd3': Double
+Type inferred for variable 'i3': Unknown
+Type inferred for variable 'name': String
+Type inferred for variable 'age': Int
+Type inferred for variable 'height': Double
+Type inferred for variable 'formatted': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: s1
+Declared s1 in scope depth 2
+Defined s1 in scope depth 2
+Visiting VariableDeclStmt: i1
+Declared i1 in scope depth 2
+Resolving s1...
+Found s1 at distance 0
+Defined i1 in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving i1...
+Found i1 at distance 0
+Visiting VariableDeclStmt: s2
+Declared s2 in scope depth 2
+Defined s2 in scope depth 2
+Visiting VariableDeclStmt: d1
+Declared d1 in scope depth 2
+Resolving s2...
+Found s2 at distance 0
+Defined d1 in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving d1...
+Found d1 at distance 0
+Visiting VariableDeclStmt: i2
+Declared i2 in scope depth 2
+Defined i2 in scope depth 2
+Visiting VariableDeclStmt: d2
+Declared d2 in scope depth 2
+Resolving i2...
+Found i2 at distance 0
+Defined d2 in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving d2...
+Found d2 at distance 0
+Visiting VariableDeclStmt: d3
+Declared d3 in scope depth 2
+Defined d3 in scope depth 2
+Visiting VariableDeclStmt: i3
+Declared i3 in scope depth 2
+Resolving d3...
+Found d3 at distance 0
+Defined i3 in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving i3...
+Found i3 at distance 0
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: name
+Declared name in scope depth 2
+Defined name in scope depth 2
+Visiting VariableDeclStmt: age
+Declared age in scope depth 2
+Defined age in scope depth 2
+Visiting VariableDeclStmt: height
+Declared height in scope depth 2
+Defined height in scope depth 2
+Visiting VariableDeclStmt: formatted
+Declared formatted in scope depth 2
+Resolving format...
+Failed to resolve format
+Resolving name...
+Found name at distance 0
+Resolving age...
+Found age at distance 0
+Resolving height...
+Found height at distance 0
+Defined formatted in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving formatted...
+Found formatted at distance 0
+Resolving println...
+Failed to resolve println
+Resolving format...
+Failed to resolve format
+End scope. Depth: 1
+End scope. Depth: 0
+--- Conversions ---
+String to Int: 123
+String to Double: 45.670000
+Runtime error: toDouble method only supported on String, Int, and Long
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/hello.lin
 ----------------------------------------
+[Parser] parseIfStatement: thenBranch=0x5a8c5187a550
+Type inferred for variable 'name': String
+Type inferred for variable 'greeting': String
+Type inferred for variable 'x': Int
+Type inferred for variable 'y': Int
+Type inferred for variable 'sum': Int
+Visiting VariableDeclStmt: name
+Visiting VariableDeclStmt: greeting
+Resolving name...
+Failed to resolve name
+Resolving println...
+Failed to resolve println
+Resolving greeting...
+Failed to resolve greeting
+Visiting VariableDeclStmt: x
+Visiting VariableDeclStmt: y
+Visiting VariableDeclStmt: sum
+Resolving x...
+Failed to resolve x
+Resolving y...
+Failed to resolve y
+Resolving println...
+Failed to resolve println
+Resolving sum...
+Failed to resolve sum
+Resolving x...
+Failed to resolve x
+Resolving y...
+Failed to resolve y
+Visiting BlockStmt
+Begin scope. Depth: 1
+Resolving println...
+Failed to resolve println
+End scope. Depth: 0
+Visiting BlockStmt
+Begin scope. Depth: 1
+Resolving println...
+Failed to resolve println
+End scope. Depth: 0
 Hello, Dotlin!
 Sum is: 30
 x is less than y
@@ -507,28 +3842,164 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/hello_dotlin.lin
 ----------------------------------------
+Type inferred for variable 'name': String
+Type inferred for variable 'x': Int
+Type inferred for variable 'y': Int
+Visiting VariableDeclStmt: name
+Visiting VariableDeclStmt: x
+Visiting VariableDeclStmt: y
+Resolving x...
+Failed to resolve x
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/hello_test.lin
 ----------------------------------------
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 Hello
 Execution result: 
 
 
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/inheritance_test.lin
+----------------------------------------
+Type inferred for variable 'd': Any
+Type inferred for variable 'c': Any
+Begin scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+Resolving name...
+Failed to resolve name
+End scope. Depth: 2
+End scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving name...
+Failed to resolve name
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Begin scope. Depth: 2
+End scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+End scope. Depth: 2
+End scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Begin scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: d
+Resolving Dog...
+Failed to resolve Dog
+Resolving d...
+Failed to resolve d
+Resolving d...
+Failed to resolve d
+Resolving d...
+Failed to resolve d
+Resolving println...
+Failed to resolve println
+Resolving d...
+Failed to resolve d
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: c
+Resolving Cat...
+Failed to resolve Cat
+Resolving c...
+Failed to resolve c
+Resolving c...
+Failed to resolve c
+Resolving println...
+Failed to resolve println
+Resolving c...
+Failed to resolve c
+--- Dog Test ---
+Runtime error: Method 'init' not found
+
+
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/io_test.lin
 ----------------------------------------
+Resolving println...
+Failed to resolve println
 Hello Dotlin!
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/lambda_assignment_test.lin
 ----------------------------------------
+Type inferred for variable 'add': Function
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: add
+Declared add in scope depth 2
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Declared y in scope depth 3
+Defined y in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+Resolving y...
+Found y at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined add in scope depth 2
+Resolving add...
+Found add at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/main_io_test.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+Resolving print...
+Failed to resolve print
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 Hello from main function!
 The answer is: 42
 This is a test of print functions
@@ -537,13 +4008,122 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/main_test.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Hello from main function!
 x = 42
 Execution result: 
 
 
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/math_test.lin
+----------------------------------------
+Type inferred for variable 'r': Unknown
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving sin...
+Failed to resolve sin
+Resolving println...
+Failed to resolve println
+Resolving sin...
+Failed to resolve sin
+Resolving println...
+Failed to resolve println
+Resolving cos...
+Failed to resolve cos
+Resolving println...
+Failed to resolve println
+Resolving cos...
+Failed to resolve cos
+Resolving println...
+Failed to resolve println
+Resolving tan...
+Failed to resolve tan
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving min...
+Failed to resolve min
+Resolving println...
+Failed to resolve println
+Resolving min...
+Failed to resolve min
+Resolving println...
+Failed to resolve println
+Resolving max...
+Failed to resolve max
+Resolving println...
+Failed to resolve println
+Resolving max...
+Failed to resolve max
+Resolving println...
+Failed to resolve println
+Resolving min...
+Failed to resolve min
+Resolving println...
+Failed to resolve println
+Resolving max...
+Failed to resolve max
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving round...
+Failed to resolve round
+Resolving println...
+Failed to resolve println
+Resolving round...
+Failed to resolve round
+Resolving println...
+Failed to resolve println
+Resolving ceil...
+Failed to resolve ceil
+Resolving println...
+Failed to resolve println
+Resolving floor...
+Failed to resolve floor
+Resolving println...
+Failed to resolve println
+Resolving round...
+Failed to resolve round
+Visiting VariableDeclStmt: r
+Resolving random...
+Failed to resolve random
+Resolving println...
+Failed to resolve println
+Resolving r...
+Failed to resolve r
+Resolving r...
+Failed to resolve r
+--- Trigonometry ---
+Runtime error: std::get: wrong index for variant
+
+
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/no_main_test.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: x
+Resolving println...
+Failed to resolve println
+Resolving x...
+Failed to resolve x
 Hello without main!
 42
 Execution result: 
@@ -551,6 +4131,14 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/no_main_test2.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: x
+Resolving println...
+Failed to resolve println
+Resolving x...
+Failed to resolve x
 Hello
 42
 Execution result: 
@@ -558,169 +4146,835 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple.lin
 ----------------------------------------
+Resolving println...
+Failed to resolve println
 Hello from Dotlin
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_args.lin
 ----------------------------------------
-Arguments received: 0
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_args_test.lin
 ----------------------------------------
-Args count: 0
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_array_test.lin
 ----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_assign.lin
 ----------------------------------------
-Initial: 0
-After 1st assignment: 1
-After 2nd assignment: 2
+Type inferred for variable 'i': Int
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: i
+Declared i in scope depth 2
+Defined i in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+Resolving i...
+Found i at distance 0
+Resolving i...
+Found i at distance 0
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+Resolving i...
+Found i at distance 0
+Resolving i...
+Found i at distance 0
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_chained.lin
 ----------------------------------------
-Runtime error: Undefined variable: x
+Type inferred for variable 'text': String
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: text
+Declared text in scope depth 2
+Defined text in scope depth 2
+Resolving x...
+Failed to resolve x
+Resolving text...
+Found text at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_complex_test.lin
 ----------------------------------------
-=== Simple Test ===
-Args count: 0
+[Parser] parseIfStatement: thenBranch=0x592ecd0504f0
+Type inferred for variable 'str': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+Resolving args...
+Found args at distance 1
+Visiting BlockStmt
+Begin scope. Depth: 3
+Visiting VariableDeclStmt: str
+Declared str in scope depth 3
+Resolving args...
+Found args at distance 2
+Defined str in scope depth 3
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_direct_test.lin
 ----------------------------------------
-=== Simple Direct Method Test ===
-Text: hello
-Starts with 'he': true
+Type inferred for variable 'text': String
+Type inferred for variable 'result': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: text
+Declared text in scope depth 2
+Defined text in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving text...
+Found text at distance 0
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving text...
+Found text at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_final_test_two.lin
 ----------------------------------------
+[Parser] parseIfStatement: thenBranch=0x6506a66bfa20
+Type inferred for variable 'x': Int
+Type inferred for variable 'y': Double
+Type inferred for variable 'name': String
+Type inferred for variable 'flag': Boolean
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'i': Int
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Visiting VariableDeclStmt: y
+Declared y in scope depth 2
+Defined y in scope depth 2
+Visiting VariableDeclStmt: name
+Declared name in scope depth 2
+Defined name in scope depth 2
+Visiting VariableDeclStmt: flag
+Declared flag in scope depth 2
+Defined flag in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Declared test in scope depth 2
+Defined test in scope depth 2
+Begin scope. Depth: 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+End scope. Depth: 3
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving test...
+Found test at distance 0
+Resolving x...
+Found x at distance 0
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+End scope. Depth: 2
+Visiting VariableDeclStmt: i
+Declared i in scope depth 2
+Defined i in scope depth 2
+Resolving i...
+Found i at distance 0
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving i...
+Found i at distance 1
+Resolving i...
+Found i at distance 1
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 === Basic Functionality Test ===
 Variables work
 Arithmetic:
 52
 Arrays work:
 3
-Functions work
-Conditionals work
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_lambda.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Type inferred for variable 'add': Function
+Type inferred for variable 'result': Function
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: add
+Declared add in scope depth 2
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Declared y in scope depth 3
+Defined y in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+Resolving y...
+Found y at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined add in scope depth 2
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving add...
+Found add at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Simple lambda test: 8
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_loop_test.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Type inferred for variable 'i': Int
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: i
+Declared i in scope depth 2
+Defined i in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+Resolving i...
+Found i at distance 0
+Resolving i...
+Found i at distance 0
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_ops.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Type inferred for variable 'y': Int
+Type inferred for variable 'sum': Int
+Visiting VariableDeclStmt: x
+Visiting VariableDeclStmt: y
+Visiting VariableDeclStmt: sum
+Resolving x...
+Failed to resolve x
+Resolving y...
+Failed to resolve y
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_string_test.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 String: Hello, Dotlin!
-Length: 0
+Length: 14
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_string_test_two.lin
 ----------------------------------------
-0
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+5
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_test.lin
 ----------------------------------------
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 Hello World
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_test2.lin
 ----------------------------------------
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 Hello World
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_test2_two.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 42
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_test_two.lin
 ----------------------------------------
+[Parser] parseIfStatement: thenBranch=0x605581e615e0
+Type inferred for variable 'x': Int
+Type inferred for variable 'y': Double
+Type inferred for variable 'name': String
+Type inferred for variable 'flag': Boolean
+Type inferred for variable 'sum': Int
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'result': Int
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Visiting VariableDeclStmt: y
+Declared y in scope depth 2
+Defined y in scope depth 2
+Visiting VariableDeclStmt: name
+Declared name in scope depth 2
+Defined name in scope depth 2
+Visiting VariableDeclStmt: flag
+Declared flag in scope depth 2
+Defined flag in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving x...
+Found x at distance 0
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving y...
+Found y at distance 0
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving name...
+Found name at distance 0
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving flag...
+Found flag at distance 0
+Visiting VariableDeclStmt: sum
+Declared sum in scope depth 2
+Resolving x...
+Found x at distance 0
+Defined sum in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving sum...
+Found sum at distance 0
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Declared add in scope depth 2
+Defined add in scope depth 2
+Begin scope. Depth: 3
+Declared a in scope depth 3
+Defined a in scope depth 3
+Declared b in scope depth 3
+Defined b in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving a...
+Found a at distance 1
+Resolving b...
+Found b at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving add...
+Found add at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+Resolving result...
+Found result at distance 0
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+End scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving i...
+Failed to resolve i
+End scope. Depth: 1
+End scope. Depth: 0
+Resolving println...
+Failed to resolve println
 All tests completed successfully!
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Basic variables test:
+x = 
+42
+y = 
+3.140000
+name = 
+Dotlin
+flag = 
+true
+Arithmetic: 42 + 10 = 
+52
+Array: 
+[1, 2, 3, 4, 5]
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_trim_test.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'trimmed': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: trimmed
+Declared trimmed in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined trimmed in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving trimmed...
+Found trimmed at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Result: Hello
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_val.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Visiting VariableDeclStmt: x
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_vars.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Visiting VariableDeclStmt: x
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_while.lin
 ----------------------------------------
-Before: 0
-After: 1
+Type inferred for variable 'i': Int
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: i
+Declared i in scope depth 2
+Defined i in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+Resolving i...
+Found i at distance 0
+Resolving i...
+Found i at distance 0
+Resolving println...
+Failed to resolve println
+Resolving i...
+Found i at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simpler_test.lin
 ----------------------------------------
+Type inferred for variable 'text': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: text
+Declared text in scope depth 2
+Defined text in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving text...
+Found text at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 HELLO WORLD
 Execution result: 
 
 
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/stack_trace_test.lin
+----------------------------------------
+Type inferred for variable 'y': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving a...
+Failed to resolve a
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving b...
+Failed to resolve b
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving causeError...
+Failed to resolve causeError
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: y
+Declared y in scope depth 2
+Resolving x...
+Failed to resolve x
+Defined y in scope depth 2
+End scope. Depth: 1
+End scope. Depth: 0
+About to trigger undefined variable error...
+Inside causeError, referencing x...
+Runtime Error at source.lin:16:13: Undefined variable: x
+Stack Trace:
+  at main
+  at a
+  at b
+  at causeError
+
+
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/starts_with_direct_test.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Starts with Hello: true
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/starts_with_test.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'result': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Starts with Hello: true
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/starts_with_test_corrected.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'result': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Starts with Hello: true
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/string_methods_test.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Original: Hello, Dotlin!
 Upper: HELLO, DOTLIN!
 Lower: hello, dotlin!
@@ -733,6 +4987,43 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/string_methods_test_copy.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Original: Hello, Dotlin!
 Upper: HELLO, DOTLIN!
 Lower: hello, dotlin!
@@ -745,7 +5036,58 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/string_methods_test_two.lin
 ----------------------------------------
-Length: 0
+Type inferred for variable 'str': String
+Type inferred for variable 'parts': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+Visiting VariableDeclStmt: parts
+Declared parts in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined parts in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving parts...
+Found parts at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Length: 11
 Substring: World
 Index: 6
 Starts with Hello: true
@@ -759,56 +5101,123 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/substring_test.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'result': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Substring: Hello
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/temp.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Visiting VariableDeclStmt: x
+Resolving println...
+Failed to resolve println
 Hello from Dotlin
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/temp_simple.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Visiting VariableDeclStmt: x
+Resolving x...
+Failed to resolve x
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/temp_test.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Resolving x...
+Found x at distance 0
+Resolving x...
+Found x at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/temp_test2.lin
 ----------------------------------------
+Type inferred for variable 'text': String
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: text
+Declared text in scope depth 2
+Defined text in scope depth 2
+Resolving text...
+Found text at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Visiting VariableDeclStmt: x
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test2.lin
 ----------------------------------------
+Resolving println...
+Failed to resolve println
 Hello, World!
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test3.lin
 ----------------------------------------
+Resolving println...
+Failed to resolve println
 Hello
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test4.lin
 ----------------------------------------
-Runtime error: Attempt to call a non-function value
+Type inferred for variable 'x': Unknown
+Visiting VariableDeclStmt: x
+Resolving toString...
+Failed to resolve toString
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test5.lin
 ----------------------------------------
-Runtime error: Attempt to call a non-function value
+Resolving toString...
+Failed to resolve toString
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test6.lin
@@ -818,88 +5227,693 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_args.lin
 ----------------------------------------
-Number of arguments: 0
 /usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_args_comprehensive.lin
 ----------------------------------------
-Number of arguments: 0
+[Parser] parseIfStatement: thenBranch=0x5acabe3e30f0
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+Resolving args...
+Found args at distance 1
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 2
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_args_comprehensive2.lin
 ----------------------------------------
-Runtime error: Array index out of bounds
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_args_simple.lin
 ----------------------------------------
-Number of arguments: 0
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_args_simple2.lin
 ----------------------------------------
-Runtime error: Array index out of bounds
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array.lin
 ----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array2.lin
 ----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array3.lin
 ----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_basic.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'element': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: element
+Declared element in scope depth 2
+Resolving arr...
+Found arr at distance 0
+Defined element in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving element...
+Found element at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array created
+Size: 5
+Element: 3
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_combined.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_debug.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_exact.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Size: 3
+Index 0: 1
+Index 1: 2
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_hardcoded.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+Starting test
+Array created
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_index.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'element': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Visiting VariableDeclStmt: element
+Declared element in scope depth 2
+Resolving arr...
+Found arr at distance 0
+Defined element in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving element...
+Found element at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Element: 1
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_new_format.lin
 ----------------------------------------
-Array created: [1, 2, 3]
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_no_tostring.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_simple.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'strArr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: strArr
+Declared strArr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined strArr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving strArr...
+Found strArr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element at index 2: 3
+String array: [hello, world, dotlin]
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_size.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Size: 3
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_step1.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_step2.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'element': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: element
+Declared element in scope depth 2
+Resolving arr...
+Found arr at distance 0
+Defined element in scope depth 2
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Got element
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_array_step3.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Type inferred for variable 'element': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Visiting VariableDeclStmt: element
+Declared element in scope depth 2
+Resolving arr...
+Found arr at distance 0
+Defined element in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving element...
+Found element at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Array size: 5
+Element: 3
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_basic.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Resolving x...
+Found x at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_basic2.lin
 ----------------------------------------
-Test
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_complex.lin
 ----------------------------------------
+Type inferred for variable 'x': Int
+Visiting VariableDeclStmt: x
+Resolving println...
+Failed to resolve println
+Resolving x...
+Failed to resolve x
 Value of x is: 10
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_complex_expr.lin
 ----------------------------------------
-0
+Type inferred for variable 'str': String
+Visiting VariableDeclStmt: str
+Resolving println...
+Failed to resolve println
+Resolving str...
+Failed to resolve str
+5
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_constructor.lin
 ----------------------------------------
-Runtime error: Attempt to call a non-function value
+Type inferred for variable 'person': Any
+Begin scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving this...
+Failed to resolve this
+End scope. Depth: 2
+End scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving this...
+Failed to resolve this
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: person
+Declared person in scope depth 2
+Resolving Person...
+Failed to resolve Person
+Defined person in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Runtime error: Class Person has no constructors but arguments were provided
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_constructor_two.lin
+----------------------------------------
+Type inferred for variable 'person': Any
+Begin scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving this...
+Failed to resolve this
+End scope. Depth: 2
+End scope. Depth: 1
+Begin scope. Depth: 2
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving this...
+Failed to resolve this
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: person
+Declared person in scope depth 2
+Resolving Person...
+Failed to resolve Person
+Defined person in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+Resolving println...
+Failed to resolve println
+Resolving person...
+Found person at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Runtime error: Class Person has no constructors but arguments were provided
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_custom_func.lin
 ----------------------------------------
+Type inferred for variable 'result': Int
+Begin scope. Depth: 1
+Declared x in scope depth 1
+Defined x in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving x...
+Found x at distance 1
+Declared main in scope depth 2
+Defined main in scope depth 2
+Begin scope. Depth: 3
+Declared args in scope depth 3
+Defined args in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Visiting VariableDeclStmt: result
+Declared result in scope depth 4
+Resolving customFunction...
+Failed to resolve customFunction
+Defined result in scope depth 4
+Resolving result...
+Found result at distance 0
+End scope. Depth: 3
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_debug.lin
 ----------------------------------------
+Type inferred for variable 'str': String
+Type inferred for variable 'index': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: index
+Declared index in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined index in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving index...
+Found index at distance 0
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
 Index: 7
 Done
 Execution result: 
@@ -907,176 +5921,556 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_edge_cases.lin
 ----------------------------------------
-/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
+Type inferred for variable 'text': String
+Type inferred for variable 'result': String
+Type inferred for variable 'greeting': String
+Type inferred for variable 'name': String
+Type inferred for variable 'message': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: text
+Declared text in scope depth 2
+Defined text in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving text...
+Found text at distance 0
+Resolving println...
+Failed to resolve println
+Resolving text...
+Found text at distance 0
+Resolving println...
+Failed to resolve println
+Resolving text...
+Found text at distance 0
+Resolving println...
+Failed to resolve println
+Resolving text...
+Found text at distance 0
+Resolving println...
+Failed to resolve println
+Resolving text...
+Found text at distance 0
+Resolving println...
+Failed to resolve println
+Resolving text...
+Found text at distance 0
+Resolving println...
+Failed to resolve println
+Resolving println...
+Failed to resolve println
+Resolving text...
+Found text at distance 0
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+Visiting VariableDeclStmt: greeting
+Declared greeting in scope depth 2
+Defined greeting in scope depth 2
+Visiting VariableDeclStmt: name
+Declared name in scope depth 2
+Defined name in scope depth 2
+Visiting VariableDeclStmt: message
+Declared message in scope depth 2
+Resolving greeting...
+Found greeting at distance 0
+Resolving name...
+Found name at distance 0
+Defined message in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving message...
+Found message at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+HELLO WORLD
+hello world
+6
+true
+true
+Hello
+6
+true
+HELLO
+5
+HELLO, WORLD
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_exact.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Type inferred for variable 'x': Int
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: x
+Declared x in scope depth 2
+Defined x in scope depth 2
+Resolving x...
+Found x at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_for_args.lin
+----------------------------------------
+Type inferred for variable 'numbers': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Visiting VariableDeclStmt: numbers
+Declared numbers in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined numbers in scope depth 2
+Resolving numbers...
+Found numbers at distance 0
+Begin scope. Depth: 3
+Declared num in scope depth 3
+Defined num in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving println...
+Failed to resolve println
+Resolving num...
+Found num at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_for_simple.lin
+----------------------------------------
+Type inferred for variable 'numbers': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: numbers
+Declared numbers in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined numbers in scope depth 2
+Resolving numbers...
+Found numbers at distance 0
+Begin scope. Depth: 3
+Declared num in scope depth 3
+Defined num in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving println...
+Failed to resolve println
+Resolving num...
+Found num at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+1
+2
+3
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_for_toString.lin
+----------------------------------------
+Type inferred for variable 'numbers': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: numbers
+Declared numbers in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined numbers in scope depth 2
+Resolving numbers...
+Found numbers at distance 0
+Begin scope. Depth: 3
+Declared num in scope depth 3
+Defined num in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving println...
+Failed to resolve println
+Resolving num...
+Found num at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+1
+2
+3
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_hello.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Resolving println...
+Failed to resolve println
+HELLO FROM DOTLIN
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_indexof.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Type inferred for variable 'str': String
+Type inferred for variable 'index': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Visiting VariableDeclStmt: index
+Declared index in scope depth 2
+Resolving str...
+Found str at distance 0
+Defined index in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving index...
+Found index at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Index result: 7
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_indexof2.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+7
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_indexof_concat.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Type inferred for variable 'str': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: str
+Declared str in scope depth 2
+Defined str in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving str...
+Found str at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Index of "Dotlin": 7
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_intarray.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving intArrayOf...
+Failed to resolve intArrayOf
+Defined arr in scope depth 2
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_interpolation.lin
+----------------------------------------
+Type inferred for variable 'name': String
+Type inferred for variable 'age': Int
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: name
+Declared name in scope depth 2
+Defined name in scope depth 2
+Visiting VariableDeclStmt: age
+Declared age in scope depth 2
+Defined age in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving name...
+Found name at distance 0
+Resolving println...
+Failed to resolve println
+Resolving age...
+Found age at distance 0
+Resolving println...
+Failed to resolve println
+Resolving name...
+Found name at distance 0
+Resolving age...
+Found age at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Hello, World!
+Age: 25
+Name is World, age is 25
+Execution result: 
+
+
+▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_interpolation_advanced.lin
+----------------------------------------
+Type inferred for variable 'arr': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: arr
+Declared arr in scope depth 2
+Resolving arrayOf...
+Failed to resolve arrayOf
+Defined arr in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving arr...
+Found arr at distance 0
+Resolving println...
+Failed to resolve println
+Resolving name...
+Failed to resolve name
+End scope. Depth: 1
+End scope. Depth: 0
+Size: 3
+Element: 1
+Runtime Error at source.lin:1:1: Undefined variable: name
+Stack Trace:
+  at main
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_lambda.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Type inferred for variable 'add': Function
+Type inferred for variable 'multiplyByTwo': Function
+Type inferred for variable 'result': Unknown
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Visiting VariableDeclStmt: add
+Declared add in scope depth 2
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Declared y in scope depth 3
+Defined y in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+Resolving y...
+Found y at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined add in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving add...
+Found add at distance 0
+Visiting VariableDeclStmt: multiplyByTwo
+Declared multiplyByTwo in scope depth 2
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined multiplyByTwo in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving multiplyByTwo...
+Found multiplyByTwo at distance 0
+Visiting VariableDeclStmt: result
+Declared result in scope depth 2
+Resolving applyOperation...
+Failed to resolve applyOperation
+Begin scope. Depth: 3
+Declared x in scope depth 3
+Defined x in scope depth 3
+Visiting BlockStmt
+Begin scope. Depth: 4
+Resolving x...
+Found x at distance 1
+Resolving x...
+Found x at distance 1
+End scope. Depth: 3
+End scope. Depth: 2
+Defined result in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving result...
+Found result at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Begin scope. Depth: 1
+Declared x in scope depth 1
+Defined x in scope depth 1
+Declared op in scope depth 1
+Defined op in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving op...
+Found op at distance 1
+Resolving x...
+Found x at distance 1
+End scope. Depth: 1
+End scope. Depth: 0
+8
+20
+49
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_length.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Type inferred for variable 'str': String
+Visiting VariableDeclStmt: str
+Resolving println...
+Failed to resolve println
+Resolving str...
+Failed to resolve str
+5
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_length2.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Type inferred for variable 'str': String
+Type inferred for variable 'len': Unknown
+Visiting VariableDeclStmt: str
+Visiting VariableDeclStmt: len
+Resolving str...
+Failed to resolve str
+Resolving println...
+Failed to resolve println
+Resolving len...
+Failed to resolve len
+5
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_length3.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Type inferred for variable 'str': String
+Type inferred for variable 'len': Unknown
+Visiting VariableDeclStmt: str
+Visiting VariableDeclStmt: len
+Resolving str...
+Failed to resolve str
+Resolving println...
+Failed to resolve println
+Resolving len...
+Failed to resolve len
+5
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_literal.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_main.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+End scope. Depth: 1
+End scope. Depth: 0
+Hello from main
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_main_args.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+[Parser] parseIfStatement: thenBranch=0x62002787d780
+Begin scope. Depth: 1
+Declared args in scope depth 1
+Defined args in scope depth 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 1
+Visiting BlockStmt
+Begin scope. Depth: 3
+Resolving println...
+Failed to resolve println
+Resolving args...
+Found args at distance 2
+End scope. Depth: 2
+End scope. Depth: 1
+End scope. Depth: 0
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_main_io.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_main_return.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_manual_copy.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_mixed_io.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_print.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_println.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_readln.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_run.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_simple.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_simple_member.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_string_methods.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_string_methods_full.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_tostring.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_user_function.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_var.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_var_only.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_vars.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_with_newlines.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/touppercase_test.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/very_simple_test.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/when_test.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Type inferred for variable 'name': String
+Begin scope. Depth: 1
+Visiting BlockStmt
+Begin scope. Depth: 2
+Resolving println...
+Failed to resolve println
+Resolving print...
+Failed to resolve print
+Visiting VariableDeclStmt: name
+Declared name in scope depth 2
+Resolving readln...
+Failed to resolve readln
+Defined name in scope depth 2
+Resolving println...
+Failed to resolve println
+Resolving name...
+Found name at distance 0
+End scope. Depth: 1
+End scope. Depth: 0
+Hello from main function!
+Enter your name: Welcome, /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_main_return.lin!
+Execution result: 
 
 
