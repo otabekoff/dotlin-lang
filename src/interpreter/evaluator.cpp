@@ -286,9 +286,6 @@ void EvalVisitor::visit(UnaryExpr &node) {
 }
 
 void EvalVisitor::visit(CallExpr &node) {
-  // Evaluate the callee (function or method)
-  Value calleeValue = interpreter->evaluate(*node.callee);
-
   // Check if this is a method call on a class instance or built-in type
   if (auto *memberAccess =
           dynamic_cast<MemberAccessExpr *>(node.callee.get())) {
@@ -438,165 +435,6 @@ void EvalVisitor::visit(CallExpr &node) {
       return;
     }
 
-    // Check if it's the special case of args.size() or args.contentToString()
-    std::string objName = "";
-    bool isArgsObject = false;
-    auto *ident = dynamic_cast<IdentifierExpr *>(memberAccess->object.get());
-    if (ident) {
-      objName = ident->name;
-      isArgsObject = (objName == "args");
-    }
-
-    if (isArgsObject) {
-      if (objName == "args" && methodName == "size" && args.empty()) {
-        result = Value(static_cast<int>(interpreter->commandLineArgs.size()));
-        return;
-      } else if (objName == "args" && methodName == "contentToString" &&
-                 args.empty()) {
-        std::string content = "[";
-        for (size_t i = 0; i < interpreter->commandLineArgs.size(); ++i) {
-          content += interpreter->commandLineArgs[i];
-          if (i < interpreter->commandLineArgs.size() - 1) {
-            content += ", ";
-          }
-        }
-        content += "]";
-        result = Value(content);
-        return;
-      }
-    }
-
-    // Handle method calls on any object (including strings, arrays, etc.)
-    if (methodName == "toString" && args.empty()) {
-      result = Value(interpreter->valueToString(objValue));
-      return;
-    } else if (methodName == "size" && args.empty()) {
-      // Handle size property for arrays
-      if (auto *array = std::get_if<ArrayValue>(&objValue)) {
-        result = Value(static_cast<int>(array->elements.size()));
-        return;
-      }
-    } else if (methodName == "substring" && args.size() == 1 &&
-               std::holds_alternative<int>(args[0])) {
-      // Handle substring(start) method call
-      if (auto *strValue = std::get_if<std::string>(&objValue)) {
-        std::string str = *strValue;
-        int start = std::get<int>(args[0]);
-        if (start >= 0 && static_cast<size_t>(start) <= str.length()) {
-          result = Value(str.substr(static_cast<size_t>(start)));
-        } else {
-          result =
-              Value(std::string("")); // Return empty string for invalid index
-        }
-      } else {
-        result = Value(
-            std::string("")); // Return empty string for non-string objects
-      }
-      return;
-    } else if (methodName == "indexOf" && args.size() == 1 &&
-               std::holds_alternative<std::string>(args[0])) {
-      // Handle indexOf(substring) method call
-      if (auto *strValue = std::get_if<std::string>(&objValue)) {
-        std::string str = *strValue;
-        std::string substr = std::get<std::string>(args[0]);
-        size_t pos = str.find(substr);
-        result = Value(static_cast<int>(
-            pos != std::string::npos ? static_cast<int>(pos) : -1));
-      } else {
-        result = Value(-1); // Return -1 for non-string objects
-      }
-      return;
-    } else if (methodName == "startsWith" && args.size() == 1 &&
-               std::holds_alternative<std::string>(args[0])) {
-      // Handle startsWith(prefix) method call
-      if (auto *strValue = std::get_if<std::string>(&objValue)) {
-        std::string str = *strValue;
-        std::string prefix = std::get<std::string>(args[0]);
-        result =
-            Value(static_cast<bool>(str.substr(0, prefix.length()) == prefix));
-      } else {
-        result = Value(false); // Return false for non-string objects
-      }
-      return;
-    } else if (methodName == "endsWith" && args.size() == 1 &&
-               std::holds_alternative<std::string>(args[0])) {
-      // Handle endsWith(suffix) method call
-      if (auto *strValue = std::get_if<std::string>(&objValue)) {
-        std::string str = *strValue;
-        std::string suffix = std::get<std::string>(args[0]);
-        if (str.length() >= suffix.length()) {
-          result =
-              Value(static_cast<bool>(str.substr(str.length() - suffix.length(),
-                                                 suffix.length()) == suffix));
-        } else {
-          result = Value(false);
-        }
-      } else {
-        result = Value(false); // Return false for non-string objects
-      }
-      return;
-    } else if (methodName == "toUpperCase" && args.empty()) {
-      // Handle toUpperCase() method call
-      if (auto *strValue = std::get_if<std::string>(&objValue)) {
-        std::string str = *strValue;
-        std::transform(str.begin(), str.end(), str.begin(), ::toupper);
-        result = Value(str);
-      } else {
-        result = Value(
-            std::string("")); // Return empty string for non-string objects
-      }
-      return;
-    } else if (methodName == "toLowerCase" && args.empty()) {
-      // Handle toLowerCase() method call
-      if (auto *strValue = std::get_if<std::string>(&objValue)) {
-        std::string str = *strValue;
-        std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-        result = Value(str);
-      } else {
-        result = Value(
-            std::string("")); // Return empty string for non-string objects
-      }
-      return;
-    } else if (methodName == "trim" && args.empty()) {
-      // Handle trim() method call
-      if (auto *strValue = std::get_if<std::string>(&objValue)) {
-        std::string str = *strValue;
-        // Left trim
-        size_t start = str.find_first_not_of(" \t\n\r\f\v");
-        if (start == std::string::npos) {
-          result = Value(str);
-        } else {
-          // Right trim
-          size_t end = str.find_last_not_of(" \t\n\r\f\v");
-          result = Value(str.substr(start, end - start + 1));
-        }
-      } else {
-        result = Value(
-            std::string("")); // Return empty string for non-string objects
-      }
-      return;
-    } else if (methodName == "split" && args.size() == 1 &&
-               std::holds_alternative<std::string>(args[0])) {
-      // Handle split(delimiter) method call
-      if (auto *strValue = std::get_if<std::string>(&objValue)) {
-        std::string str = *strValue;
-        std::string delim = std::get<std::string>(args[0]);
-        std::vector<Value> parts;
-        size_t pos = 0;
-        size_t delimLen = delim.length();
-        while ((pos = str.find(delim, pos)) != std::string::npos) {
-          parts.push_back(Value(str.substr(0, pos)));
-          pos += delimLen;
-        }
-        parts.push_back(Value(str.substr(pos)));
-        result = Value(ArrayValue(parts));
-      } else {
-        result =
-            Value(ArrayValue()); // Return empty array for non-string objects
-      }
-      return;
-    }
-
     // Check if the object is a class instance
     if (auto *instance =
             std::get_if<std::shared_ptr<ClassInstance>>(&objValue)) {
@@ -604,12 +442,8 @@ void EvalVisitor::visit(CallExpr &node) {
       for (const auto &method : (*instance)->classDef->methods) {
         if (method->name == methodName) {
           // Found the method, execute it
-          // Create new environment for method execution with 'this'
-          // bound to the instance
           auto methodEnv =
               std::make_shared<Environment>(interpreter->environment);
-
-          // Bind 'this' to the instance
           methodEnv->define("this", Value(*instance));
 
           // Bind method parameters to arguments
@@ -618,7 +452,6 @@ void EvalVisitor::visit(CallExpr &node) {
               Value argValue = interpreter->evaluate(*node.arguments[i]);
               methodEnv->define(method->parameters[i].name, argValue);
             } else {
-              // Default parameter value
               methodEnv->define(method->parameters[i].name, Value());
             }
           }
@@ -639,10 +472,13 @@ void EvalVisitor::visit(CallExpr &node) {
       }
       throw std::runtime_error("Method '" + methodName + "' not found");
     }
-    throw std::runtime_error("Cannot call method on non-object");
+
+    throw std::runtime_error("Cannot call method '" + methodName +
+                             "' on this object");
   }
 
   // Handle regular function calls
+  Value calleeValue = interpreter->evaluate(*node.callee);
   if (auto *lambda = std::get_if<std::shared_ptr<LambdaValue>>(&calleeValue)) {
     // Check if this is a built-in function
     if ((*lambda)->parameters.empty() && (*lambda)->body == nullptr) {
@@ -702,8 +538,8 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
   auto objValue = node.object ? interpreter->evaluate(*node.object)
                               : Value(std::string("null"));
 
-  // Check if the object is an identifier "args" and the property is "size" or
-  // "contentToString"
+  // Check if the object is an identifier "args" and the property is "size"
+  // or "contentToString"
   if (auto *identifier = dynamic_cast<IdentifierExpr *>(node.object.get())) {
     if (identifier->name == "args") {
       if (node.property == "size") {
