@@ -4,10 +4,10 @@
 - [-] is for partially completed
 - [x] is for completed.
 
-- [ ] Phase 15: Performance Optimizations
-  - [ ] Implement Constant Folding (evaluate constant expressions statically)
-  - [ ] Implement Dead Code Elimination
-  - [ ] Optimize Environment lookups (use hashes or pre-indexed scopes)
+- [x] Phase 15: Performance Optimizations
+  - [x] Implement Constant Folding (evaluate constant expressions statically)
+  - [x] Implement Dead Code Elimination
+  - [x] Optimize Environment lookups (use hashes or pre-indexed scopes)
 
 - [ ] Phase 16: Advanced Kotlin Features
   - [ ] Extension Functions (`fun Type.name()`)
@@ -15,7 +15,7 @@
   - [ ] Full Generics Enforcement
 
 - [ ] Phase 17: Language Compatibility & Audit
-  - [ ] Audit codebase for "todo", "for now", "fixme" comments and address them
+  - [x] Audit codebase for "todo", "for now", "fixme" comments and address them
   - [-] Expand Kotlin syntax compatibility (operators like `as?`, `is!`)
   - [ ] Expand test suite for 100% Kotlin compliance
 

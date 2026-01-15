@@ -1,0 +1,22 @@
+// Example of extension functions in Dotlin
+fun Int.isEven(): Boolean {
+    return this % 2 == 0
+}
+
+fun String.times(n: Int): String {
+    var result = ""
+    var i = 0
+    while (i < n) {
+        result = result + this
+        i = i + 1
+    }
+    return result
+}
+
+fun main() {
+    val num = 4
+    val str = "Hello"
+    
+    println(num.isEven())  // Should print true
+    println(str.times(3))  // Should print HelloHelloHello
+}

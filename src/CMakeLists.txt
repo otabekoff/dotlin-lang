@@ -14,6 +14,7 @@ set(SOURCES
   interpreter/builtins.cpp
   interpreter/interpreter.cpp
   interpreter/constant_folder.cpp
+  interpreter/dead_code_elimination.cpp
 )
 
 # Set sources for the library
