@@ -86,4 +86,55 @@ std::string typeToString(const std::shared_ptr<Type> &type) {
   }
 }
 
+bool valuesEqual(const Value &v1, const Value &v2) {
+  if (v1.index() != v2.index()) {
+    // Special case: int vs int64_t comparison
+    if (std::holds_alternative<int>(v1) &&
+        std::holds_alternative<int64_t>(v2)) {
+      return static_cast<int64_t>(std::get<int>(v1)) == std::get<int64_t>(v2);
+    }
+    if (std::holds_alternative<int64_t>(v1) &&
+        std::holds_alternative<int>(v2)) {
+      return std::get<int64_t>(v1) == static_cast<int64_t>(std::get<int>(v2));
+    }
+    // int/long vs double
+    if ((std::holds_alternative<int>(v1) ||
+         std::holds_alternative<int64_t>(v1)) &&
+        std::holds_alternative<double>(v2)) {
+      double d1 = std::holds_alternative<int>(v1)
+                      ? static_cast<double>(std::get<int>(v1))
+                      : static_cast<double>(std::get<int64_t>(v1));
+      return d1 == std::get<double>(v2);
+    }
+    if (std::holds_alternative<double>(v1) &&
+        (std::holds_alternative<int>(v2) ||
+         std::holds_alternative<int64_t>(v2))) {
+      double d2 = std::holds_alternative<int>(v2)
+                      ? static_cast<double>(std::get<int>(v2))
+                      : static_cast<double>(std::get<int64_t>(v2));
+      return std::get<double>(v1) == d2;
+    }
+    return false;
+  }
+
+  return std::visit(
+      [&v2](auto &&arg1) -> bool {
+        using T = std::decay_t<decltype(arg1)>;
+        const T &arg2 = std::get<T>(v2);
+
+        if constexpr (std::is_same_v<T, ArrayValue>) {
+          if (arg1.elements->size() != arg2.elements->size())
+            return false;
+          for (size_t i = 0; i < arg1.elements->size(); ++i) {
+            if (!valuesEqual((*arg1.elements)[i], (*arg2.elements)[i]))
+              return false;
+          }
+          return true;
+        } else {
+          return arg1 == arg2;
+        }
+      },
+      v1);
+}
+
 } // namespace dotlin

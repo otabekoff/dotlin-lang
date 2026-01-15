@@ -12,6 +12,7 @@ class Interpreter;
 std::string getTypeOfValue(const Value &value);
 std::string typeToString(const std::shared_ptr<Type> &type);
 std::string valueToString(const Value &value);
+bool valuesEqual(const Value &v1, const Value &v2);
 } // namespace dotlin
 
 using namespace dotlin;
@@ -333,63 +334,12 @@ void EvalVisitor::visit(BinaryExpr &node) {
     return;
 
   if (node.op == TokenType::EQUAL) {
-    if (left.index() == right.index()) {
-      if (auto *lInt = std::get_if<int>(&left)) {
-        result = Value(*lInt == std::get<int>(right));
-      } else if (auto *lDouble = std::get_if<double>(&left)) {
-        result = Value(*lDouble == std::get<double>(right));
-      } else if (auto *lStr = std::get_if<std::string>(&left)) {
-        result = Value(*lStr == std::get<std::string>(right));
-      } else if (auto *lBool = std::get_if<bool>(&left)) {
-        result = Value(*lBool == std::get<bool>(right));
-      } else {
-        result = Value(left == right);
-      }
-    } else {
-      // Allow int vs double
-      if (auto *lInt = std::get_if<int>(&left)) {
-        if (auto *rDouble = std::get_if<double>(&right)) {
-          result = Value(static_cast<double>(*lInt) == *rDouble);
-          return;
-        }
-      } else if (auto *lDouble = std::get_if<double>(&left)) {
-        if (auto *rInt = std::get_if<int>(&right)) {
-          result = Value(*lDouble == static_cast<double>(*rInt));
-          return;
-        }
-      }
-      result = Value(false);
-    }
+    result = Value(dotlin::valuesEqual(left, right));
     return;
   }
 
   if (node.op == TokenType::NOT_EQUAL) {
-    bool isEqual = false;
-    if (left.index() == right.index()) {
-      if (auto *lInt = std::get_if<int>(&left)) {
-        isEqual = (*lInt == std::get<int>(right));
-      } else if (auto *lDouble = std::get_if<double>(&left)) {
-        isEqual = (*lDouble == std::get<double>(right));
-      } else if (auto *lStr = std::get_if<std::string>(&left)) {
-        isEqual = (*lStr == std::get<std::string>(right));
-      } else if (auto *lBool = std::get_if<bool>(&left)) {
-        isEqual = (*lBool == std::get<bool>(right));
-      } else {
-        isEqual = (left == right);
-      }
-    } else {
-      // Allow int vs double
-      if (auto *lInt = std::get_if<int>(&left)) {
-        if (auto *rDouble = std::get_if<double>(&right)) {
-          isEqual = (static_cast<double>(*lInt) == *rDouble);
-        }
-      } else if (auto *lDouble = std::get_if<double>(&left)) {
-        if (auto *rInt = std::get_if<int>(&right)) {
-          isEqual = (*lDouble == static_cast<double>(*rInt));
-        }
-      }
-    }
-    result = Value(!isEqual);
+    result = Value(!dotlin::valuesEqual(left, right));
     return;
   }
 

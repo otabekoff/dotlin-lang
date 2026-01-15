@@ -14,6 +14,12 @@ namespace fs = std::filesystem;
 
 using namespace dotlin;
 
+namespace dotlin {
+std::string getTypeOfValue(const Value &value);
+std::string valueToString(const Value &value);
+bool valuesEqual(const Value &v1, const Value &v2);
+} // namespace dotlin
+
 Value Interpreter::executeBuiltinFunction(
     const std::string &name,
     const std::vector<std::shared_ptr<Expression>> &arguments) {
@@ -279,11 +285,8 @@ Value Interpreter::executeBuiltinFunction(
 
     if (auto *arrayVal = std::get_if<ArrayValue>(&array)) {
       for (size_t i = 0; i < arrayVal->elements->size(); ++i) {
-        // Simple equality check for now
-        if ((*arrayVal->elements)[i].index() == element.index()) {
-          if ((*arrayVal->elements)[i] == element) {
-            return Value(static_cast<int>(i));
-          }
+        if (valuesEqual((*arrayVal->elements)[i], element)) {
+          return Value(static_cast<int>(i));
         }
       }
       return Value(-1); // Not found
