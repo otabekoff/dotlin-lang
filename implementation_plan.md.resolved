@@ -1,0 +1,33 @@
+# Phase 14: Type System Completion
+
+## Goal
+Transform the current stubbed type checker into a robust static analysis tool capable of type inference and validation.
+
+## Proposed Changes
+
+### [Component] Type Infrastructure
+#### [MODIFY] [interpreter.h](file:///home/otabek/Projects/langs/cpp/dotlin/include/dotlin/interpreter.h)
+- [NEW] Add `TypeEnvironment` struct to handle static type scoping.
+- [MODIFY] [TypeChecker](file:///home/otabek/Projects/langs/cpp/dotlin/include/dotlin/interpreter.h#437-438) to use `TypeEnvironment` instead of runtime [Environment](file:///home/otabek/Projects/langs/cpp/dotlin/include/dotlin/interpreter.h#333-346).
+
+### [Component] Visitor Implementation
+#### [MODIFY] [typechecker.cpp](file:///home/otabek/Projects/langs/cpp/dotlin/src/interpreter/typechecker.cpp)
+- [MODIFY] `TypeCheckVisitor::visit(IdentifierExpr)`: Implement variable lookup in `TypeEnvironment`.
+- [MODIFY] `TypeCheckVisitor::visit(BinaryExpr)`: Implement arithmetic and comparison type rules.
+- [MODIFY] `TypeCheckVisitor::visit(UnaryExpr)`: Implement negation and logical NOT rules.
+- [MODIFY] `TypeCheckVisitor::visit(CallExpr)`: Implement function return type resolution.
+- [MODIFY] `TypeCheckVisitor::visit(ArrayAccessExpr)`: Resolve element types.
+- [MODIFY] `StmtTypeCheckVisitor::visit(VariableDeclStmt)`: Define variable types in `TypeEnvironment`.
+- [MODIFY] `StmtTypeCheckVisitor::visit(FunctionDeclStmt)`: Register function signatures for checking.
+
+## Verification Plan
+
+### Automated Tests
+- Create `tests/files/type_check_test.lin` with:
+    - Correct type assignments (should pass).
+    - Incorrect type assignments (should trigger warnings/errors in inference).
+    - Mixed numeric operations.
+- Run [build/apps/dotlin](file:///home/otabek/Projects/langs/cpp/dotlin/build/apps/dotlin) with type inference enabled and check console output.
+
+### Manual Verification
+- Verify that `println("Type inferred for variable 'x': INT")` (or similar) appears for simple declarations.

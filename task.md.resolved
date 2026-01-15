@@ -1,0 +1,35 @@
+# Dotlin Implementation Tasks
+
+## Phase 1-12: Completed Milestones ✅
+
+- [x] Standard Library (Math, File I/O, Date/Time)
+- [x] Language Features (Classes, Inheritance, Constructors, Try-Catch)
+- [x] Collections (Arrays, map, filter, structural equality)
+- [x] Core Architecture (Binary arithmetic, structural equality, full lexer interpolation)
+
+## Phase 13: Error Handling & Debugging (Current Priority)
+
+- [ ] **Comprehensive Error Messages**:
+
+## Phase 13: Error Handling & Debugging (Completed) ✅
+
+- [x] Specialized Errors with Location ✅
+- [x] Stack Trace implementation ✅
+- [x] Debugging utilities (printStackTrace) ✅
+
+## Phase 14: Type System Finalization ✅
+- [x] Functional Type Inference for variables
+- [x] Type Resolution for functions and built-ins
+- [x] Integrated static analysis pass
+
+## Phase 15: Performance Optimizations (Current Priority) 🚀
+- [/] **Constant Folding**:
+  - [ ] Implement `ConstantFolder` visitor to evaluate expressions like `2 + 2` at compile-time.
+  - [ ] Apply folding to literal math and string concatenation.
+- [ ] **Environment Optimization**:
+  - [ ] Measure and improve environment lookup performance.
+
+## Phase 16: Advanced Kotlin Features & Compatibility
+- [ ] **Extension Functions**: `fun Type.name()`
+- [ ] **Null Safety**: `?`, `!!`, `?.`
+- [ ] **Generics**: Full enforcement in static analysis.
