@@ -59,7 +59,7 @@ void EvalVisitor::visit(IdentifierExpr &node) {
       // Check if this is a built-in function
       if (node.name == "println" || node.name == "print" ||
           node.name == "sqrt" || node.name == "abs" || node.name == "pow" ||
-          node.name == "readln") {
+          node.name == "readln" || node.name == "arrayOf") {
         // Return a special lambda that represents a built-in function
         auto builtinLambda =
             std::make_shared<LambdaValue>(std::vector<FunctionParameter>(),
