@@ -26,9 +26,11 @@ void ExecVisitor::visit(VariableDeclStmt &node) {
     }
     value = interpreter->evaluate(*node.initializer.value());
   }
-  std::cout << "[DEBUG] Defining '" << node.name << "' in environment"
-            << std::endl;
-  interpreter->environment->define(node.name, value);
+  if (node.index != -1) {
+    interpreter->environment->defineAt(node.index, value);
+  } else {
+    interpreter->environment->define(node.name, value);
+  }
 }
 
 void ExecVisitor::visit(FunctionDeclStmt &node) {

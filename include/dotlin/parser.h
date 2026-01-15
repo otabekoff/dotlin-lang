@@ -378,6 +378,7 @@ struct StringInterpolationExpr : Expression {
 
 struct IdentifierExpr : Expression {
   std::string name;
+  int index = -1; // Added for performance (Resolver)
   IdentifierExpr(std::string n, size_t l, size_t c)
       : Expression(l, c), name(std::move(n)) {}
 
@@ -489,6 +490,7 @@ struct ExpressionStmt : Statement {
 struct VariableDeclStmt : Statement {
   bool isVal; // true for val, false for var
   std::string name;
+  int index = -1; // Added for performance (Resolver)
   std::optional<std::shared_ptr<Type>> typeAnnotation;
   std::optional<Expression::Ptr> initializer;
   VariableDeclStmt(bool is_val, std::string n,

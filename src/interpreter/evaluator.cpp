@@ -53,9 +53,10 @@ void EvalVisitor::visit(IdentifierExpr &node) {
   // Look up the value in the environment
   else {
     try {
-      auto distance = interpreter->getResolvedDistance(&node);
-      if (distance) {
-        result = interpreter->environment->getAt(*distance, node.name);
+      auto location = interpreter->getResolvedLocation(&node);
+      if (location) {
+        result =
+            interpreter->environment->getAt(location->first, location->second);
       } else {
         result = interpreter->globals->get(node.name);
       }
@@ -114,9 +115,10 @@ void EvalVisitor::visit(BinaryExpr &node) {
     // Handle assignment
     if (auto *ident = dynamic_cast<IdentifierExpr *>(node.left.get())) {
       Value value = interpreter->evaluate(*node.right);
-      auto distance = interpreter->getResolvedDistance(ident);
-      if (distance) {
-        interpreter->environment->assignAt(*distance, ident->name, value);
+      auto location = interpreter->getResolvedLocation(ident);
+      if (location) {
+        interpreter->environment->assignAt(location->first, location->second,
+                                           value);
       } else {
         interpreter->globals->assign(ident->name, value);
       }

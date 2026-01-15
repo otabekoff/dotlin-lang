@@ -17,8 +17,9 @@ Value Environment::get(const std::string &name) {
     return enclosing->get(name);
   }
 
-  std::cout << "[DEBUG] Environment(" << this << ")::get failed for '" << name
-            << "'" << std::endl;
+  /* std::cout << "[DEBUG] Environment(" << this << ")::get failed for '" <<
+     name
+            << "'" << std::endl; */
   throw std::runtime_error("Undefined variable: " + name);
 }
 
@@ -50,14 +51,28 @@ std::shared_ptr<Environment> Environment::ancestor(int distance) {
   return environment;
 }
 
-Value Environment::getAt(int distance, const std::string &name) {
-  return ancestor(distance)
-      ->values[name]; // or find() to be safe? Resolver helps safety.
-  // ancestor(distance)->values.find(name)->second;
+void Environment::defineAt(int index, Value value) {
+  if (static_cast<size_t>(index) >= indexedValues.size()) {
+    indexedValues.resize(static_cast<size_t>(index) + 1);
+  }
+  indexedValues[static_cast<size_t>(index)] = value;
 }
 
-void Environment::assignAt(int distance, const std::string &name, Value value) {
-  ancestor(distance)->values[name] = value;
+Value Environment::getAt(int distance, int index) {
+  auto env = ancestor(distance);
+  if (static_cast<size_t>(index) < env->indexedValues.size()) {
+    return env->indexedValues[static_cast<size_t>(index)];
+  }
+  // Fallback or error? Resolver should ensure index is valid.
+  return Value();
+}
+
+void Environment::assignAt(int distance, int index, Value value) {
+  auto env = ancestor(distance);
+  if (static_cast<size_t>(index) >= env->indexedValues.size()) {
+    env->indexedValues.resize(static_cast<size_t>(index) + 1);
+  }
+  env->indexedValues[static_cast<size_t>(index)] = value;
 }
 
 } // namespace dotlin

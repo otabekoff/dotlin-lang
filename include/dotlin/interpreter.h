@@ -364,7 +364,8 @@ struct TypeEnvironment {
 struct Environment : public std::enable_shared_from_this<Environment> {
   std::unordered_map<std::string, Value> values;
   std::shared_ptr<Environment> enclosing = nullptr;
-  bool is_block_scope = false; // Flag to identify block vs function scope
+  bool is_block_scope = false;      // Flag to identify block vs function scope
+  std::vector<Value> indexedValues; // Added for performance (O(1) access)
 
   Environment(std::shared_ptr<Environment> parent = nullptr,
               bool block_scope = false)
@@ -375,8 +376,9 @@ struct Environment : public std::enable_shared_from_this<Environment> {
   void assign(const std::string &name, Value value);
 
   // Resolver optimization methods
-  Value getAt(int distance, const std::string &name);
-  void assignAt(int distance, const std::string &name, Value value);
+  void defineAt(int index, Value value);
+  Value getAt(int distance, int index);
+  void assignAt(int distance, int index, Value value);
   std::shared_ptr<Environment> ancestor(int distance);
 };
 
@@ -471,14 +473,15 @@ private:
   static std::map<std::string, std::vector<std::shared_ptr<FunctionDef>>>
       functionDefinitions;
 
-  // Map to store resolution depth for expressions (Resolver pass)
-  // Key: Expression raw pointer (address), Value: depth (hops)
-  std::map<const Expression *, int> locals;
+  // Map to store resolution (distance, index) for expressions (Resolver pass)
+  // Key: Expression raw pointer (address), Value: pair(distance, index)
+  std::map<const Expression *, std::pair<int, int>> locals;
 
   // API for Resolver
-  void resolve(const Expression *expr, int depth);
-  // Helper to get resolved distance
-  std::optional<int> getResolvedDistance(const Expression *expr);
+  void resolve(const Expression *expr, int depth, int index);
+  // Helper to get resolved location
+  std::optional<std::pair<int, int>>
+  getResolvedLocation(const Expression *expr);
   void traceLookup(const std::string &name, std::optional<int> distance);
 };
 

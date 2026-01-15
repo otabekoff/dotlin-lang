@@ -410,12 +410,22 @@ Value Interpreter::executeBuiltinFunction(
     if (arguments.size() != 0) {
       throw std::runtime_error(name + "() expects no arguments");
     }
-    // Return current time in milliseconds
-    auto now = std::chrono::system_clock::now();
+    auto now = std::chrono::high_resolution_clock::now();
     auto duration = now.time_since_epoch();
     auto millis =
         std::chrono::duration_cast<std::chrono::milliseconds>(duration);
     return Value(static_cast<int64_t>(millis.count()));
+  }
+
+  if (name == "currentTimeMicros") {
+    if (arguments.size() != 0) {
+      throw std::runtime_error("currentTimeMicros() expects no arguments");
+    }
+    auto now = std::chrono::high_resolution_clock::now();
+    auto duration = now.time_since_epoch();
+    auto micros =
+        std::chrono::duration_cast<std::chrono::microseconds>(duration);
+    return Value(static_cast<int64_t>(micros.count()));
   }
 
   if (name == "now") {

@@ -27,13 +27,12 @@ Interpreter::Interpreter()
       functionEnvironment(nullptr), hasMainFunction(false),
       mainFunctionStmt(nullptr), commandLineArgs({}) {}
 
-void Interpreter::resolve(const Expression *expr, int depth) {
-  // std::cout << "[DEBUG] Resolving expression at address " << expr << " to
-  // depth " << depth << std::endl;
-  locals[expr] = depth;
+void Interpreter::resolve(const Expression *expr, int depth, int index) {
+  locals[expr] = {depth, index};
 }
 
-std::optional<int> Interpreter::getResolvedDistance(const Expression *expr) {
+std::optional<std::pair<int, int>>
+Interpreter::getResolvedLocation(const Expression *expr) {
   auto it = locals.find(expr);
   if (it != locals.end()) {
     return it->second;

@@ -22,10 +22,14 @@ void ResolverVisitor::resolve(const Expression::Ptr &expr) {
 }
 
 void ResolverVisitor::beginScope() {
-  scopes.push_back(std::unordered_map<std::string, bool>());
+  scopes.push_back(std::unordered_map<std::string, ScopeEntry>());
+  scopeIndexCounters.push_back(0);
 }
 
-void ResolverVisitor::endScope() { scopes.pop_back(); }
+void ResolverVisitor::endScope() {
+  scopes.pop_back();
+  scopeIndexCounters.pop_back();
+}
 
 void ResolverVisitor::declare(const std::string &name) {
   if (scopes.empty()) {
@@ -34,23 +38,26 @@ void ResolverVisitor::declare(const std::string &name) {
   auto &scope = scopes.back();
   if (scope.find(name) != scope.end()) {
     // Variable already declared
+    return;
   }
-  scope[name] = false;
+  int index = scopeIndexCounters.back()++;
+  scope[name] = {false, index};
 }
 
 void ResolverVisitor::define(const std::string &name) {
   if (scopes.empty()) {
     return;
   }
-  scopes.back()[name] = true;
+  scopes.back()[name].defined = true;
 }
 
 void ResolverVisitor::resolveLocal(Expression &expr, const std::string &name) {
   for (int i = static_cast<int>(scopes.size()) - 1; i >= 0; i--) {
-    if (scopes[static_cast<size_t>(i)].find(name) !=
-        scopes[static_cast<size_t>(i)].end()) {
+    auto it = scopes[static_cast<size_t>(i)].find(name);
+    if (it != scopes[static_cast<size_t>(i)].end()) {
       int distance = static_cast<int>(scopes.size()) - 1 - i;
-      interpreter->resolve(&expr, distance);
+      int index = it->second.index;
+      interpreter->resolve(&expr, distance, index);
       return;
     }
   }
@@ -68,6 +75,11 @@ void ResolverVisitor::visit(VariableDeclStmt &node) {
     resolve(node.initializer.value());
   }
   define(node.name);
+
+  // Store the index in the AST node for use during execution if it's a local
+  if (!scopes.empty()) {
+    node.index = scopes.back()[node.name].index;
+  }
 }
 
 void ResolverVisitor::visit(FunctionDeclStmt &node) {
@@ -171,9 +183,11 @@ void ResolverVisitor::visit(ClassDeclStmt &node) {
 }
 
 void ResolverVisitor::visit(IdentifierExpr &node) {
-  if (!scopes.empty() && scopes.back().count(node.name) > 0 &&
-      scopes.back()[node.name] == false) {
-    // Error: Cannot read local variable in its own initializer
+  if (!scopes.empty()) {
+    auto it = scopes.back().find(node.name);
+    if (it != scopes.back().end() && it->second.defined == false) {
+      // Error: Cannot read local variable in its own initializer
+    }
   }
   resolveLocal(node, node.name);
 }

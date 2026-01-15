@@ -11,16 +11,20 @@ fun benchmark() {
                     {
                         var f = "fifth";
                         // Access variables from different depths 1,000,000 times
-                        var start = currentTimeMillis();
+                        var start = currentTimeMicros();
                         var i = 0;
-                        while(i < 1000000) {
-                            var x = a; 
-                            var y = b; 
-                            var z = e; 
+                        var x = a;
+                        var y = b;
+                        var z = e;
+                        while(i < 2000000) {
+                            x = a; 
+                            y = b; 
+                            z = e; 
                             i = i + 1;
                         }
-                        var end = currentTimeMillis();
-                        println("Time taken: " + (end - start) + "ms");
+                        var end = currentTimeMicros();
+                        println("Time taken: " + (end - start) + "us");
+                        println("Final i: " + i);
                     }
                 }
             }

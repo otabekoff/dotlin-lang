@@ -218,7 +218,12 @@ struct DeadCodeEliminationVisitor : public AstVisitor {
 // Resolver visitor for static analysis
 struct ResolverVisitor : public AstVisitor {
   Interpreter *interpreter;
-  std::vector<std::unordered_map<std::string, bool>> scopes;
+  struct ScopeEntry {
+    bool defined;
+    int index;
+  };
+  std::vector<std::unordered_map<std::string, ScopeEntry>> scopes;
+  std::vector<int> scopeIndexCounters; // Tracks indices per scope level
 
   // Helper for function types
   enum class FunctionType { NONE, FUNCTION, INITIALIZER, METHOD };
