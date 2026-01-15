@@ -83,6 +83,111 @@ Value Interpreter::executeBuiltinFunction(
     throw std::runtime_error("pow() expects numbers");
   }
 
+  if (name == "sin") {
+    if (arguments.size() != 1)
+      throw std::runtime_error("sin() expects 1 argument");
+    Value arg = evaluate(*arguments[0]);
+    if (auto *num = std::get_if<double>(&arg))
+      return Value(std::sin(*num));
+    if (auto *num = std::get_if<int>(&arg))
+      return Value(std::sin(*num));
+    throw std::runtime_error("sin() expects a number");
+  }
+  if (name == "cos") {
+    if (arguments.size() != 1)
+      throw std::runtime_error("cos() expects 1 argument");
+    Value arg = evaluate(*arguments[0]);
+    if (auto *num = std::get_if<double>(&arg))
+      return Value(std::cos(*num));
+    if (auto *num = std::get_if<int>(&arg))
+      return Value(std::cos(*num));
+    throw std::runtime_error("cos() expects a number");
+  }
+  if (name == "tan") {
+    if (arguments.size() != 1)
+      throw std::runtime_error("tan() expects 1 argument");
+    Value arg = evaluate(*arguments[0]);
+    if (auto *num = std::get_if<double>(&arg))
+      return Value(std::tan(*num));
+    if (auto *num = std::get_if<int>(&arg))
+      return Value(std::tan(*num));
+    throw std::runtime_error("tan() expects a number");
+  }
+
+  if (name == "min") {
+    if (arguments.size() != 2)
+      throw std::runtime_error("min() expects 2 arguments");
+    Value a = evaluate(*arguments[0]);
+    Value b = evaluate(*arguments[1]);
+    if (std::holds_alternative<int>(a) && std::holds_alternative<int>(b)) {
+      return Value(std::min(std::get<int>(a), std::get<int>(b)));
+    }
+    if (std::holds_alternative<double>(a) ||
+        std::holds_alternative<double>(b)) {
+      double da = std::holds_alternative<int>(a) ? std::get<int>(a)
+                                                 : std::get<double>(a);
+      double db = std::holds_alternative<int>(b) ? std::get<int>(b)
+                                                 : std::get<double>(b);
+      return Value(std::min(da, db));
+    }
+    throw std::runtime_error("min() expects numbers");
+  }
+  if (name == "max") {
+    if (arguments.size() != 2)
+      throw std::runtime_error("max() expects 2 arguments");
+    Value a = evaluate(*arguments[0]);
+    Value b = evaluate(*arguments[1]);
+    if (std::holds_alternative<int>(a) && std::holds_alternative<int>(b)) {
+      return Value(std::max(std::get<int>(a), std::get<int>(b)));
+    }
+    if (std::holds_alternative<double>(a) ||
+        std::holds_alternative<double>(b)) {
+      double da = std::holds_alternative<int>(a) ? std::get<int>(a)
+                                                 : std::get<double>(a);
+      double db = std::holds_alternative<int>(b) ? std::get<int>(b)
+                                                 : std::get<double>(b);
+      return Value(std::max(da, db));
+    }
+    throw std::runtime_error("max() expects numbers");
+  }
+
+  if (name == "round") {
+    if (arguments.size() != 1)
+      throw std::runtime_error("round() expects 1 argument");
+    Value arg = evaluate(*arguments[0]);
+    if (auto *num = std::get_if<double>(&arg))
+      return Value(static_cast<int>(std::round(*num)));
+    if (auto *num = std::get_if<int>(&arg))
+      return Value(*num);
+    throw std::runtime_error("round() expects a number");
+  }
+  if (name == "ceil") {
+    if (arguments.size() != 1)
+      throw std::runtime_error("ceil() expects 1 argument");
+    Value arg = evaluate(*arguments[0]);
+    if (auto *num = std::get_if<double>(&arg))
+      return Value(static_cast<int>(std::ceil(*num)));
+    if (auto *num = std::get_if<int>(&arg))
+      return Value(*num);
+    throw std::runtime_error("ceil() expects a number");
+  }
+  if (name == "floor") {
+    if (arguments.size() != 1)
+      throw std::runtime_error("floor() expects 1 argument");
+    Value arg = evaluate(*arguments[0]);
+    if (auto *num = std::get_if<double>(&arg))
+      return Value(static_cast<int>(std::floor(*num)));
+    if (auto *num = std::get_if<int>(&arg))
+      return Value(*num);
+    throw std::runtime_error("floor() expects a number");
+  }
+
+  if (name == "random") {
+    if (arguments.size() != 0)
+      throw std::runtime_error("random() expects 0 arguments");
+    return Value(static_cast<double>(std::rand()) / RAND_MAX);
+  }
+
   // String functions
   if (name == "length") {
     if (arguments.size() != 1) {

@@ -1,0 +1,29 @@
+// Test Math Functions
+println("--- Trigonometry ---")
+println("sin(0): " + sin(0))
+// sin(PI/2) approx 1
+println("sin(1.570796): " + sin(1.570796)) 
+println("cos(0): " + cos(0))
+// cos(PI) approx -1
+println("cos(3.14159): " + cos(3.14159)) 
+println("tan(0): " + tan(0))
+
+println("\n--- Min/Max ---")
+println("min(10, 20): " + min(10, 20))
+println("min(20, 10): " + min(20, 10))
+println("max(10, 20): " + max(10, 20))
+println("max(20, 10): " + max(20, 10))
+println("min(5.5, 2.2): " + min(5.5, 2.2))
+println("max(5.5, 2.2): " + max(5.5, 2.2))
+
+println("\n--- Rounding ---")
+println("round(3.2): " + round(3.2))
+println("round(3.8): " + round(3.8))
+println("ceil(3.2): " + ceil(3.2))
+println("floor(3.8): " + floor(3.8))
+println("round(-3.2): " + round(-3.2))
+println("round(-3.8): " + round(-3.8))
+
+println("\n--- Random ---")
+var r = random()
+println("random() [0-1]: " + (r >= 0.0 && r < 1.0))
