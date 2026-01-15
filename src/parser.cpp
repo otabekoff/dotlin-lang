@@ -540,9 +540,11 @@ parsePrimaryExpression(const std::vector<Token> &tokens, size_t &pos) {
     }
     pos++;
 
-    // Check if this string contains interpolation by looking for ${ pattern
-    // but ignoring escaped \${ (only for non-raw strings)
+    // Check if this string contains interpolation by looking for ${ or $
+    // pattern but ignoring escaped sequences (only for non-raw strings)
     bool hasInterpolation = false;
+
+    // Check for ${
     size_t found = rawValue.find("${");
     while (found != std::string::npos) {
       if (isRaw || found == 0 || rawValue[found - 1] != '\\') {
@@ -550,6 +552,23 @@ parsePrimaryExpression(const std::vector<Token> &tokens, size_t &pos) {
         break;
       }
       found = rawValue.find("${", found + 1);
+    }
+
+    // Check for $ (if not already found)
+    if (!hasInterpolation) {
+      found = rawValue.find('$');
+      while (found != std::string::npos) {
+        if (isRaw || found == 0 || rawValue[found - 1] != '\\') {
+          // Check if it's followed by an identifier start
+          if (found + 1 < rawValue.length() &&
+              (std::isalpha(rawValue[found + 1]) ||
+               rawValue[found + 1] == '_')) {
+            hasInterpolation = true;
+            break;
+          }
+        }
+        found = rawValue.find('$', found + 1);
+      }
     }
 
     if (hasInterpolation) {
@@ -1309,20 +1328,50 @@ parseStringInterpolation(const std::string &strValue, size_t line,
   size_t currentPos = 0;
 
   while (currentPos < strValue.length()) {
-    size_t interpolationStart = strValue.find("${", currentPos);
+    // Find the next candidate for interpolation: either ${ or $
+    size_t interpolationStart = std::string::npos;
+    bool isBraceStyle = false;
 
-    while (interpolationStart != std::string::npos) {
-      if (isRaw || interpolationStart == 0 ||
-          strValue[interpolationStart - 1] != '\\') {
-        break;
+    size_t bracePos = strValue.find("${", currentPos);
+    size_t simplePos = strValue.find('$', currentPos);
+
+    // Filter out escaped ones if not raw
+    while (bracePos != std::string::npos && !isRaw && bracePos > 0 &&
+           strValue[bracePos - 1] == '\\') {
+      bracePos = strValue.find("${", bracePos + 1);
+    }
+    while (simplePos != std::string::npos && !isRaw && simplePos > 0 &&
+           strValue[simplePos - 1] == '\\') {
+      simplePos = strValue.find('$', simplePos + 1);
+    }
+
+    if (bracePos == std::string::npos && simplePos == std::string::npos) {
+      // No more interpolations
+      interpolationStart = std::string::npos;
+    } else if (bracePos == std::string::npos) {
+      interpolationStart = simplePos;
+      isBraceStyle = false;
+    } else if (simplePos == std::string::npos) {
+      interpolationStart = bracePos;
+      isBraceStyle = true;
+    } else {
+      if (bracePos <= simplePos) {
+        interpolationStart = bracePos;
+        isBraceStyle = true;
+      } else {
+        // Special case: $ followed immediately by { is brace style
+        if (simplePos + 1 == bracePos) {
+          interpolationStart = bracePos;
+          isBraceStyle = true;
+        } else {
+          interpolationStart = simplePos;
+          isBraceStyle = false;
+        }
       }
-      // It was escaped, find next
-      interpolationStart = strValue.find("${", interpolationStart + 1);
     }
 
     if (interpolationStart == std::string::npos) {
-      // No more interpolations, add rest as a string literal (unescaped if not
-      // raw)
+      // No more valid interpolations, add rest as a string literal
       if (currentPos < strValue.length()) {
         std::string remaining = strValue.substr(currentPos);
         parts.push_back(std::make_unique<LiteralExpr>(
@@ -1331,7 +1380,7 @@ parseStringInterpolation(const std::string &strValue, size_t line,
       break;
     }
 
-    // Add string part before interpolation (unescaped if not raw)
+    // Add string part before interpolation
     if (interpolationStart > currentPos) {
       std::string stringPart =
           strValue.substr(currentPos, interpolationStart - currentPos);
@@ -1339,99 +1388,105 @@ parseStringInterpolation(const std::string &strValue, size_t line,
           isRaw ? stringPart : unescapeString(stringPart), line, column));
     }
 
-    // Find the closing brace
-    size_t interpolationEnd = strValue.find('}', interpolationStart + 2);
-    if (interpolationEnd == std::string::npos) {
-      // Unclosed interpolation, treat as literal
-      std::string remaining = strValue.substr(currentPos);
-      parts.push_back(std::make_unique<LiteralExpr>(remaining, line, column));
-      break;
-    }
-
-    // Extract the expression inside ${}
-    std::string expressionStr = strValue.substr(
-        interpolationStart + 2, interpolationEnd - interpolationStart - 2);
-
-    // For complex expressions, we need to tokenize and parse the expression
-    // Create a temporary token stream for the expression
-    std::vector<Token> exprTokens;
-
-    // Simple tokenization for basic expressions
-    size_t exprPos = 0;
-    while (exprPos < expressionStr.length()) {
-      char ch = expressionStr[exprPos];
-
-      if (std::isalpha(ch) || ch == '_') {
-        // Identifier
-        size_t start = exprPos;
-        while (exprPos < expressionStr.length() &&
-               (std::isalnum(expressionStr[exprPos]) ||
-                expressionStr[exprPos] == '_')) {
-          exprPos++;
-        }
-        std::string ident = expressionStr.substr(start, exprPos - start);
-        exprTokens.emplace_back(TokenType::IDENTIFIER, ident, line, column);
-      } else if (ch == '.') {
-        // Member access operator
-        exprTokens.emplace_back(TokenType::DOT, ".", line, column);
-        exprPos++;
-      } else if (ch == '[') {
-        // Array access operator
-        exprTokens.emplace_back(TokenType::LBRACKET, "[", line, column);
-        exprPos++;
-      } else if (ch == ']') {
-        // Array access operator
-        exprTokens.emplace_back(TokenType::RBRACKET, "]", line, column);
-        exprPos++;
-      } else if (ch == '(') {
-        // Function call
-        exprTokens.emplace_back(TokenType::LPAREN, "(", line, column);
-        exprPos++;
-      } else if (ch == ')') {
-        // Function call
-        exprTokens.emplace_back(TokenType::RPAREN, ")", line, column);
-        exprPos++;
-      } else if (ch == ',') {
-        // Argument separator
-        exprTokens.emplace_back(TokenType::COMMA, ",", line, column);
-        exprPos++;
-      } else if (std::isdigit(ch)) {
-        // Number
-        size_t start = exprPos;
-        while (exprPos < expressionStr.length() &&
-               std::isdigit(expressionStr[exprPos])) {
-          exprPos++;
-        }
-        std::string num = expressionStr.substr(start, exprPos - start);
-        exprTokens.emplace_back(TokenType::NUMBER, num, line, column);
-      } else if (std::isspace(ch)) {
-        // Skip whitespace
-        exprPos++;
-      } else {
-        // Unknown character, skip for now
-        exprPos++;
+    if (isBraceStyle) {
+      // Find the closing brace
+      size_t interpolationEnd = strValue.find('}', interpolationStart + 2);
+      if (interpolationEnd == std::string::npos) {
+        // Unclosed interpolation, treat as literal
+        std::string remaining = strValue.substr(interpolationStart);
+        parts.push_back(std::make_unique<LiteralExpr>(
+            isRaw ? remaining : unescapeString(remaining), line, column));
+        break;
       }
-    }
 
-    // Parse the expression using our token stream
-    size_t tokenPos = 0;
-    try {
-      auto expr = parseExpression(exprTokens, tokenPos);
-      if (expr) {
-        parts.push_back(std::move(expr));
-      } else {
-        // If parsing fails, treat as literal
+      // Extract the expression inside ${}
+      std::string expressionStr = strValue.substr(
+          interpolationStart + 2, interpolationEnd - interpolationStart - 2);
+
+      // Tokenize and parse (existing logic)
+      std::vector<Token> exprTokens;
+      size_t exprPos = 0;
+      while (exprPos < expressionStr.length()) {
+        char ch = expressionStr[exprPos];
+        if (std::isalpha(ch) || ch == '_') {
+          size_t start = exprPos;
+          while (exprPos < expressionStr.length() &&
+                 (std::isalnum(expressionStr[exprPos]) ||
+                  expressionStr[exprPos] == '_')) {
+            exprPos++;
+          }
+          std::string ident = expressionStr.substr(start, exprPos - start);
+          exprTokens.emplace_back(TokenType::IDENTIFIER, ident, line, column);
+        } else if (ch == '.') {
+          exprTokens.emplace_back(TokenType::DOT, ".", line, column);
+          exprPos++;
+        } else if (ch == '[') {
+          exprTokens.emplace_back(TokenType::LBRACKET, "[", line, column);
+          exprPos++;
+        } else if (ch == ']') {
+          exprTokens.emplace_back(TokenType::RBRACKET, "]", line, column);
+          exprPos++;
+        } else if (ch == '(') {
+          exprTokens.emplace_back(TokenType::LPAREN, "(", line, column);
+          exprPos++;
+        } else if (ch == ')') {
+          exprTokens.emplace_back(TokenType::RPAREN, ")", line, column);
+          exprPos++;
+        } else if (ch == ',') {
+          exprTokens.emplace_back(TokenType::COMMA, ",", line, column);
+          exprPos++;
+        } else if (std::isdigit(ch)) {
+          size_t start = exprPos;
+          while (exprPos < expressionStr.length() &&
+                 std::isdigit(expressionStr[exprPos])) {
+            exprPos++;
+          }
+          std::string num = expressionStr.substr(start, exprPos - start);
+          exprTokens.emplace_back(TokenType::NUMBER, num, line, column);
+        } else if (std::isspace(ch)) {
+          exprPos++;
+        } else {
+          exprPos++;
+        }
+      }
+
+      size_t tokenPos = 0;
+      try {
+        auto expr = parseExpression(exprTokens, tokenPos);
+        if (expr) {
+          parts.push_back(std::move(expr));
+        } else {
+          std::string literalStr = "${" + expressionStr + "}";
+          parts.push_back(
+              std::make_unique<LiteralExpr>(literalStr, line, column));
+        }
+      } catch (...) {
         std::string literalStr = "${" + expressionStr + "}";
         parts.push_back(
             std::make_unique<LiteralExpr>(literalStr, line, column));
       }
-    } catch (...) {
-      // If parsing fails, treat as literal
-      std::string literalStr = "${" + expressionStr + "}";
-      parts.push_back(std::make_unique<LiteralExpr>(literalStr, line, column));
+      currentPos = interpolationEnd + 1;
+    } else {
+      // Simple $variable style
+      size_t varStart = interpolationStart + 1;
+      size_t varEnd = varStart;
+      if (varEnd < strValue.length() &&
+          (std::isalpha(strValue[varEnd]) || strValue[varEnd] == '_')) {
+        varEnd++;
+        while (varEnd < strValue.length() &&
+               (std::isalnum(strValue[varEnd]) || strValue[varEnd] == '_')) {
+          varEnd++;
+        }
+        std::string varName = strValue.substr(varStart, varEnd - varStart);
+        parts.push_back(
+            std::make_unique<IdentifierExpr>(varName, line, column));
+        currentPos = varEnd;
+      } else {
+        // Not a variable, treat $ as literal
+        parts.push_back(std::make_unique<LiteralExpr>("$", line, column));
+        currentPos = varStart;
+      }
     }
-
-    currentPos = interpolationEnd + 1;
   }
 
   return std::make_unique<StringInterpolationExpr>(std::move(parts), line,
