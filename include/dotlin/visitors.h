@@ -134,4 +134,41 @@ struct StmtTypeCheckVisitor : public dotlin::AstVisitor {
   void visit(ArrayAccessExpr &node) override;
 };
 
+// Constant folding visitor
+struct ConstantFolderVisitor : public AstVisitor {
+  Expression::Ptr resultExpr;
+  Statement::Ptr resultStmt;
+
+  ConstantFolderVisitor() : resultExpr(nullptr), resultStmt(nullptr) {}
+
+  // Helper to fold an expression and return the new pointer
+  Expression::Ptr fold(Expression::Ptr expr);
+  // Helper to fold a statement and return the new pointer
+  Statement::Ptr fold(Statement::Ptr stmt);
+
+  void visit(LiteralExpr &node) override;
+  void visit(StringInterpolationExpr &node) override;
+  void visit(IdentifierExpr &node) override;
+  void visit(LambdaExpr &node) override;
+  void visit(BinaryExpr &node) override;
+  void visit(UnaryExpr &node) override;
+  void visit(CallExpr &node) override;
+  void visit(MemberAccessExpr &node) override;
+  void visit(ArrayLiteralExpr &node) override;
+  void visit(ArrayAccessExpr &node) override;
+
+  void visit(ExpressionStmt &node) override;
+  void visit(VariableDeclStmt &node) override;
+  void visit(FunctionDeclStmt &node) override;
+  void visit(BlockStmt &node) override;
+  void visit(IfStmt &node) override;
+  void visit(WhileStmt &node) override;
+  void visit(ReturnStmt &node) override;
+  void visit(ClassDeclStmt &node) override;
+  void visit(ForStmt &node) override;
+  void visit(WhenStmt &node) override;
+  void visit(TryStmt &node) override;
+  void visit(ConstructorDeclStmt &node) override;
+};
+
 } // namespace dotlin

@@ -4,32 +4,20 @@
 - [-] is for partially completed
 - [x] is for completed.
 
-- [x] Phase 14: Type System Finalization
-  - [x] Audit `typechecker.cpp` and identify missing logic
-  - [x] Implement `TypeEnvironment` for static analysis
-  - [x] Complete `TypeCheckVisitor` for all expression types
-  - [x] Complete `StmtTypeCheckVisitor` for all statement types
-  - [x] Implement type inference for variables (`val x = 10`)
-  - [x] Integrate type checking pass into `Interpreter::interpret`
-  - [x] Verify type inference with new test cases
+- [ ] Phase 15: Performance Optimizations
+  - [ ] Implement Constant Folding (evaluate constant expressions statically)
+  - [ ] Implement Dead Code Elimination
+  - [ ] Optimize Environment lookups (use hashes or pre-indexed scopes)
 
-- [x] Phase 13: Error Handling and Debugging
-  - [x] Add comprehensive error messages (DotlinError)
-  - [x] Implement stack traces (callStack)
-  - [x] Add debugging utilities (printStackTrace)
-  - [x] Improve exception handling (location-aware errors)
+- [ ] Phase 16: Advanced Kotlin Features
+  - [ ] Extension Functions (`fun Type.name()`)
+  - [ ] Null Safety (`String?`, `?.`, `!!`)
+  - [ ] Full Generics Enforcement
 
-3. Performance Optimizations
-   - [ ] Add expression evaluation optimizations ❌ (Not yet started)
-   - [ ] Implement constant folding ❌ (Not yet started)
-   - [ ] Add dead code elimination ❌ (Not yet started)
-   - [ ] Optimize variable lookups ❌ (Currently uses O(N) environment chain lookup)
-
-4. Language Compatibility
-   - [-] Expand Kotlin syntax compatibility ⚠️ (Core syntax is Kotlin-like, but many nuances missing)
-   - [-] Add more Kotlin-style operators ⚠️ (Range and interpolation added; others like `as?`, `is!` missing)
-   - [ ] Implement extension functions ❌ (Not yet started)
-   - [ ] Add null safety features ❌ (Reference types are currently nullable but without safety checks)
+- [ ] Phase 17: Language Compatibility & Audit
+  - [ ] Audit codebase for "todo", "for now", "fixme" comments and address them
+  - [-] Expand Kotlin syntax compatibility (operators like `as?`, `is!`)
+  - [ ] Expand test suite for 100% Kotlin compliance
 
 ---
 

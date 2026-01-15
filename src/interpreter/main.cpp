@@ -32,6 +32,9 @@ Value Interpreter::interpret(const Program &program,
   // Perform type inference before execution
   performTypeInference(const_cast<Program &>(program));
 
+  // Perform optimizations
+  performOptimization(const_cast<Program &>(program));
+
   // First, execute all statements to register functions and declare variables
   for (const auto &stmt : program.statements) {
     execute(*stmt);
@@ -266,4 +269,11 @@ void Interpreter::performTypeInference(Program &program) {
     typeChecker.checkStatement(*stmt);
   }
 }
+
+void Interpreter::performOptimization(Program &program) {
+  ConstantFolderVisitor folder;
+  for (auto &stmt : program.statements) {
+    stmt = folder.fold(stmt);
+  }
 }
+} // namespace dotlin

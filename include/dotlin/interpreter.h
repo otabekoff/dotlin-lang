@@ -430,6 +430,8 @@ private:
                                        class TypeChecker &typeChecker);
   void performTypeInferenceOnExpression(Expression &expr,
                                         class TypeChecker &typeChecker);
+  // Optimization methods
+  void performOptimization(Program &program);
 
   // Helper method for function overloading
   std::shared_ptr<FunctionDef>

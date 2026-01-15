@@ -1,6 +1,7 @@
 // Parser for Dotlin - Kotlin-like language implementation in C++
 #pragma once
 #include "dotlin/lexer.h"
+#include <cstdint>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -9,6 +10,9 @@
 #include <vector>
 
 namespace dotlin {
+
+// Define the primitive types supported by literals
+using LiteralValue = std::variant<int, int64_t, double, bool, std::string>;
 
 // Type system - moved to top to be available for expressions
 enum class TypeKind {
@@ -121,7 +125,7 @@ struct Statement : AstNode {
 
 // AST Node Types
 struct Program {
-  std::vector<std::unique_ptr<Statement>> statements;
+  std::vector<Statement::Ptr> statements;
 };
 
 struct Identifier {
@@ -131,7 +135,7 @@ struct Identifier {
 };
 
 struct Literal {
-  std::variant<int, double, bool, std::string> value;
+  LiteralValue value;
   size_t line;
   size_t column;
 };
@@ -354,9 +358,8 @@ public:
 
 // Concrete expression types
 struct LiteralExpr : Expression {
-  std::variant<int, double, bool, std::string> value;
-  LiteralExpr(std::variant<int, double, bool, std::string> v, size_t l,
-              size_t c)
+  LiteralValue value;
+  LiteralExpr(LiteralValue v, size_t l, size_t c)
       : Expression(l, c), value(std::move(v)) {}
 
   void accept(AstVisitor &visitor) override { visitor.visit(*this); }

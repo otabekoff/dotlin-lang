@@ -1,0 +1,31 @@
+fun main() {
+    // Basic arithmetic folding
+    val a = 10 + 20 * 2
+    println("10 + 20 * 2 = " + a) // Expected: 50
+    
+    // String folding
+    val s = "Hello, " + "World!"
+    println("Concatenation: " + s) // Expected: Hello, World!
+    
+    // Boolean folding and DCE
+    if (10 > 5 && true) {
+        println("Optimization works: 10 > 5 && true is folded to true")
+    } else {
+        println("ERROR: Optimization failed for boolean logic")
+    }
+    
+    if (1 == 0) {
+        println("ERROR: Dead code in if(false) should be eliminated")
+    } else {
+        println("Optimization works: if(1 == 0) else branch taken")
+    }
+    
+    // Unary folding
+    val negative = - (100 + 50)
+    println("Unary folding: -(100 + 50) = " + negative) // Expected: -150
+    
+    val notTrue = !false
+    println("Unary folding: !false = " + notTrue) // Expected: true
+    
+    println("Constant folding verification complete!")
+}

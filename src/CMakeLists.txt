@@ -13,6 +13,7 @@ set(SOURCES
   interpreter/typechecker.cpp
   interpreter/builtins.cpp
   interpreter/interpreter.cpp
+  interpreter/constant_folder.cpp
 )
 
 # Set sources for the library
