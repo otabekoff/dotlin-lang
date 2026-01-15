@@ -11,7 +11,18 @@
 namespace dotlin {
 
 // Type system - moved to top to be available for expressions
-enum class TypeKind { INT, DOUBLE, BOOL, STRING, ARRAY, VOID, UNKNOWN, ANY };
+enum class TypeKind {
+  INT,
+  LONG,
+  DOUBLE,
+  BOOL,
+  STRING,
+  ARRAY,
+  VOID,
+  UNKNOWN,
+  ANY,
+  FUNCTION
+};
 
 struct Type {
   TypeKind kind;

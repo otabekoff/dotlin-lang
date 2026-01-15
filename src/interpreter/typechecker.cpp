@@ -106,8 +106,40 @@ void TypeCheckVisitor::visit(UnaryExpr &node) {
 }
 
 void TypeCheckVisitor::visit(CallExpr &node) {
-  (void)node;
-  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+  // Determine return type based on callee
+  if (auto *id = dynamic_cast<IdentifierExpr *>(node.callee.get())) {
+    // Look up function return type in environment
+    if (checker->typeEnvironment) {
+      auto type = checker->typeEnvironment->get(id->name);
+      if (type) {
+        result = type;
+        return;
+      }
+    }
+
+    // Check if it's a class constructor (class name used as function)
+    // In a full implementation, we'd check if id->name is a registered class
+    // For now, if it starts with uppercase, assume it's a class constructor?
+    if (!id->name.empty() && std::isupper(id->name[0])) {
+      // Return UNKNOWN or a Class type if implemented
+      result = std::make_shared<dotlin::Type>(TypeKind::ANY);
+      return;
+    }
+  } else if (auto *memberAccess =
+                 dynamic_cast<MemberAccessExpr *>(node.callee.get())) {
+    // Basic method return type inference
+    if (memberAccess->property == "size" ||
+        memberAccess->property == "length") {
+      result = std::make_shared<dotlin::Type>(TypeKind::INT);
+      return;
+    }
+    if (memberAccess->property == "toString") {
+      result = std::make_shared<dotlin::Type>(TypeKind::STRING);
+      return;
+    }
+  }
+
+  result = std::make_shared<dotlin::Type>(TypeKind::UNKNOWN);
 }
 
 void TypeCheckVisitor::visit(MemberAccessExpr &node) {
@@ -116,8 +148,16 @@ void TypeCheckVisitor::visit(MemberAccessExpr &node) {
 }
 
 void TypeCheckVisitor::visit(ArrayLiteralExpr &node) {
-  (void)node;
-  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::ARRAY);
+  // Infer element type from elements
+  std::shared_ptr<dotlin::Type> elementType =
+      std::make_shared<dotlin::Type>(TypeKind::UNKNOWN);
+  if (!node.elements.empty() && node.elements[0]) {
+    elementType = checker->checkExpression(*node.elements[0]);
+  }
+
+  auto arrayType = std::make_shared<dotlin::Type>(TypeKind::ARRAY);
+  arrayType->elementType = elementType;
+  result = arrayType;
 }
 
 void TypeCheckVisitor::visit(StringInterpolationExpr &node) {
@@ -126,8 +166,12 @@ void TypeCheckVisitor::visit(StringInterpolationExpr &node) {
 }
 
 void TypeCheckVisitor::visit(ArrayAccessExpr &node) {
-  (void)node;
-  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
+  auto arrayType = checker->checkExpression(*node.array);
+  if (arrayType->kind == TypeKind::ARRAY && arrayType->elementType) {
+    result = arrayType->elementType;
+  } else {
+    result = std::make_shared<dotlin::Type>(TypeKind::UNKNOWN);
+  }
 }
 
 // Add the missing statement visitor implementations to TypeCheckVisitor
@@ -215,8 +259,20 @@ void StmtTypeCheckVisitor::visit(VariableDeclStmt &node) {
 }
 
 void StmtTypeCheckVisitor::visit(FunctionDeclStmt &node) {
-  (void)node;
-  // For now, just skip function declarations
+  // Register function name and return type in environment
+  std::shared_ptr<dotlin::Type> returnType;
+  if (node.returnType.has_value() && node.returnType.value()) {
+    returnType = node.returnType.value();
+  } else {
+    returnType = std::make_shared<dotlin::Type>(TypeKind::VOID);
+  }
+
+  if (checker->typeEnvironment) {
+    checker->typeEnvironment->define(node.name, returnType);
+  }
+
+  // Ideally, also check the function body in a new scope with parameters
+  // ... future work ...
 }
 
 void StmtTypeCheckVisitor::visit(BlockStmt &node) {

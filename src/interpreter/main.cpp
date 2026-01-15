@@ -297,7 +297,17 @@ void Interpreter::performTypeInference(Program &program) {
   auto typeEnv = std::make_shared<TypeEnvironment>();
 
   // Register built-in functions in type environment
-  // ... future work: add built-ins here ...
+  typeEnv->define("println", std::make_shared<Type>(TypeKind::VOID));
+  typeEnv->define("print", std::make_shared<Type>(TypeKind::VOID));
+  typeEnv->define("readln", std::make_shared<Type>(TypeKind::STRING));
+  typeEnv->define("readLine", std::make_shared<Type>(TypeKind::STRING));
+  typeEnv->define("sqrt", std::make_shared<Type>(TypeKind::DOUBLE));
+  typeEnv->define("abs", std::make_shared<Type>(TypeKind::DOUBLE));
+  typeEnv->define("sin", std::make_shared<Type>(TypeKind::DOUBLE));
+  typeEnv->define("cos", std::make_shared<Type>(TypeKind::DOUBLE));
+  typeEnv->define("tan", std::make_shared<Type>(TypeKind::DOUBLE));
+  typeEnv->define("now", std::make_shared<Type>(TypeKind::LONG));
+  typeEnv->define("currentTimeMillis", std::make_shared<Type>(TypeKind::LONG));
 
   // Create a type checker instance
   TypeChecker typeChecker(typeEnv, environment);
