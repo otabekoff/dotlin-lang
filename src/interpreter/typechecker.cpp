@@ -79,6 +79,11 @@ void TypeCheckVisitor::visit(ArrayLiteralExpr &node) {
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::ARRAY);
 }
 
+void TypeCheckVisitor::visit(StringInterpolationExpr &node) {
+  (void)node;
+  result = std::make_shared<dotlin::Type>(dotlin::TypeKind::STRING);
+}
+
 void TypeCheckVisitor::visit(ArrayAccessExpr &node) {
   (void)node;
   result = std::make_shared<dotlin::Type>(dotlin::TypeKind::UNKNOWN);
@@ -307,6 +312,10 @@ void StmtTypeCheckVisitor::visit(MemberAccessExpr &node) {
 }
 
 void StmtTypeCheckVisitor::visit(ArrayLiteralExpr &node) {
+  (void)node; // Not used in statement type checking
+}
+
+void StmtTypeCheckVisitor::visit(StringInterpolationExpr &node) {
   (void)node; // Not used in statement type checking
 }
 

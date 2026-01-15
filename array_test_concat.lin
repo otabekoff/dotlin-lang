@@ -1,0 +1,9 @@
+fun main() {
+    val arr = arrayOf(1, 2, 3, 4, 5)
+    println("Array size: " + arr.size)
+    println("Element at index 2: " + arr[2])
+    val strArr = arrayOf("hello", "world", "dotlin")
+    println("String array: " + strArr.contentToString())
+    val mixedArr = arrayOf(1, "two", true, 3.14)
+    println("Mixed array size: " + mixedArr.size)
+}

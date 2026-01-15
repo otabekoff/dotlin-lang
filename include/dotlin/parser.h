@@ -284,12 +284,40 @@ std::unique_ptr<Expression>
 parsePostfixExpression(const std::vector<Token> &tokens, size_t &pos);
 std::unique_ptr<Expression>
 parsePrimaryExpression(const std::vector<Token> &tokens, size_t &pos);
+std::unique_ptr<Expression>
+parseStringInterpolation(const std::string &strValue, size_t line,
+                         size_t column);
+
+// Forward declarations for visitor pattern
+struct StringInterpolationExpr;
+struct LiteralExpr;
+struct IdentifierExpr;
+struct BinaryExpr;
+struct UnaryExpr;
+struct CallExpr;
+struct MemberAccessExpr;
+struct ArrayAccessExpr;
+struct ExpressionStmt;
+struct VariableDeclStmt;
+struct FunctionDeclStmt;
+struct BlockStmt;
+struct ReturnStmt;
+struct ArrayLiteralExpr;
+struct LambdaExpr;
+struct IfStmt;
+struct WhileStmt;
+struct ForStmt;
+struct WhenStmt;
+struct TryStmt;
+struct ConstructorDeclStmt;
+struct ClassDeclStmt;
 
 // Visitor pattern for AST traversal
 class AstVisitor {
 public:
   virtual ~AstVisitor() = default;
   virtual void visit(LiteralExpr &node) = 0;
+  virtual void visit(StringInterpolationExpr &node) = 0;
   virtual void visit(IdentifierExpr &node) = 0;
   virtual void visit(BinaryExpr &node) = 0;
   virtual void visit(UnaryExpr &node) = 0;
@@ -318,6 +346,15 @@ struct LiteralExpr : Expression {
   LiteralExpr(std::variant<int, double, bool, std::string> v, size_t l,
               size_t c)
       : Expression(l, c), value(std::move(v)) {}
+
+  void accept(AstVisitor &visitor) override { visitor.visit(*this); }
+};
+
+struct StringInterpolationExpr : Expression {
+  std::vector<Expression::Ptr>
+      parts; // Alternating string literals and expressions
+  StringInterpolationExpr(std::vector<Expression::Ptr> p, size_t l, size_t c)
+      : Expression(l, c), parts(std::move(p)) {}
 
   void accept(AstVisitor &visitor) override { visitor.visit(*this); }
 };

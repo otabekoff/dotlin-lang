@@ -32,6 +32,15 @@ void EvalVisitor::visit(LiteralExpr &node) {
       node.value);
 }
 
+void EvalVisitor::visit(StringInterpolationExpr &node) {
+  std::string resultStr = "";
+  for (const auto &part : node.parts) {
+    Value partValue = interpreter->evaluate(*part);
+    resultStr += interpreter->valueToString(partValue);
+  }
+  result = Value(resultStr);
+}
+
 void EvalVisitor::visit(IdentifierExpr &node) {
   // Check if this is a special identifier like "args"
   if (node.name == "args") {
@@ -118,11 +127,14 @@ void EvalVisitor::visit(BinaryExpr &node) {
         return;
       }
     }
+    // Handle string concatenation with type conversion
     if (auto *leftStr = std::get_if<std::string>(&left)) {
-      if (auto *rightStr = std::get_if<std::string>(&right)) {
-        result = Value(*leftStr + *rightStr);
-        return;
-      }
+      result = Value(*leftStr + interpreter->valueToString(right));
+      return;
+    }
+    if (auto *rightStr = std::get_if<std::string>(&right)) {
+      result = Value(interpreter->valueToString(left) + *rightStr);
+      return;
     }
     throw std::runtime_error("Invalid operands for + operator");
   }
@@ -585,22 +597,22 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
 
     // Check if the object is a string and has string properties/methods
     if (auto *strValue = std::get_if<std::string>(&objValue)) {
-      if (propertyName == "length") {
+      if (node.property == "length") {
         result = Value(static_cast<int>(strValue->length()));
         return;
-      } else if (propertyName == "substring") {
+      } else if (node.property == "substring") {
         throw std::runtime_error("Substring method requires arguments");
-      } else if (propertyName == "indexOf") {
+      } else if (node.property == "indexOf") {
         throw std::runtime_error("IndexOf method requires arguments");
-      } else if (propertyName == "startsWith") {
+      } else if (node.property == "startsWith") {
         throw std::runtime_error("StartsWith method requires arguments");
-      } else if (propertyName == "endsWith") {
+      } else if (node.property == "endsWith") {
         throw std::runtime_error("EndsWith method requires arguments");
-      } else if (propertyName == "toUpperCase") {
+      } else if (node.property == "toUpperCase") {
         throw std::runtime_error("ToUpper method requires arguments");
-      } else if (propertyName == "toLowerCase") {
+      } else if (node.property == "toLowerCase") {
         throw std::runtime_error("ToLower method requires arguments");
-      } else if (propertyName == "trim") {
+      } else if (node.property == "trim") {
         std::string trimmedStr = *strValue;
         size_t start = trimmedStr.find_first_not_of(" \t\n\r\f\v");
         if (start == std::string::npos) {
@@ -610,9 +622,9 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
           result = Value(trimmedStr.substr(start, end - start + 1));
         }
         return;
-      } else if (propertyName == "split") {
+      } else if (node.property == "split") {
         throw std::runtime_error("Split method requires arguments");
-      } else if (propertyName == "contentToString") {
+      } else if (node.property == "contentToString") {
         std::string content = "[";
         for (size_t i = 0; i < strValue->length(); ++i) {
           if (i > 0) {
@@ -626,118 +638,180 @@ void EvalVisitor::visit(MemberAccessExpr &node) {
       }
     } else {
       // For now, just throw an error for unimplemented string properties
-      throw std::runtime_error("String property '" + propertyName +
+      throw std::runtime_error("String property '" + node.property +
                                "' not implemented yet");
     }
   }
 
   // Check if the object is an array
   if (auto *array = std::get_if<ArrayValue>(&objValue)) {
-    if (propertyName == "size") {
-      if (node.property == "size") {
-        result = Value(static_cast<int>(array->elements.size()));
-        return;
-      }
-      if (node.property == "contentToString") {
-        std::string content = "[";
-        for (size_t i = 0; i < array->elements.size(); ++i) {
-          if (i > 0) {
-            content += ", ";
-          }
-          content += valueToString(array->elements[i]);
+    if (node.property == "size") {
+      result = Value(static_cast<int>(array->elements.size()));
+      return;
+    }
+    if (node.property == "contentToString") {
+      std::string content = "[";
+      for (size_t i = 0; i < array->elements.size(); ++i) {
+        if (i > 0) {
+          content += ", ";
         }
-        content += "]";
-        result = Value(content);
-        return;
+        content += valueToString(array->elements[i]);
       }
+      content += "]";
+      result = Value(content);
+      return;
     }
 
     throw std::runtime_error("Invalid member access");
   }
+}
 
-  void EvalVisitor::visit(ArrayLiteralExpr & node) {
-    ArrayValue array;
-    for (const auto &element : node.elements) {
-      array.elements.push_back(interpreter->evaluate(*element));
-    }
-    result = Value(array);
+void EvalVisitor::visit(ArrayLiteralExpr &node) {
+  ArrayValue array;
+  for (const auto &element : node.elements) {
+    array.elements.push_back(interpreter->evaluate(*element));
   }
+  result = Value(array);
+}
 
-  void EvalVisitor::visit(ArrayAccessExpr & node) {
-    Value arrayValue = interpreter->evaluate(*node.array);
-    Value indexValue = interpreter->evaluate(*node.index);
+void EvalVisitor::visit(ArrayAccessExpr &node) {
+  Value arrayValue = interpreter->evaluate(*node.array);
+  Value indexValue = interpreter->evaluate(*node.index);
 
-    if (auto *array = std::get_if<ArrayValue>(&arrayValue)) {
-      if (auto *index = std::get_if<int>(&indexValue)) {
-        if (*index >= 0 && *index < static_cast<int>(array->elements.size())) {
-          result = array->elements[static_cast<size_t>(*index)];
-          return;
-        }
-        throw std::runtime_error("Array index out of bounds");
+  if (auto *array = std::get_if<ArrayValue>(&arrayValue)) {
+    if (auto *index = std::get_if<int>(&indexValue)) {
+      if (*index >= 0 && *index < static_cast<int>(array->elements.size())) {
+        result = array->elements[static_cast<size_t>(*index)];
+        return;
       }
-      throw std::runtime_error("Array index must be an integer");
+      throw std::runtime_error("Array index out of bounds");
+    }
+    throw std::runtime_error("Array index must be an integer");
+  }
+
+  throw std::runtime_error("Invalid array access");
+}
+
+// Statement visit methods (needed for complete interface but not used in
+// expression evaluation)
+void EvalVisitor::visit(ExpressionStmt &node) {
+  result = interpreter->evaluate(*node.expression);
+}
+
+void EvalVisitor::visit(VariableDeclStmt &node) {
+  (void)node;
+  result = Value();
+}
+
+void EvalVisitor::visit(FunctionDeclStmt &node) {
+  (void)node;
+  result = Value();
+}
+
+void EvalVisitor::visit(BlockStmt &node) {
+  (void)node;
+  result = Value();
+}
+
+void EvalVisitor::visit(IfStmt &node) {
+  (void)node;
+  result = Value();
+}
+
+void EvalVisitor::visit(ReturnStmt &node) {
+  (void)node;
+  result = Value();
+}
+
+void EvalVisitor::visit(ClassDeclStmt &node) {
+  (void)node;
+  result = Value();
+}
+
+void EvalVisitor::visit(ForStmt &node) {
+  // Evaluate the iterable expression
+  Value iterableValue = interpreter->evaluate(*node.iterable);
+
+  // Check if it's an array
+  if (auto *arrayValue = std::get_if<ArrayValue>(&iterableValue)) {
+    // Create a new scope for the loop variable
+    auto loopScope = std::make_shared<Environment>(interpreter->environment);
+
+    // Iterate through array elements
+    for (const auto &element : arrayValue->elements) {
+      // Set the loop variable in the new scope
+      loopScope->define(node.variable, element);
+
+      // Temporarily switch to loop scope
+      auto oldEnv = interpreter->environment;
+      interpreter->environment = loopScope;
+
+      try {
+        // Execute the loop body
+        interpreter->execute(*node.body);
+      } catch (...) {
+        // Restore environment on exception
+        interpreter->environment = oldEnv;
+        throw;
+      }
+
+      // Restore environment
+      interpreter->environment = oldEnv;
+    }
+  } else {
+    throw std::runtime_error("Can only iterate over arrays");
+  }
+
+  result = Value();
+}
+
+void EvalVisitor::visit(WhenStmt &node) {
+  // Evaluate the subject expression
+  Value subjectValue = interpreter->evaluate(*node.subject);
+
+  // Check each branch
+  for (const auto &branch : node.branches) {
+    Value conditionValue = interpreter->evaluate(*branch.first);
+
+    // Check if condition matches subject
+    bool matches = false;
+    if (auto *subjectInt = std::get_if<int>(&subjectValue)) {
+      if (auto *conditionInt = std::get_if<int>(&conditionValue)) {
+        matches = (*subjectInt == *conditionInt);
+      }
+    } else if (auto *subjectStr = std::get_if<std::string>(&subjectValue)) {
+      if (auto *conditionStr = std::get_if<std::string>(&conditionValue)) {
+        matches = (*subjectStr == *conditionStr);
+      }
     }
 
-    throw std::runtime_error("Invalid array access");
+    if (matches) {
+      // Execute the matching branch
+      interpreter->execute(*branch.second);
+      result = Value();
+      return;
+    }
   }
 
-  // Statement visit methods (needed for complete interface but not used in
-  // expression evaluation)
-  void EvalVisitor::visit(ExpressionStmt & node) {
-    result = interpreter->evaluate(*node.expression);
+  // Check for else branch
+  if (node.elseBranch) {
+    interpreter->execute(**node.elseBranch);
   }
 
-  void EvalVisitor::visit(VariableDeclStmt & node) {
-    (void)node;
-    result = Value();
-  }
+  result = Value();
+}
 
-  void EvalVisitor::visit(FunctionDeclStmt & node) {
-    (void)node;
-    result = Value();
-  }
+void EvalVisitor::visit(TryStmt &node) {
+  (void)node;
+  result = Value();
+}
 
-  void EvalVisitor::visit(BlockStmt & node) {
-    (void)node;
-    result = Value();
-  }
+void EvalVisitor::visit(ConstructorDeclStmt &node) {
+  (void)node;
+  result = Value();
+}
 
-  void EvalVisitor::visit(IfStmt & node) {
-    (void)node;
-    result = Value();
-  }
-
-  void EvalVisitor::visit(ReturnStmt & node) {
-    (void)node;
-    result = Value();
-  }
-
-  void EvalVisitor::visit(ClassDeclStmt & node) {
-    (void)node;
-    result = Value();
-  }
-
-  void EvalVisitor::visit(ForStmt & node) {
-    (void)node;
-    result = Value();
-  }
-
-  void EvalVisitor::visit(WhenStmt & node) {
-    (void)node;
-    result = Value();
-  }
-
-  void EvalVisitor::visit(TryStmt & node) {
-    (void)node;
-    result = Value();
-  }
-
-  void EvalVisitor::visit(ConstructorDeclStmt & node) {
-    (void)node;
-    result = Value();
-  }
-
-  void EvalVisitor::visit(WhileStmt & node) {
-    (void)node;
-    result = Value();
-  }
+void EvalVisitor::visit(WhileStmt &node) {
+  (void)node;
+  result = Value();
+}

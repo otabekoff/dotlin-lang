@@ -1,0 +1,7 @@
+fun main() {
+    val name = "World"
+    val age = 25
+    println("Hello, ${name}!")
+    println("Age: ${age}")
+    println("Name is ${name}, age is ${age}")
+}

@@ -1,0 +1,6 @@
+fun main() {
+    val numbers = arrayOf(1, 2, 3)
+    for (num in numbers) {
+        println(num)
+    }
+}

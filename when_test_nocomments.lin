@@ -1,0 +1,17 @@
+fun main(args: Array<String>) {
+    println("Testing when expressions...")
+    var x = 2
+    when (x) {
+        1 -> println("x is one")
+        2 -> println("x is two") 
+        3 -> println("x is three")
+        else -> println("x is something else")
+    }
+    var day = "Monday"
+    when (day) {
+        "Monday" -> println("Start of the week!")
+        "Friday" -> println("End of the week!")
+        else -> println("Some other day")
+    }
+    println("When test completed!")
+}

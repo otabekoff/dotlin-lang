@@ -3053,6 +3053,20 @@ namespace dotlin
         result = std::string("error: expression visitor called on statement");
         (void)node;
       }
+      void visit(StringInterpolationExpr &node) override
+      {
+        // For now, just concatenate all parts as strings
+        std::string resultStr = "";
+        for (const auto &part : node.parts)
+        {
+          if (part)
+          {
+            auto partValue = interpreter->evaluate(*part);
+            resultStr += interpreter->valueToString(partValue);
+          }
+        }
+        result = resultStr;
+      }
     };
 
     EvalVisitor visitor(this);
@@ -3128,6 +3142,11 @@ namespace dotlin
         (void)node; /* For now, just acknowledge the constructor */
       }
       void visit(ClassDeclStmt &node) override { interpreter->visit(node); }
+      void visit(StringInterpolationExpr &node) override
+      {
+        // For statement execution, evaluate the expression to trigger side effects
+        interpreter->evaluate(node);
+      }
     };
 
     ExecVisitor visitor(this);

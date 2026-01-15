@@ -1,8 +1,8 @@
 // Lexer for Dotlin - Kotlin-like language implementation in C++
 #pragma once
-#include <optional>
+// #include <optional>
 #include <string>
-#include <variant>
+// #include <variant>
 #include <vector>
 
 namespace dotlin {
@@ -96,6 +96,7 @@ enum class TokenType {
   EOF_TOKEN,
   WHITESPACE,
   COMMENT,
+  DOLLAR_LBRACE, // ${
   UNKNOWN
 };
 

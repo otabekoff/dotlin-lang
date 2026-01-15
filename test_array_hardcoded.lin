@@ -1,0 +1,5 @@
+fun main() {
+    println("Starting test")
+    val arr = arrayOf(1, 2, 3)
+    println("Array created")
+}

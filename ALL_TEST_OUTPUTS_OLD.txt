@@ -1,4 +1,4 @@
-Dotlin test run - Thu Jan 15 12:05:08 +05 2026
+Dotlin test run - Thu Jan 15 09:38:53 +05 2026
 =========================
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/01_basic_minimal.lin
@@ -22,7 +22,7 @@ Execution result:
 ----------------------------------------
 === String Methods Test ===
 Original: Hello World
-Length: 0
+Length: 11
 Substring(6): World
 Substring(0, 5): Hello
 /usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
@@ -65,8 +65,7 @@ Execution result:
 ----------------------------------------
 Original: [  Hello, Dotlin!  ]
 Trimmed: [Hello, Dotlin!]
-Split result: [apple, banana, cherry]
-Execution result: 
+Runtime error: Invalid operands for + operator
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/args_content_test.lin
@@ -177,7 +176,7 @@ Runtime error: Attempt to call a non-function value
 ----------------------------------------
 Testing string length
 String: Hello, Dotlin!
-Length: 0
+Length: 14
 Test complete
 Execution result: 
 
@@ -240,10 +239,7 @@ Runtime error: Attempt to call a non-function value
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_array_indexing.lin
 ----------------------------------------
-Size: 3
-Index 0: 1
-Index 1: 2
-Execution result: 
+Runtime error: Invalid operands for + operator
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_array_simple.lin
@@ -319,7 +315,7 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/debug_method.lin
 ----------------------------------------
-0
+5
 Execution result: 
 
 
@@ -382,7 +378,7 @@ Execution result:
 ----------------------------------------
 === Debug String Methods ===
 Step 1: String created
-Step 2: 0
+Step 2: 11
 Step 3: World
 Step 4: Hello
 === Debug Complete ===
@@ -603,8 +599,7 @@ Execution result:
 ----------------------------------------
 === Simple Direct Method Test ===
 Text: hello
-Starts with 'he': true
-Execution result: 
+Runtime error: Invalid operands for + operator
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_final_test_two.lin
@@ -638,13 +633,13 @@ Execution result:
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_string_test.lin
 ----------------------------------------
 String: Hello, Dotlin!
-Length: 0
+Length: 14
 Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/simple_string_test_two.lin
 ----------------------------------------
-0
+5
 Execution result: 
 
 
@@ -745,7 +740,7 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/string_methods_test_two.lin
 ----------------------------------------
-Length: 0
+Length: 11
 Substring: World
 Index: 6
 Starts with Hello: true
@@ -884,7 +879,7 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_complex_expr.lin
 ----------------------------------------
-0
+5
 Execution result: 
 
 
@@ -912,171 +907,81 @@ Execution result:
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_exact.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_hello.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+HELLO FROM DOTLIN
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_indexof.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Index result: 7
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_indexof2.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+7
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_indexof_concat.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_intarray.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Runtime error: Attempt to call a non-function value
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_lambda.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+/usr/include/c++/15/bits/unique_ptr.h:455: typename std::add_lvalue_reference<_Tp>::type std::unique_ptr<_Tp, _Dp>::operator*() const [with _Tp = dotlin::Expression; _Dp = std::default_delete<dotlin::Expression>; typename std::add_lvalue_reference<_Tp>::type = dotlin::Expression&]: Assertion 'get() != pointer()' failed.
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_length.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+5
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_length2.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+5
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_length3.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+5
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_literal.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_main.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Hello from main
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_main_args.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Hello from main with args!
+Execution result: 
 
 
 ▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_main_io.lin
 ----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_main_return.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_manual_copy.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_mixed_io.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_print.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_println.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_readln.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_run.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_simple.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_simple_member.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_string_methods.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_string_methods_full.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_tostring.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_user_function.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_var.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_var_only.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_vars.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_with_newlines.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/touppercase_test.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/very_simple_test.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
-
-
-▶ Running: /home/otabek/Projects/langs/cpp/dotlin/tests/files/when_test.lin
-----------------------------------------
-./run_all_tests.sh: line 16: ./build/apps/dotlin: Permission denied
+Hello from main function!
+Enter your name: Welcome, /home/otabek/Projects/langs/cpp/dotlin/tests/files/test_main_return.lin!
+Execution result: 
 
 

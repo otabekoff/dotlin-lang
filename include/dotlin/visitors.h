@@ -12,6 +12,7 @@ struct EvalVisitor : public AstVisitor {
   EvalVisitor(Interpreter *interp) : interpreter(interp) {}
 
   void visit(LiteralExpr &node) override;
+  void visit(StringInterpolationExpr &node) override;
   void visit(IdentifierExpr &node) override;
   void visit(LambdaExpr &node) override;
   void visit(BinaryExpr &node) override;
@@ -57,6 +58,7 @@ struct ExecVisitor : public AstVisitor {
 
   // Expression visit methods (needed for complete interface)
   void visit(LiteralExpr &node) override;
+  void visit(StringInterpolationExpr &node) override;
   void visit(IdentifierExpr &node) override;
   void visit(LambdaExpr &node) override;
   void visit(BinaryExpr &node) override;
@@ -75,6 +77,7 @@ struct TypeCheckVisitor : public dotlin::AstVisitor {
   TypeCheckVisitor(TypeChecker *c) : checker(c) {}
 
   void visit(LiteralExpr &node) override;
+  void visit(StringInterpolationExpr &node) override;
   void visit(IdentifierExpr &node) override;
   void visit(LambdaExpr &node) override;
   void visit(BinaryExpr &node) override;
@@ -120,6 +123,7 @@ struct StmtTypeCheckVisitor : public dotlin::AstVisitor {
 
   // Expression visit methods (needed for complete interface)
   void visit(LiteralExpr &node) override;
+  void visit(StringInterpolationExpr &node) override;
   void visit(IdentifierExpr &node) override;
   void visit(LambdaExpr &node) override;
   void visit(BinaryExpr &node) override;

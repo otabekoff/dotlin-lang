@@ -6,6 +6,11 @@
 
 namespace dotlin {
 
+// Forward declarations
+std::unique_ptr<Expression>
+parseStringInterpolation(const std::string &strValue, size_t line,
+                         size_t column);
+
 // Parser implementation for Dotlin
 Program parse(const std::vector<Token> &tokens) {
   Program program;
@@ -463,7 +468,14 @@ parsePrimaryExpression(const std::vector<Token> &tokens, size_t &pos) {
     std::string strValue =
         token.text.substr(1, token.text.length() - 2); // remove quotes
     pos++;
-    return std::make_unique<LiteralExpr>(strValue, token.line, token.column);
+
+    // Check if this string contains interpolation by looking for ${ pattern
+    if (strValue.find("${") != std::string::npos) {
+      // Parse string interpolation
+      return parseStringInterpolation(strValue, token.line, token.column);
+    } else {
+      return std::make_unique<LiteralExpr>(strValue, token.line, token.column);
+    }
   }
   case TokenType::TRUE:
     pos++;
@@ -1196,6 +1208,101 @@ parseClassDeclaration(const std::vector<Token> &tokens, size_t &pos) {
   size_t col = (pos > 0) ? tokens[pos - 1].column : 1;
   return std::make_unique<ClassDeclStmt>(className, std::move(members),
                                          superClass, line, col);
+}
+
+std::unique_ptr<Expression>
+parseStringInterpolation(const std::string &strValue, size_t line,
+                         size_t column) {
+  std::vector<Expression::Ptr> parts;
+  size_t currentPos = 0;
+
+  while (currentPos < strValue.length()) {
+    size_t interpolationStart = strValue.find("${", currentPos);
+
+    if (interpolationStart == std::string::npos) {
+      // No more interpolations, add rest as a string literal
+      if (currentPos < strValue.length()) {
+        std::string remaining = strValue.substr(currentPos);
+        parts.push_back(std::make_unique<LiteralExpr>(remaining, line, column));
+      }
+      break;
+    }
+
+    // Add string part before interpolation
+    if (interpolationStart > currentPos) {
+      std::string stringPart =
+          strValue.substr(currentPos, interpolationStart - currentPos);
+      parts.push_back(std::make_unique<LiteralExpr>(stringPart, line, column));
+    }
+
+    // Find the closing brace
+    size_t interpolationEnd = strValue.find('}', interpolationStart + 2);
+    if (interpolationEnd == std::string::npos) {
+      // Unclosed interpolation, treat as literal
+      std::string remaining = strValue.substr(currentPos);
+      parts.push_back(std::make_unique<LiteralExpr>(remaining, line, column));
+      break;
+    }
+
+    // Extract the expression inside ${}
+    std::string expressionStr = strValue.substr(
+        interpolationStart + 2, interpolationEnd - interpolationStart - 2);
+
+    // For complex expressions, we need to tokenize and parse the expression
+    // Create a temporary token stream for the expression
+    std::vector<Token> exprTokens;
+
+    // Simple tokenization for basic expressions
+    size_t exprPos = 0;
+    while (exprPos < expressionStr.length()) {
+      char ch = expressionStr[exprPos];
+
+      if (std::isalpha(ch) || ch == '_') {
+        // Identifier
+        size_t start = exprPos;
+        while (exprPos < expressionStr.length() &&
+               (std::isalnum(expressionStr[exprPos]) ||
+                expressionStr[exprPos] == '_')) {
+          exprPos++;
+        }
+        std::string ident = expressionStr.substr(start, exprPos - start);
+        exprTokens.emplace_back(TokenType::IDENTIFIER, ident, line, column);
+      } else if (ch == '.') {
+        // Member access operator
+        exprTokens.emplace_back(TokenType::DOT, ".", line, column);
+        exprPos++;
+      } else if (std::isspace(ch)) {
+        // Skip whitespace
+        exprPos++;
+      } else {
+        // Unknown character, skip for now
+        exprPos++;
+      }
+    }
+
+    // Parse the expression using our token stream
+    size_t tokenPos = 0;
+    try {
+      auto expr = parseExpression(exprTokens, tokenPos);
+      if (expr) {
+        parts.push_back(std::move(expr));
+      } else {
+        // If parsing fails, treat as literal
+        std::string literalStr = "${" + expressionStr + "}";
+        parts.push_back(
+            std::make_unique<LiteralExpr>(literalStr, line, column));
+      }
+    } catch (...) {
+      // If parsing fails, treat as literal
+      std::string literalStr = "${" + expressionStr + "}";
+      parts.push_back(std::make_unique<LiteralExpr>(literalStr, line, column));
+    }
+
+    currentPos = interpolationEnd + 1;
+  }
+
+  return std::make_unique<StringInterpolationExpr>(std::move(parts), line,
+                                                   column);
 }
 
 } // namespace dotlin

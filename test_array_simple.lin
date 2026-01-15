@@ -1,0 +1,12 @@
+fun main() {
+    // Test array construction
+    val arr = arrayOf(1, 2, 3, 4, 5)
+    println("Array size: " + arr.size.toString())
+    
+    // Test array indexing
+    println("Element at index 2: " + arr[2].toString())
+    
+    // Test array with different types
+    val strArr = arrayOf("hello", "world", "dotlin")
+    println("String array: " + strArr.contentToString())
+}

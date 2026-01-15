@@ -108,15 +108,71 @@ void ExecVisitor::visit(ClassDeclStmt &node) {
 }
 
 void ExecVisitor::visit(ForStmt &node) {
-  (void)node;
-  // TODO: Implement for loop
-  throw std::runtime_error("For loops not yet implemented");
+  // Evaluate the iterable expression
+  Value iterableValue = interpreter->evaluate(*node.iterable);
+
+  // Check if it's an array
+  if (auto *arrayValue = std::get_if<ArrayValue>(&iterableValue)) {
+    // Create a new scope for the loop variable
+    auto loopScope = std::make_shared<Environment>(interpreter->environment);
+
+    // Iterate through array elements
+    for (const auto &element : arrayValue->elements) {
+      // Set the loop variable in the new scope
+      loopScope->define(node.variable, element);
+
+      // Temporarily switch to loop scope
+      auto oldEnv = interpreter->environment;
+      interpreter->environment = loopScope;
+
+      try {
+        // Execute the loop body
+        interpreter->execute(*node.body);
+      } catch (...) {
+        // Restore environment on exception
+        interpreter->environment = oldEnv;
+        throw;
+      }
+
+      // Restore environment
+      interpreter->environment = oldEnv;
+    }
+  } else {
+    throw std::runtime_error("Can only iterate over arrays");
+  }
 }
 
 void ExecVisitor::visit(WhenStmt &node) {
-  (void)node;
-  // TODO: Implement when statement
-  throw std::runtime_error("When statements not yet implemented");
+  // Evaluate the subject expression
+  Value subjectValue = interpreter->evaluate(*node.subject);
+
+  // Check each branch
+  for (const auto &branch : node.branches) {
+    Value conditionValue = interpreter->evaluate(*branch.first);
+
+    // Check if condition matches subject
+    bool matches = false;
+    if (auto *subjectInt = std::get_if<int>(&subjectValue)) {
+      if (auto *conditionInt = std::get_if<int>(&conditionValue)) {
+        matches = (*subjectInt == *conditionInt);
+      }
+    } else if (auto *subjectStr = std::get_if<std::string>(&subjectValue)) {
+      if (auto *conditionStr = std::get_if<std::string>(&conditionValue)) {
+        matches = (*subjectStr == *conditionStr);
+      }
+    }
+
+    if (matches) {
+      // Execute the matching branch
+      interpreter->execute(*branch.second);
+      return;
+    }
+  }
+
+  // Check for else branch
+  if (node.elseBranch) {
+    interpreter->execute(**node.elseBranch);
+  }
 }
 
 void ExecVisitor::visit(TryStmt &node) {
@@ -134,6 +190,11 @@ void ExecVisitor::visit(ConstructorDeclStmt &node) {
 // Expression visit methods (needed for complete interface but not used in
 // statement execution)
 void ExecVisitor::visit(LiteralExpr &node) {
+  (void)node;
+  // Not used in statement execution
+}
+
+void ExecVisitor::visit(StringInterpolationExpr &node) {
   (void)node;
   // Not used in statement execution
 }

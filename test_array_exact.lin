@@ -1,0 +1,6 @@
+fun main() {
+    val arr = arrayOf(1, 2, 3)
+    println("Size: " + arr.size)
+    println("Index 0: " + arr[0])
+    println("Index 1: " + arr[1])
+}

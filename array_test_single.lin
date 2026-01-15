@@ -1,0 +1,8 @@
+fun main() {
+    // Test array construction
+    val arr = arrayOf(1, 2, 3, 4, 5)
+    println("Array size: " + arr.size)
+    
+    // Test array indexing
+    println("Element at index 2: " + arr[2])
+}
