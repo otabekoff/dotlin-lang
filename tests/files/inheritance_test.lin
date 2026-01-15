@@ -1,0 +1,50 @@
+// Test Class Inheritance
+
+class Animal {
+  var name = "Animal"
+  
+  fun makeSound() {
+    println(name + " makes a sound")
+  }
+  
+  fun getName() {
+    return name
+  }
+}
+
+class Dog : Animal {
+  fun init() {
+    this.name = "Dog"
+  }
+  
+  fun makeSound() {
+    println("Woof!")
+  }
+  
+  fun originalSound() {
+    // calling super method not yet supported via 'super', but checks if method can be found in parent if not in child?
+    // Wait, if I override, I can't call super easily without 'super' keyword support.
+    // For now, testing basic inheritance and override.
+    println("Dog barking")
+  }
+}
+
+class Cat : Animal {
+  fun init() {
+     this.name = "Cat"
+  }
+  // Inherits makeSound
+}
+
+println("--- Dog Test ---")
+var d = Dog()
+d.init()
+d.originalSound() 
+d.makeSound() // Should print "Woof!" (override)
+println("Dog name: " + d.getName()) // Should act on inherited field/method
+
+println("\n--- Cat Test ---")
+var c = Cat()
+c.init()
+c.makeSound() // Should print "Cat makes a sound" (inherited)
+println("Cat name: " + c.getName())

@@ -40,10 +40,14 @@ struct ClassInstance {
 struct ClassDefinition {
   std::string name;
   std::vector<std::pair<std::string, std::shared_ptr<Type>>> fields;
+  std::vector<std::shared_ptr<VariableDeclStmt>>
+      fieldDecls; // To store field initializers
   std::vector<std::shared_ptr<FunctionDef>> constructors;
   std::vector<std::shared_ptr<FunctionDef>> methods;
+  std::shared_ptr<ClassDefinition> superclass;
 
-  ClassDefinition(const std::string &className) : name(className) {}
+  ClassDefinition(const std::string &className)
+      : name(className), superclass(nullptr) {}
 };
 
 // Structure to represent a function definition

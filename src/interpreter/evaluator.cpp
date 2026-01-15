@@ -67,7 +67,13 @@ void EvalVisitor::visit(IdentifierExpr &node) {
       // Check if this is a built-in function
       if (node.name == "println" || node.name == "print" ||
           node.name == "sqrt" || node.name == "abs" || node.name == "pow" ||
-          node.name == "readln" || node.name == "arrayOf") {
+          node.name == "readln" || node.name == "arrayOf" ||
+          node.name == "sin" || node.name == "cos" || node.name == "tan" ||
+          node.name == "min" || node.name == "max" || node.name == "round" ||
+          node.name == "ceil" || node.name == "floor" ||
+          node.name == "random" || node.name == "clock" ||
+          node.name == "exit" || node.name == "readLine" ||
+          node.name == "toInt" || node.name == "toString") {
         // Return a special lambda that represents a built-in function
         auto builtinLambda =
             std::make_shared<LambdaValue>(std::vector<FunctionParameter>(),
@@ -550,37 +556,50 @@ void EvalVisitor::visit(CallExpr &node) {
     // Check if the object is a class instance
     if (auto *instance =
             std::get_if<std::shared_ptr<ClassInstance>>(&objValue)) {
-      // Look up the method in the class definition
-      for (const auto &method : (*instance)->classDef->methods) {
-        if (method->name == methodName) {
-          // Found the method, execute it
-          auto methodEnv =
-              std::make_shared<Environment>(interpreter->environment);
-          methodEnv->define("this", Value(*instance));
+      // Look up the method in the class definition or superclasses
+      std::shared_ptr<ClassDefinition> currentClass = (*instance)->classDef;
 
-          // Bind method parameters to arguments
-          for (size_t i = 0; i < method->parameters.size(); ++i) {
-            if (i < node.arguments.size()) {
-              Value argValue = interpreter->evaluate(*node.arguments[i]);
-              methodEnv->define(method->parameters[i].name, argValue);
-            } else {
-              methodEnv->define(method->parameters[i].name, Value());
+      while (currentClass) {
+        for (const auto &method : currentClass->methods) {
+          if (method->name == methodName) {
+            // Found the method, execute it
+            auto methodEnv =
+                std::make_shared<Environment>(interpreter->environment);
+            methodEnv->define("this", Value(*instance));
+
+            // Bind method parameters to arguments
+            for (size_t i = 0; i < method->parameters.size(); ++i) {
+              if (i < node.arguments.size()) {
+                Value argValue = interpreter->evaluate(*node.arguments[i]);
+                methodEnv->define(method->parameters[i].name, argValue);
+              } else {
+                methodEnv->define(method->parameters[i].name, Value());
+              }
             }
+
+            // Switch to method environment
+            interpreter->environment = methodEnv;
+            interpreter->functionEnvironment = methodEnv;
+
+            // Execute method body
+            Value returnValue;
+            try {
+              returnValue =
+                  interpreter->executeFunction(method->body.get(), methodEnv);
+            } catch (...) {
+              interpreter->environment = methodEnv->enclosing;
+              interpreter->functionEnvironment = methodEnv->enclosing;
+              throw;
+            }
+            interpreter->environment = methodEnv->enclosing;
+            interpreter->functionEnvironment = methodEnv->enclosing;
+
+            result = returnValue;
+            return;
           }
-
-          // Switch to method environment
-          interpreter->environment = methodEnv;
-          interpreter->functionEnvironment = methodEnv;
-
-          // Execute method body
-          Value returnValue =
-              interpreter->executeFunction(method->body.get(), methodEnv);
-          interpreter->environment = methodEnv->enclosing;
-          interpreter->functionEnvironment = methodEnv->enclosing;
-
-          result = returnValue;
-          return;
         }
+        // Move to superclass
+        currentClass = currentClass->superclass;
       }
       throw std::runtime_error("Method '" + methodName + "' not found");
     }
@@ -636,6 +655,56 @@ void EvalVisitor::visit(CallExpr &node) {
     interpreter->functionEnvironment = funcEnv->enclosing;
 
     result = returnValue;
+  } else if (auto *classDef =
+                 std::get_if<std::shared_ptr<ClassDefinition>>(&calleeValue)) {
+    // Create a class instance
+    auto instance =
+        std::make_shared<ClassInstance>((*classDef)->name, *classDef);
+
+    // Create a temporary environment to execute field initializers
+    // We use the current environment as enclosing to allow access to
+    // globals/etc? Actually field initializers might refer to globals.
+    auto instanceEnv = std::make_shared<Environment>(interpreter->environment);
+
+    // Collect class hierarchy directly to a vector (Base -> Derived)
+    std::vector<std::shared_ptr<ClassDefinition>> hierarchy;
+    std::shared_ptr<ClassDefinition> current = *classDef;
+    while (current) {
+      hierarchy.insert(hierarchy.begin(), current);
+      current = current->superclass;
+    }
+
+    // Execute field declarations in order
+    auto oldEnv = interpreter->environment;
+    interpreter->environment = instanceEnv;
+
+    try {
+      for (const auto &cls : hierarchy) {
+        std::cout << "DEBUG: initializing fields for class " << cls->name
+                  << " (count: " << cls->fieldDecls.size() << ")" << std::endl;
+        for (const auto &fieldDecl : cls->fieldDecls) {
+          if (!fieldDecl) {
+            std::cout << "CRITICAL: Field decl is null!" << std::endl;
+            continue;
+          }
+          std::cout << "DEBUG: Executing field decl " << fieldDecl->name
+                    << std::endl;
+          interpreter->execute(*fieldDecl);
+        }
+      }
+      std::cout << "DEBUG: Finished field initialization" << std::endl;
+    } catch (...) {
+      interpreter->environment = oldEnv;
+      throw;
+    }
+    interpreter->environment = oldEnv;
+
+    // Copy initialized variables to instance fields
+    instance->fields = instanceEnv->values;
+
+    std::cout << "DEBUG: Returning new instance of " << instance->className
+              << std::endl;
+    result = Value(instance);
   } else {
     throw std::runtime_error("Attempt to call a non-function value");
   }

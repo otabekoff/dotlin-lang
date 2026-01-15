@@ -1,6 +1,7 @@
 #include "dotlin/interpreter.h"
 #include "dotlin/parser.h"
 #include "dotlin/visitors.h"
+#include <iostream>
 #include <stdexcept>
 
 // Forward declaration of valueToString
@@ -19,7 +20,12 @@ void ExecVisitor::visit(ExpressionStmt &node) {
 void ExecVisitor::visit(VariableDeclStmt &node) {
   Value value;
   if (node.initializer) {
+    if (!node.initializer.value()) {
+      std::cout << "CRITICAL: Initializer is NULL for " << node.name
+                << std::endl;
+    }
     value = interpreter->evaluate(*node.initializer.value());
+    std::cout << "DEBUG: Evaluated initializer for " << node.name << std::endl;
   }
   interpreter->environment->define(node.name, value);
 }
@@ -97,11 +103,57 @@ void ExecVisitor::visit(ReturnStmt &node) {
   throw std::runtime_error(returnMsg);
 }
 
+// Statement execution visitor implementations
 void ExecVisitor::visit(ClassDeclStmt &node) {
+  std::cout << "DEBUG: Defining class " << node.name << std::endl;
   // Create a class definition
   auto classDef = std::make_shared<ClassDefinition>(node.name);
-  // TODO: Handle constructor and methods from members
-  // For now, just create an empty class
+
+  // Resolve superclass if present
+  if (node.superClass) {
+    try {
+      Value superVal = interpreter->environment->get(*node.superClass);
+      if (auto *superDef =
+              std::get_if<std::shared_ptr<ClassDefinition>>(&superVal)) {
+        classDef->superclass = *superDef;
+      } else {
+        throw std::runtime_error("Superclass '" + *node.superClass +
+                                 "' is not a class");
+      }
+    } catch (const std::exception &e) {
+      throw std::runtime_error("Superclass '" + *node.superClass +
+                               "' not found");
+    }
+  }
+
+  // Process class members
+  for (const auto &member : node.members) {
+    if (auto *funcDecl = dynamic_cast<FunctionDeclStmt *>(member.get())) {
+      // Create function definition
+      std::vector<FunctionParameter> paramsCopy;
+      for (const auto &param : funcDecl->parameters) {
+        paramsCopy.push_back(param);
+      }
+      auto funcDef = std::make_shared<FunctionDef>(
+          funcDecl->name, std::move(paramsCopy), funcDecl->body);
+      classDef->methods.push_back(funcDef);
+    } else if (auto *varDecl = dynamic_cast<VariableDeclStmt *>(member.get())) {
+      // Store variable declaration for instantiation
+      // We need to cast back to shared_ptr, but member is correct type
+      // Hack: we cast the raw pointer to the derived type and make a shared
+      // copy or just ref? Since 'members' is vector of shared_ptr<Statement>,
+      // we can use static_pointer_cast
+      auto varDeclPtr = std::static_pointer_cast<VariableDeclStmt>(member);
+      classDef->fieldDecls.push_back(varDeclPtr);
+
+      // Also add to fields metadata (optional, mainly for type checking if we
+      // had it here) classDef->fields.push_back({varDecl->name,
+      // varDecl->typeAnnotation.value_or(nullptr)});
+    } else if (auto *ctorDecl =
+                   dynamic_cast<ConstructorDeclStmt *>(member.get())) {
+      // TODO: Handle constructors
+    }
+  }
 
   // Store the class definition in the global environment
   interpreter->environment->define(node.name, Value(classDef));
