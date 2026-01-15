@@ -105,7 +105,6 @@ void ExecVisitor::visit(ReturnStmt &node) {
 
 // Statement execution visitor implementations
 void ExecVisitor::visit(ClassDeclStmt &node) {
-  std::cout << "DEBUG: Defining class " << node.name << std::endl;
   // Create a class definition
   auto classDef = std::make_shared<ClassDefinition>(node.name);
 
@@ -145,6 +144,7 @@ void ExecVisitor::visit(ClassDeclStmt &node) {
       // we can use static_pointer_cast
       auto varDeclPtr = std::static_pointer_cast<VariableDeclStmt>(member);
       classDef->fieldDecls.push_back(varDeclPtr);
+      (void)varDecl; // Silence unused variable warning
 
       // Also add to fields metadata (optional, mainly for type checking if we
       // had it here) classDef->fields.push_back({varDecl->name,
@@ -152,6 +152,7 @@ void ExecVisitor::visit(ClassDeclStmt &node) {
     } else if (auto *ctorDecl =
                    dynamic_cast<ConstructorDeclStmt *>(member.get())) {
       // TODO: Handle constructors
+      (void)ctorDecl; // Silence unused variable warning
     }
   }
 

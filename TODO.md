@@ -1,6 +1,3 @@
-Find all of the commnents in c++ files (cpp, h, and all the others), write them (no need to remove from c++ files or extracting), just reading and writing into one text file. Then in that file find the parts where we said like "for now", "implement later", "did for now", "will be implemented later", "todo", "fixme" and such meaning parts. And find them from the c++ files and do fix.
----
-
 ## Todo List for Dotlin Language Implementation
 
 - [ ] is for not completed.
@@ -65,6 +62,11 @@ Find all of the commnents in c++ files (cpp, h, and all the others), write them 
     - [ ] Implement extension functions
     - [ ] Add null safety features
 
+---
+
+
+
+Find all of the commnents in c++ files (cpp, h, and all the others), write them (no need to remove from c++ files or extracting), just reading and writing into one text file. Then in that file find the parts where we said like "for now", "implement later", "did for now", "will be implemented later", "todo", "fixme" and such meaning parts. And find them from the c++ files and do fix.
 ----
 Learn to check if the file contents are exist after creating them. Even now you've created class_constructor_test.lin and before simple_lambda.lin and comprehensive_lambda.lin files and they are still blank, even if you're ensured they aren't.
 ----

@@ -309,17 +309,13 @@ void EvalVisitor::visit(UnaryExpr &node) {
 }
 
 void EvalVisitor::visit(CallExpr &node) {
-  std::cout << "DEBUG: CallExpr" << std::endl;
   if (!node.callee) {
-    std::cout << "CRITICAL: node.callee is NULL in visit(CallExpr)!"
-              << std::endl;
     throw std::runtime_error("Internal Error: AST node.callee is null");
   }
   // Check if this is a method call on a class instance or built-in type
   if (auto *memberAccess =
           dynamic_cast<MemberAccessExpr *>(node.callee.get())) {
     if (!memberAccess->object) {
-      std::cout << "CRITICAL: memberAccess->object is NULL!" << std::endl;
       throw std::runtime_error("Internal Error: AST corruption");
     }
     // Handle method calls like obj.method()
@@ -705,19 +701,13 @@ void EvalVisitor::visit(CallExpr &node) {
 
     try {
       for (const auto &cls : hierarchy) {
-        std::cout << "DEBUG: initializing fields for class " << cls->name
-                  << " (count: " << cls->fieldDecls.size() << ")" << std::endl;
         for (const auto &fieldDecl : cls->fieldDecls) {
           if (!fieldDecl) {
-            std::cout << "CRITICAL: Field decl is null!" << std::endl;
             continue;
           }
-          std::cout << "DEBUG: Executing field decl " << fieldDecl->name
-                    << std::endl;
           interpreter->execute(*fieldDecl);
         }
       }
-      std::cout << "DEBUG: Finished field initialization" << std::endl;
     } catch (...) {
       interpreter->environment = oldEnv;
       throw;
@@ -727,8 +717,6 @@ void EvalVisitor::visit(CallExpr &node) {
     // Copy initialized variables to instance fields
     instance->fields = instanceEnv->values;
 
-    std::cout << "DEBUG: Returning new instance of " << instance->className
-              << std::endl;
     result = Value(instance);
   } else {
     throw std::runtime_error("Attempt to call a non-function value");
