@@ -249,6 +249,8 @@ parseMultiplicativeExpression(const std::vector<Token> &tokens, size_t &pos) {
 std::unique_ptr<Expression>
 parsePostfixExpression(const std::vector<Token> &tokens, size_t &pos) {
   auto expr = parsePrimaryExpression(tokens, pos);
+  if (!expr)
+    return nullptr;
 
   // Handle postfix operations like function calls and member access
   while (pos < tokens.size()) {
@@ -278,19 +280,41 @@ parsePostfixExpression(const std::vector<Token> &tokens, size_t &pos) {
         size_t line = tokens[pos].line;
         size_t col = tokens[pos].column;
         pos++; // consume ')'
-        expr = std::make_unique<CallExpr>(std::move(expr), std::move(arguments),
-                                          line, col);
+
+        if (!expr)
+          std::cout << "DEBUG: expr is NULL before CallExpr creation!"
+                    << std::endl;
+        else
+          std::cout << "DEBUG: expr is VALID before CallExpr creation"
+                    << std::endl;
+
+        auto callee = std::move(expr);
+        if (!callee)
+          std::cout << "DEBUG: callee is NULL after move!" << std::endl;
+
+        expr = std::make_unique<CallExpr>(std::move(callee),
+                                          std::move(arguments), line, col);
       }
     } else if (tokens[pos].type == TokenType::DOT) {
       // Member access
       pos++; // consume '.'
-      if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER) {
+      if (pos < tokens.size() && (tokens[pos].type == TokenType::IDENTIFIER ||
+                                  tokens[pos].type == TokenType::INIT)) {
         std::string property = tokens[pos].text;
         size_t line = tokens[pos].line;
         size_t col = tokens[pos].column;
         pos++;
+
+        if (!expr)
+          std::cout << "DEBUG: expr is NULL before MemberAccessExpr creation!"
+                    << std::endl;
+
         expr = std::make_unique<MemberAccessExpr>(std::move(expr), property,
                                                   line, col);
+
+        if (!expr)
+          std::cout << "DEBUG: expr is NULL after MemberAccessExpr creation!"
+                    << std::endl;
       }
     } else if (tokens[pos].type == TokenType::LBRACKET) {
       // Array access
@@ -550,7 +574,8 @@ parseFunctionDeclaration(const std::vector<Token> &tokens, size_t &pos) {
 
   // Expect function name
   std::string name = "anonymous"; // default name
-  if (pos < tokens.size() && tokens[pos].type == TokenType::IDENTIFIER) {
+  if (pos < tokens.size() && (tokens[pos].type == TokenType::IDENTIFIER ||
+                              tokens[pos].type == TokenType::INIT)) {
     name = tokens[pos].text;
     pos++;
   }

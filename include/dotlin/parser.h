@@ -1,6 +1,7 @@
 // Parser for Dotlin - Kotlin-like language implementation in C++
 #pragma once
 #include "dotlin/lexer.h"
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
@@ -393,7 +394,11 @@ struct CallExpr : Expression {
   CallExpr(Expression::Ptr calleeParam, std::vector<Expression::Ptr> args,
            size_t l, size_t c)
       : Expression(l, c), callee(std::move(calleeParam)),
-        arguments(std::move(args)) {}
+        arguments(std::move(args)) {
+    if (!callee) {
+      std::cout << "CRITICAL: CallExpr callee is NULL!" << std::endl;
+    }
+  }
 
   void accept(AstVisitor &visitor) override { visitor.visit(*this); }
 };
@@ -402,7 +407,12 @@ struct MemberAccessExpr : Expression {
   Expression::Ptr object;
   std::string property;
   MemberAccessExpr(Expression::Ptr obj, std::string prop, size_t l, size_t c)
-      : Expression(l, c), object(std::move(obj)), property(std::move(prop)) {}
+      : Expression(l, c), object(std::move(obj)), property(std::move(prop)) {
+    if (!object) {
+      std::cout << "CRITICAL: MemberAccessExpr object is null for property "
+                << property << std::endl;
+    }
+  }
 
   void accept(AstVisitor &visitor) override { visitor.visit(*this); }
 };

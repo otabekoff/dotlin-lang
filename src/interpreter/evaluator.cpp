@@ -64,6 +64,21 @@ void EvalVisitor::visit(IdentifierExpr &node) {
     try {
       result = interpreter->environment->get(node.name);
     } catch (const std::runtime_error &e) {
+      // Try to look up in 'this' context if available
+      try {
+        Value thisVal = interpreter->environment->get("this");
+        if (auto *instance =
+                std::get_if<std::shared_ptr<ClassInstance>>(&thisVal)) {
+          auto it = (*instance)->fields.find(node.name);
+          if (it != (*instance)->fields.end()) {
+            result = it->second;
+            return;
+          }
+        }
+      } catch (...) {
+        // 'this' not defined or not an instance, ignore
+      }
+
       // Check if this is a built-in function
       if (node.name == "println" || node.name == "print" ||
           node.name == "sqrt" || node.name == "abs" || node.name == "pow" ||
@@ -294,9 +309,19 @@ void EvalVisitor::visit(UnaryExpr &node) {
 }
 
 void EvalVisitor::visit(CallExpr &node) {
+  std::cout << "DEBUG: CallExpr" << std::endl;
+  if (!node.callee) {
+    std::cout << "CRITICAL: node.callee is NULL in visit(CallExpr)!"
+              << std::endl;
+    throw std::runtime_error("Internal Error: AST node.callee is null");
+  }
   // Check if this is a method call on a class instance or built-in type
   if (auto *memberAccess =
           dynamic_cast<MemberAccessExpr *>(node.callee.get())) {
+    if (!memberAccess->object) {
+      std::cout << "CRITICAL: memberAccess->object is NULL!" << std::endl;
+      throw std::runtime_error("Internal Error: AST corruption");
+    }
     // Handle method calls like obj.method()
     auto objValue = interpreter->evaluate(*memberAccess->object);
     std::string methodName = memberAccess->property;
