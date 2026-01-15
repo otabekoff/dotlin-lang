@@ -281,17 +281,7 @@ parsePostfixExpression(const std::vector<Token> &tokens, size_t &pos) {
         size_t col = tokens[pos].column;
         pos++; // consume ')'
 
-        if (!expr)
-          std::cout << "DEBUG: expr is NULL before CallExpr creation!"
-                    << std::endl;
-        else
-          std::cout << "DEBUG: expr is VALID before CallExpr creation"
-                    << std::endl;
-
         auto callee = std::move(expr);
-        if (!callee)
-          std::cout << "DEBUG: callee is NULL after move!" << std::endl;
-
         expr = std::make_unique<CallExpr>(std::move(callee),
                                           std::move(arguments), line, col);
       }
@@ -305,16 +295,8 @@ parsePostfixExpression(const std::vector<Token> &tokens, size_t &pos) {
         size_t col = tokens[pos].column;
         pos++;
 
-        if (!expr)
-          std::cout << "DEBUG: expr is NULL before MemberAccessExpr creation!"
-                    << std::endl;
-
         expr = std::make_unique<MemberAccessExpr>(std::move(expr), property,
                                                   line, col);
-
-        if (!expr)
-          std::cout << "DEBUG: expr is NULL after MemberAccessExpr creation!"
-                    << std::endl;
       }
     } else if (tokens[pos].type == TokenType::LBRACKET) {
       // Array access
