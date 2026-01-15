@@ -302,6 +302,20 @@ void EvalVisitor::visit(CallExpr &node) {
         result = Value(static_cast<int>(array->elements.size()));
         return;
       }
+    } else if (methodName == "contentToString" && args.empty()) {
+      // Handle contentToString for arrays
+      if (auto *array = std::get_if<ArrayValue>(&objValue)) {
+        std::string content = "[";
+        for (size_t i = 0; i < array->elements.size(); ++i) {
+          if (i > 0) {
+            content += ", ";
+          }
+          content += interpreter->valueToString(array->elements[i]);
+        }
+        content += "]";
+        result = Value(content);
+        return;
+      }
     } else if (methodName == "substring" && args.size() >= 1) {
       // Handle substring method calls
       if (auto *strValue = std::get_if<std::string>(&objValue)) {
